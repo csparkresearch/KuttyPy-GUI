@@ -151,7 +151,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		self.locateDevices()
 		if not self.checkConnectionStatus():return
 
-		if len(self.commandQ) and self.clearLog.isChecked():
+		if len(self.commandQ) and self.clearLog.isChecked()and self.enableLog.isChecked():
 			self.log.clear()
 			self.updatedRegs = OrderedDict()
 
@@ -185,8 +185,9 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 				cl = self.getReg('TCNT1L');
 				ch = self.getReg('TCNT1H');
 				a[1].setValue(cl|(ch<<8))
-
-			self.genLog()
+			
+			if self.enableLog.isChecked():
+				self.genLog()
 
 		if self.pending['status'].ready() and self.monitoring:
 			val = self.p.getReg(self.getRegs[self.currentRegister][0])

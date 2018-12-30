@@ -40,6 +40,7 @@ class Ui_MainWindow(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.log.sizePolicy().hasHeightForWidth())
         self.log.setSizePolicy(sizePolicy)
+        self.log.setLineWrapMode(QtWidgets.QTextEdit.NoWrap)
         self.log.setObjectName("log")
         self.gridLayout_2.addWidget(self.log, 2, 0, 2, 1)
         self.clearLog = QtWidgets.QCheckBox(self.centralwidget)
