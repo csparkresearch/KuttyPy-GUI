@@ -33,15 +33,6 @@ ADMUX	= 0X27,    # ADC channel, reference
 ACSR	= 0X28,
 
 
-# Register bit definitions
-REF_EXT	= 0,			# Feed reference voltage externally
-REF_INT	= (3<<6),	# use the 2.56 V internal reference
-REF_AVCC = (1<<6),	# Connect AVCC internally to reference
-ADMAX = 7,			# channels 0 to 7 
-ADC_SPEED = 7,		# ADCClk = (8 MHz/ 128) = 62.5 KHz =>208 usec
-ADEN   = 7,
-ADIF   = 4,
-ADSC   = 6,
 
 OCR2	= 0X43,		# Timer/Counter 2  Output Compare  Reg
 TCNT2	= 0X44	,	# Counter2 
@@ -74,6 +65,18 @@ SPH		= 0x5E,
 SREG	= 0X5F,
 )
 
+BITS = genlist(
+# Register bit definitions
+REF_EXT	= 0,			# Feed reference voltage externally
+REF_INT	= (3<<6),	# use the 2.56 V internal reference
+REF_AVCC = (1<<6),	# Connect AVCC internally to reference
+ADMAX = 7,			# channels 0 to 7 
+ADC_SPEED = 7,		# ADCClk = (8 MHz/ 128) = 62.5 KHz =>208 usec
+ADEN   = 7,
+ADIF   = 4,
+ADSC   = 6,
+
+)
 SPECIALS = genlist(
 PD5 = 'OC1A',
 PD7 = 'OC2',
@@ -88,3 +91,4 @@ PA5 = 'ADC5',
 PA6 = 'ADC6',
 PA7 = 'ADC7',
 )
+

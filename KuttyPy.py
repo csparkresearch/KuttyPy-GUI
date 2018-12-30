@@ -2,7 +2,7 @@
 '''
 #!/usr/bin/python3
 
-import os,sys,time
+import os,sys,time,re
 from utilities.Qt import QtGui, QtCore, QtWidgets
 
 from utilities.templates import ui_layout as layout
@@ -40,6 +40,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		self.docks = [self.padock,self.pbdock,self.pcdock,self.pddock]
 		self.monitoring = True
 		self.setTheme("material")
+		self.codeThread = QtCore.QThread()
 
 		self.commandQ = []
 		self.btns={}
@@ -48,18 +49,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		self.statusBar = self.statusBar()
 
 		global app
-		'''
-		#Auto-Update Menu
-		self.autoUpdateMenu = QtGui.QMenu()
-		#self.autoUpdateMenu.addAction("Interval",self.setAutoUpdateTime)
-		self.autoUpdateTimerAction = QtWidgets.QWidgetAction(self.autoUpdateMenu)
-		self.autoUpdateTimerInterval = QtWidgets.QSpinBox()
-		self.autoUpdateTimerInterval.setMinimum(5);self.autoUpdateTimerInterval.setMaximum(3600);self.autoUpdateTimerInterval.setValue(constants.AUTOUPDATE_INTERVAL); self.autoUpdateTimerInterval.setSuffix(' S');
-		self.autoUpdateTimerInterval.valueChanged['int'].connect(self.setAutoUpdateInterval)
-		self.autoUpdateTimerAction.setDefaultWidget(self.autoUpdateTimerInterval)
-		self.autoUpdateMenu.addAction(self.autoUpdateTimerAction)
-		self.autoUpdateSettings.setMenu(self.autoUpdateMenu)
-		'''
+
 
 		self.initializeCommunications()
 		self.updatedRegs=OrderedDict()
@@ -108,15 +98,81 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 			for a in self.docks:
 				a.show()		
 
+	################USER CODE SECTION####################
+	class codeObject(QtCore.QObject):
+		finished = QtCore.pyqtSignal()
+		logThis = QtCore.pyqtSignal(str)
+		code = ''
+		evalGlobals = {}
+		stopFlag = False
+		PORTMAP = {v: k for k, v in PORTS.PORTS.items()} #Lookup port name based on number
+
+		def __init__(self,code,SR,GR):
+			super(AppWindow.codeObject, self).__init__()
+			self.code = code
+			self.SR = SR
+			self.GR = GR
+			self.compiled = compile(self.code.encode(), '<string>', mode='exec')
+			self.evalGlobals['getReg']  = self.getReg
+			self.evalGlobals['setReg']  = self.setReg
+			self.evalGlobals['print']  = self.printer
+
+		def printer(self,*args):
+			self.logThis.emit('''<span style="color:cyan;">%s</span>'''%(' '.join([str(a) for a in args])))
+
+		def setReg(self,reg,value):
+			html=u'''<pre><span>W\u2193</span>{0:s}\t{1:d}\t0x{1:02x} / 0b{1:08b}</pre>'''.format(self.PORTMAP.get(reg,''),value)
+			self.logThis.emit(html)
+			self.SR(reg,value)
+
+		def getReg(self,reg):
+			value = self.GR(reg)
+			html=u'''<pre><span>R\u2191</span>{0:s}\t{1:d}\t0x{1:02x} / 0b{1:08b}</pre>'''.format(self.PORTMAP.get(reg,''),value)
+			self.logThis.emit(html)
+			return value
+
+		def execute(self):
+			exec(self.compiled,self.evalGlobals)
+			self.logThis.emit("Finished executing user code")
+			self.finished.emit()
+	
 	def runCode(self):
 		#if self.p:
 		#	try:
 		#		self.p.fd.read() #Clear junk
 		#		self.p.fd.close()
 		#	except:pass
-		self.run('{0:s}'.format(self.userCode.toPlainText()))
-	def run(self,txt):
-		exec(txt)
+		if self.codeThread.isRunning():
+			print('one code is already running')
+			return
+
+		self.codeThread = QtCore.QThread()
+		self.codeEval = self.codeObject('{0:s}'.format(self.userCode.toPlainText()), self.p.setReg, self.p.getReg)
+		self.codeEval.moveToThread(self.codeThread)
+		self.codeEval.finished.connect(self.codeThread.quit)
+		self.codeEval.logThis.connect(self.appendLog) #Connect to the log window
+
+		self.codeThread.started.connect(self.codeEval.execute)
+		self.codeThread.finished.connect(self.codeFinished)
+
+		self.codeThread.start()
+
+		self.userCode.setStyleSheet("border: 3px dashed #53ffff;")
+		self.log.clear() #clear the log window
+		self.tabs.setTabEnabled(0,False)
+		self.log.setText('''<span style="color:green;">----------User Code Started-----------</span>''')
+
+	def codeFinished(self):
+		self.tabs.setTabEnabled(0,True)
+		self.userCode.setStyleSheet("")
+
+	def abort(self):
+		if self.codeThread.isRunning():
+			self.log.append('''<span style="color:red;">----------Kill Signal(Doesn't work yet. Restart the application)-----------</span>''')
+			self.codeThread.quit()
+			self.codeThread.terminate()
+		
+	################ END: USER CODE SECTION ####################
 
 	def getReg(self,reg):
 		val = self.p.getReg(reg)
@@ -127,6 +183,9 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		self.p.setReg(reg,val)
 		self.updatedRegs[reg] = [1,val]
 		return val
+
+	def appendLog(self,txt):
+		self.log.append(txt)
 
 	def genLog(self):
 		html='''<table border="1" align="center" cellpadding="1" cellspacing="0" style="font-family:arial,helvetica,sans-serif;font-size:9pt;">
@@ -150,6 +209,9 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 	def updateEverything(self):
 		self.locateDevices()
 		if not self.checkConnectionStatus():return
+
+		if self.codeThread.isRunning():
+			return
 
 		if len(self.commandQ) and self.clearLog.isChecked()and self.enableLog.isChecked():
 			self.log.clear()

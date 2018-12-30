@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>538</width>
-    <height>581</height>
+    <height>564</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -59,6 +59,11 @@
         <horstretch>0</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+       </font>
       </property>
       <property name="lineWrapMode">
        <enum>QTextEdit::NoWrap</enum>
@@ -161,10 +166,16 @@
         <string>Code Snippets</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_3">
+        <property name="horizontalSpacing">
+         <number>3</number>
+        </property>
         <property name="verticalSpacing">
          <number>2</number>
         </property>
-        <item row="0" column="1">
+        <property name="margin">
+         <number>0</number>
+        </property>
+        <item row="0" column="2">
          <widget class="QToolButton" name="toolButton">
           <property name="text">
            <string/>
@@ -184,7 +195,7 @@
           </item>
          </widget>
         </item>
-        <item row="1" column="0" colspan="2">
+        <item row="1" column="0" colspan="3">
          <widget class="QPlainTextEdit" name="userCode">
           <property name="plainText">
            <string>import time
@@ -196,6 +207,20 @@ for a in range(5):   #Run this loop 5 times.
 	time.sleep(0.5)
 	setReg(PORTD, 0)
 	time.sleep(0.5)</string>
+          </property>
+          <property name="class" stdset="0">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QToolButton" name="toolButton_2">
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="res.qrc">
+            <normaloff>:/control/stop.svg</normaloff>:/control/stop.svg</iconset>
           </property>
          </widget>
         </item>
@@ -345,9 +370,26 @@ for a in range(5):   #Run this loop 5 times.
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>toolButton_2</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>abort()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>420</x>
+     <y>52</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>420</x>
+     <y>-6</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>runCode()</slot>
   <slot>tabChanged(int)</slot>
+  <slot>abort()</slot>
  </slots>
 </ui>

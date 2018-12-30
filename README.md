@@ -7,9 +7,11 @@ The kuttyPy hardware is an ATMEGA32 microcontroller development board developed 
 
 ## Simple blink.py example
 ![Screenshot](/docs/blink.gif?raw=true "Write Python code to blink all of PORT D")
+![Screencast](/docs/monitor.gif?raw=true "Monitor your code!")
 
 ## Plotting ADC values using matplotlib
 ![Screenshot](/docs/code.gif?raw=true "Recording of the ADC logging example")
+
 
 
 ### Installing on Ubuntu

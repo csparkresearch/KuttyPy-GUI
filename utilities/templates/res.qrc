@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="control">
+    <file>stop.svg</file>
     <file>play.svg</file>
     <file>document-open.png</file>
     <file>folder.png</file>
