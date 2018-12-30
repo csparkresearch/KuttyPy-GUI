@@ -40,6 +40,14 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		self.docks = [self.padock,self.pbdock,self.pcdock,self.pddock]
 		self.monitoring = True
 		self.setTheme("material")
+		examples = [a for a in os.listdir(path["examples"]) if '.py' in a]
+		self.exampleList.addItems(examples)
+		blinkindex = self.exampleList.findText('blink.py')
+		print(blinkindex)
+		if blinkindex!=-1: #default example. blink.py present in examples directory
+			self.exampleList.setCurrentIndex(blinkindex)
+
+
 		self.codeThread = QtCore.QThread()
 
 		self.commandQ = []
@@ -276,6 +284,10 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 			elif type(btn)==dio.DIOCNTR and btn.currentPage==2: # CNTR
 					self.commandQ.append(['CNTR1',btn.slider])
 
+	def loadExample(self,filename):
+		self.userCode.setPlainText(open(os.path.join(path["examples"],filename), "r").read())
+
+
 	def setTheme(self,theme):
 		self.setStyleSheet("")
 		self.setStyleSheet(open(os.path.join(path["themes"],theme+".qss"), "r").read())
@@ -438,6 +450,11 @@ def common_paths():
 
 	path["themes"] = firstExistingPath(
 			[os.path.join(p,'utilities','themes') for p in
+			 (curPath, sharedPath,)])
+
+
+	path["examples"] = firstExistingPath(
+			[os.path.join(p,'examples') for p in
 			 (curPath, sharedPath,)])
 
 	lang=str(QtCore.QLocale.system().name()) 

@@ -126,7 +126,7 @@
            <enum>Qt::RightToLeft</enum>
           </property>
           <property name="text">
-           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;img src=&quot;:/control/kpys.jpeg&quot;/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;img src=&quot;:/control/kpy.jpg&quot;/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
           <property name="scaledContents">
            <bool>true</bool>
@@ -187,13 +187,7 @@
          </widget>
         </item>
         <item row="0" column="0">
-         <widget class="QComboBox" name="comboBox">
-          <item>
-           <property name="text">
-            <string>blink.py</string>
-           </property>
-          </item>
-         </widget>
+         <widget class="QComboBox" name="exampleList"/>
         </item>
         <item row="1" column="0" colspan="3">
          <widget class="QPlainTextEdit" name="userCode">
@@ -345,12 +339,12 @@ for a in range(5):   #Run this loop 5 times.
    <slot>runCode()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>449</x>
-     <y>59</y>
+     <x>458</x>
+     <y>50</y>
     </hint>
     <hint type="destinationlabel">
      <x>462</x>
-     <y>-11</y>
+     <y>0</y>
     </hint>
    </hints>
   </connection>
@@ -366,7 +360,7 @@ for a in range(5):   #Run this loop 5 times.
     </hint>
     <hint type="destinationlabel">
      <x>268</x>
-     <y>-20</y>
+     <y>0</y>
     </hint>
    </hints>
   </connection>
@@ -377,12 +371,28 @@ for a in range(5):   #Run this loop 5 times.
    <slot>abort()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>420</x>
-     <y>52</y>
+     <x>432</x>
+     <y>43</y>
     </hint>
     <hint type="destinationlabel">
      <x>420</x>
-     <y>-6</y>
+     <y>0</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>exampleList</sender>
+   <signal>currentIndexChanged(QString)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>loadExample(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>89</x>
+     <y>44</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>73</x>
+     <y>-15</y>
     </hint>
    </hints>
   </connection>
@@ -391,5 +401,6 @@ for a in range(5):   #Run this loop 5 times.
   <slot>runCode()</slot>
   <slot>tabChanged(int)</slot>
   <slot>abort()</slot>
+  <slot>loadExample(QString)</slot>
  </slots>
 </ui>

@@ -101,10 +101,9 @@ class Ui_MainWindow(object):
         self.toolButton.setIcon(icon)
         self.toolButton.setObjectName("toolButton")
         self.gridLayout_3.addWidget(self.toolButton, 0, 2, 1, 1)
-        self.comboBox = QtWidgets.QComboBox(self.examples)
-        self.comboBox.setObjectName("comboBox")
-        self.comboBox.addItem("")
-        self.gridLayout_3.addWidget(self.comboBox, 0, 0, 1, 1)
+        self.exampleList = QtWidgets.QComboBox(self.examples)
+        self.exampleList.setObjectName("exampleList")
+        self.gridLayout_3.addWidget(self.exampleList, 0, 0, 1, 1)
         self.userCode = QtWidgets.QPlainTextEdit(self.examples)
         self.userCode.setProperty("class", "")
         self.userCode.setObjectName("userCode")
@@ -187,6 +186,7 @@ class Ui_MainWindow(object):
         self.toolButton.clicked.connect(MainWindow.runCode)
         self.tabs.currentChanged['int'].connect(MainWindow.tabChanged)
         self.toolButton_2.clicked.connect(MainWindow.abort)
+        self.exampleList.currentIndexChanged['QString'].connect(MainWindow.loadExample)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
@@ -194,9 +194,8 @@ class Ui_MainWindow(object):
         MainWindow.setWindowTitle(_translate("MainWindow", "KuttyPy Interactive Console"))
         self.enableLog.setText(_translate("MainWindow", "Enabled"))
         self.clearLog.setText(_translate("MainWindow", "Auto-Clear"))
-        self.label.setText(_translate("MainWindow", "<html><head/><body><p><img src=\":/control/kpys.jpeg\"/></p></body></html>"))
+        self.label.setText(_translate("MainWindow", "<html><head/><body><p><img src=\":/control/kpy.jpg\"/></p></body></html>"))
         self.tabs.setTabText(self.tabs.indexOf(self.playground), _translate("MainWindow", "Playground"))
-        self.comboBox.setItemText(0, _translate("MainWindow", "blink.py"))
         self.userCode.setPlainText(_translate("MainWindow", "import time\n"
 "from kuttyPy import *\n"
 "setReg(DDRD,255)\n"
