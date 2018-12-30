@@ -7,7 +7,9 @@ The kuttyPy hardware is an ATMEGA32 microcontroller development board developed 
 
 ## Simple blink.py example
 ![Screenshot](/docs/blink.gif?raw=true "Write Python code to blink all of PORT D")
+
 ![Screencast](/docs/monitor.gif?raw=true "Monitor your code!")
+Monitor your code's activity while it executes
 
 ## Plotting ADC values using matplotlib
 ![Screenshot](/docs/code.gif?raw=true "Recording of the ADC logging example")
@@ -15,7 +17,7 @@ The kuttyPy hardware is an ATMEGA32 microcontroller development board developed 
 
 
 ### Installing on Ubuntu
-+ sudo apt-get install python3 python3-pyqt5 python3-pyqtgraph
++ sudo apt-get install python3 python3-pyqt5
 
 
 ---
