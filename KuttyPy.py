@@ -43,7 +43,6 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		examples = [a for a in os.listdir(path["examples"]) if '.py' in a]
 		self.exampleList.addItems(examples)
 		blinkindex = self.exampleList.findText('blink.py')
-		print(blinkindex)
 		if blinkindex!=-1: #default example. blink.py present in examples directory
 			self.exampleList.setCurrentIndex(blinkindex)
 

@@ -129,6 +129,17 @@
         </item>
         <item row="1" column="0" colspan="3">
          <widget class="QPlainTextEdit" name="userCode">
+          <property name="font">
+           <font>
+            <pointsize>11</pointsize>
+           </font>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="lineWrapMode">
+           <enum>QPlainTextEdit::NoWrap</enum>
+          </property>
           <property name="plainText">
            <string>import time
 from kuttyPy import *
@@ -139,6 +150,15 @@ for a in range(5):   #Run this loop 5 times.
 	time.sleep(0.5)
 	setReg(PORTD, 0)
 	time.sleep(0.5)</string>
+          </property>
+          <property name="tabStopWidth">
+           <number>30</number>
+          </property>
+          <property name="backgroundVisible">
+           <bool>false</bool>
+          </property>
+          <property name="centerOnScroll">
+           <bool>false</bool>
           </property>
           <property name="class" stdset="0">
            <string/>
