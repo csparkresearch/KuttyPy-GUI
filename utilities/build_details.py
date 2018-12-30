@@ -1,0 +1,3 @@
+QT_VERSION = 'PyQt5'
+PY_VERSION = 3
+
