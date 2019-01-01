@@ -178,16 +178,24 @@ class KUTTYPY:
 		val - byte to send
 		"""
 		#print (val)
-		if(type(val)==int):
-			self.fd.write(Byte.pack(val))
-		else:
-			self.fd.write(val)
+		try:
+			if(type(val)==int):
+				self.fd.write(Byte.pack(val))
+			else:
+				self.fd.write(val)
+		except:
+			self.connected = False
 
 	def __getByte__(self):
 		"""
 		reads a byte from the serial port and returns it
 		"""
-		ss=self.fd.read(1)
+		try:
+			ss=self.fd.read(1)
+		except:
+			self.connected = False
+			print('No byte received. Disconnected?',time.ctime())
+			return 0
 		if len(ss): return Byte.unpack(ss)[0]
 		else:
 			print('byte communication error.',time.ctime())
