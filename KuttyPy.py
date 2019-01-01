@@ -321,6 +321,8 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 			self.p = KuttyPyLib.connect(port = port)
 		else:
 			self.p = KuttyPyLib.connect(autoscan=True)
+		if self.p.connected:
+			self.setWindowTitle('KuttyPy Interactive Console [{0:s}]'.format(self.p.portname))
 
 		self.makeBottomMenu()
 
@@ -363,6 +365,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 						try:self.p.fd.close()
 						except:pass
 						self.p.connected = False
+						self.setWindowTitle('KuttyPy Interactive Console [ Hardware not detected ]')
 
 			elif True in L.values():
 				reply = QtWidgets.QMessageBox.question(self, 'Connection', 'Device Available. Connect?', QtWidgets.QMessageBox.Yes, QtWidgets.QMessageBox.No)
