@@ -3,7 +3,7 @@
 ![Screenshot](/docs/main.gif?raw=true "Recording of the User Interface")
 
 ---
-The kuttyPy hardware is an ATMEGA32 microcontroller development board developed by the [ExpEYES](http://expeyes.in) project wherein the processor's registers can be manipulated in real-time via a connected computer containing its python library. The setReg and getReg function calls act as a real-time debugging and monitoring utility, and combined with Python's visualization and analytical utilities, this approach has immense pedagogical potential for beginners. 
+The kuttyPy (/kʊtipʌɪ/) hardware is an ATMEGA32 microcontroller development board developed by the [ExpEYES](http://expeyes.in) project wherein the processor's registers can be manipulated in real-time via a connected computer containing its python library. The setReg and getReg function calls act as a real-time debugging and monitoring utility, and combined with Python's visualization and analytical utilities, this approach has immense pedagogical potential for beginners. 
 
 ## Simple blink.py example
 ![Screenshot](/docs/blink.gif?raw=true "Write Python code to blink all of PORT D")
