@@ -227,7 +227,7 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
         self.tabs.setCurrentIndex(0)
-        self.tabWidget.setCurrentIndex(1)
+        self.tabWidget.setCurrentIndex(0)
         self.toolButton.clicked.connect(MainWindow.runCode)
         self.tabs.currentChanged['int'].connect(MainWindow.tabChanged)
         self.toolButton_2.clicked.connect(MainWindow.abort)
