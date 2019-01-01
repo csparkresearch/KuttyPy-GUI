@@ -323,6 +323,8 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 			self.p = KuttyPyLib.connect(autoscan=True)
 		if self.p.connected:
 			self.setWindowTitle('KuttyPy Interactive Console [{0:s}]'.format(self.p.portname))
+		else:
+			self.setWindowTitle('KuttyPy Interactive Console [ Hardware not detected ]')
 
 		self.makeBottomMenu()
 
