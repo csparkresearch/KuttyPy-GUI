@@ -345,7 +345,7 @@ QDateEdit {
 	background-color: #1e1d23;
 }
 QComboBox {
-	color: #a9b7c6;	
+	color: #c9d7f6;	
 	background: #1e1d23;
 }
 
@@ -356,14 +356,12 @@ QComboBox:editable {
 	selection-background-color: #1e1d23;
 }
 QComboBox QAbstractItemView {
-	color: #a9b7c6;	
-	background: #1e1d23;
-	selection-color: #FFFFFF;
-	selection-background-color: #1e1d23;
+	color: #fff;
+	background: #111;
 }
 QComboBox:!editable:on, QComboBox::drop-down:editable:on {
 	color: #a9b7c6;	
-	background: #1e1d23;
+	background: #1e4d23;
 }
 
 /*----------jithin */
@@ -379,7 +377,7 @@ QComboBox{
 	border-style: solid;
 	color: #a9b7c6;
 	margin-left:1px;
-	background-color: #1e1d23;
+	background-color: #1e1f27;
 }
 QComboBox::default{
 	border-style: inset;
@@ -403,8 +401,6 @@ QComboBox:hover{
 	color: #FFF;
 	background-color: #1e1d23;
 }
-
-
 
 
 

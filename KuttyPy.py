@@ -6,12 +6,10 @@ import os,sys,time,re
 from utilities.Qt import QtGui, QtCore, QtWidgets
 
 from utilities.templates import ui_layout as layout
-from utilities import dio
+from utilities import dio,PORTS
 import constants
 from functools import partial
 from collections import OrderedDict
-
-import PORTS
 
 class myTimer():
 	def __init__(self,interval):
@@ -37,8 +35,12 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 	def __init__(self, parent=None,**kwargs):
 		super(AppWindow, self).__init__(parent)
 		self.setupUi(self)
+
 		self.docks = [self.padock,self.pbdock,self.pcdock,self.pddock]
 		self.monitoring = True
+		self.autoUpdateUserRegisters = False
+		self.registerLayout.setAlignment(QtCore.Qt.AlignTop)
+
 		self.setTheme("material")
 		examples = [a for a in os.listdir(path["examples"]) if '.py' in a]
 		self.exampleList.addItems(examples)
@@ -48,9 +50,19 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 
 
 		self.codeThread = QtCore.QThread()
+		self.codeEval = self.codeObject()
+		self.codeEval.moveToThread(self.codeThread)
+		self.codeEval.finished.connect(self.codeThread.quit)
+		self.codeEval.logThis.connect(self.appendLog) #Connect to the log window
+
+		self.codeThread.started.connect(self.codeEval.execute)
+		self.codeThread.finished.connect(self.codeFinished)
+
+		self.codeThread.start()
 
 		self.commandQ = []
 		self.btns={}
+		self.registers = []
 		self.addPins()
 
 		self.statusBar = self.statusBar()
@@ -81,6 +93,11 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		#Auto-Detector
 		self.shortlist=KuttyPyLib.getFreePorts()
 
+	def newRegister(self):
+		reg = dio.REGEDIT('DDRD',self.commandQ)
+		self.registerLayout.addWidget(reg)
+		self.registers.append(reg)
+
 	def addPins(self):
 		for port,dock in zip(self.ports,[self.palayout,self.pblayout,self.pclayout,self.pdlayout]):
 			checkbox = dio.REGVALS(port)
@@ -96,11 +113,11 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 				self.btns[name] = checkbox
 
 	def tabChanged(self,index):
-		if index == 1: #examples tab. disable monitoring
+		if index != 0 : #examples/editor tab. disable monitoring
 			self.monitoring = False
 			for a in self.docks:
 				a.hide()		
-		elif index == 0: #Playground . enable monitoring and control.
+		else: #Playground . enable monitoring and control.
 			self.monitoring = True
 			for a in self.docks:
 				a.show()		
@@ -110,19 +127,23 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		finished = QtCore.pyqtSignal()
 		logThis = QtCore.pyqtSignal(str)
 		code = ''
-		evalGlobals = {}
 		stopFlag = False
 		PORTMAP = {v: k for k, v in PORTS.PORTS.items()} #Lookup port name based on number
 
-		def __init__(self,code,SR,GR):
+		def __init__(self):
 			super(AppWindow.codeObject, self).__init__()
-			self.code = code
-			self.SR = SR
-			self.GR = GR
-			self.compiled = compile(self.code.encode(), '<string>', mode='exec')
+			self.compiled = ''
+			self.SR = None
+			self.GR = None
+			self.evalGlobals = {}
 			self.evalGlobals['getReg']  = self.getReg
 			self.evalGlobals['setReg']  = self.setReg
 			self.evalGlobals['print']  = self.printer
+
+		def setCode(self,code,SR,GR):
+			self.compiled = compile(code.encode(), '<string>', mode='exec')
+			self.SR = SR
+			self.GR = GR
 
 		def printer(self,*args):
 			self.logThis.emit('''<span style="color:cyan;">%s</span>'''%(' '.join([str(a) for a in args])))
@@ -139,7 +160,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 			return value
 
 		def execute(self):
-			exec(self.compiled,self.evalGlobals)
+			exec(self.compiled,{},self.evalGlobals)
 			self.logThis.emit("Finished executing user code")
 			self.finished.emit()
 	
@@ -153,15 +174,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 			print('one code is already running')
 			return
 
-		self.codeThread = QtCore.QThread()
-		self.codeEval = self.codeObject('{0:s}'.format(self.userCode.toPlainText()), self.p.setReg, self.p.getReg)
-		self.codeEval.moveToThread(self.codeThread)
-		self.codeEval.finished.connect(self.codeThread.quit)
-		self.codeEval.logThis.connect(self.appendLog) #Connect to the log window
-
-		self.codeThread.started.connect(self.codeEval.execute)
-		self.codeThread.finished.connect(self.codeFinished)
-
+		self.codeEval.setCode('{0:s}'.format(self.userCode.toPlainText()),self.p.setReg, self.p.getReg)
 		self.codeThread.start()
 
 		self.userCode.setStyleSheet("border: 3px dashed #53ffff;")
@@ -179,7 +192,6 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 			self.codeThread.quit()
 			self.codeThread.terminate()
 		
-	################ END: USER CODE SECTION ####################
 
 	def getReg(self,reg):
 		val = self.p.getReg(reg)
@@ -213,13 +225,21 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		html+="</tbody></table>"	
 		self.log.setHtml(html)
 
+	def userRegistersAutoRefresh(self,state):
+		self.autoUpdateUserRegisters = state
+
 	def updateEverything(self):
 		self.locateDevices()
 		if not self.checkConnectionStatus():return
+		self.setTheme("material")
 
 		if self.codeThread.isRunning():
 			return
 
+		if self.autoUpdateUserRegisters:
+			for a in self.registers:
+				a.execute()
+			
 		if len(self.commandQ) and self.clearLog.isChecked()and self.enableLog.isChecked():
 			self.log.clear()
 			self.updatedRegs = OrderedDict()
@@ -242,8 +262,9 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 				self.setReg(pname,reg);
 			elif a[0] == 'WRITE': #['WRITE','REGNAME',val]
 				self.setReg(a[1],a[2]);
-			elif a[0] == 'READ': #['WRITE','REGNAME']
-				self.getReg(a[1]);
+			elif a[0] == 'READ': #['READ','REGNAME',function]
+				val = self.getReg(a[1]);
+				a[2](val)
 			elif a[0] == 'ADC': #['ADC',channel,output with setValue function]
 				self.setReg('ADMUX',192|a[1]);
 				self.setReg('ADCSRA',196);
@@ -337,7 +358,6 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 
 			if self.p.connected:
 				if self.p.portname not in L:
-						self.showStatus('Device Disconnected',True)
 						self.setWindowTitle('Error : Device Disconnected')
 						QtWidgets.QMessageBox.warning(self, 'Connection Error', 'Device Disconnected. Please check the connections')
 						try:self.p.fd.close()
@@ -352,8 +372,6 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 			#update the shortlist
 			self.shortlist=L
 
-	def showStatus(self,msg,state):
-		pass
 	def checkConnectionStatus(self,dialog=False):
 		if self.p.connected:return True
 		else:
@@ -390,8 +408,6 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 			self.render(p)
 			p.end()
 
-	############ THUMBNAILS FOR DATA LOGGER ##########
-		
 
 
 
@@ -451,9 +467,12 @@ def common_paths():
 			[os.path.join(p,'utilities','themes') for p in
 			 (curPath, sharedPath,)])
 
-
 	path["examples"] = firstExistingPath(
 			[os.path.join(p,'examples') for p in
+			 (curPath, sharedPath,)])
+
+	path["editor"] = firstExistingPath(
+			[os.path.join(p,'editor') for p in
 			 (curPath, sharedPath,)])
 
 	lang=str(QtCore.QLocale.system().name()) 

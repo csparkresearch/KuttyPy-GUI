@@ -8,10 +8,11 @@ if ENVIRON=='PyQt5':
 	from PyQt5 import QtGui,QtCore,QtWidgets
 	try: from PyQt5 import QtSvg
 	except: pass
-	#try:
-	#	from PyQt5.QtWebKitWidgets import QWebView# , QWebPage
-	#except:
-	#	print('webview unavailable')
+	try:
+		#from PyQt5.QtWebEngineWidgets import QWebEngineView as QWebView
+		from PyQt5.QtWebKitWidgets import QWebView# , QWebPage
+	except:
+		QWebView = None
 elif ENVIRON == 'PyQt4':
 	from PyQt4 import QtGui,QtCore
 	from PyQt4 import QtGui as QtWidgets

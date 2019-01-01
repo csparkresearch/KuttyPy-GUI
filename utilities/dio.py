@@ -1,5 +1,6 @@
 from .Qt import QtGui,QtCore,QtWidgets
-from utilities.templates import ui_dio,ui_dio_pwm,ui_dio_adc,ui_regvals,ui_dio_cntr
+from utilities.templates import ui_dio,ui_dio_pwm,ui_dio_adc,ui_regvals,ui_dio_cntr,ui_regedit
+from . import PORTS
 
 def widget(name,Q,**kwargs):
 	if 'OC' in kwargs.get('extra',''):
@@ -217,6 +218,72 @@ class DIOCNTR(QtWidgets.QFrame,ui_dio_cntr.Ui_Frame):
 		self.nameOut.setChecked(state)
 		self.pullup.setChecked(state)
 		self.Q.append(['DSTATE',self.name,state])
+
+class REGEDIT(QtWidgets.QFrame,ui_regedit.Ui_Frame):
+	def __init__(self,name,Q):
+		super(REGEDIT, self).__init__()
+		self.setupUi(self)
+		self.name = name
+		self.Q = Q
+		self.regName.addItems(PORTS.PORTS.keys())
+		self.type = 0 # 0=read. 1 =write
+		self.bits = [self.b0,self.b1,self.b2,self.b3,self.b4,self.b5,self.b6,self.b7]
+		for a in self.bits:
+			a.clicked.connect(self.valueRefresh)
+
+		self.labels = [self.l0,self.l1,self.l2,self.l3,self.l4,self.l5,self.l6,self.l7]
+		self.format = '{0:d}'
+		self.valueLabel.mousePressEvent = self.valueMouseClick
+		self.typeLabel.mousePressEvent = self.changeType
+
+	def execute(self):
+		if self.type: #In write mode
+			self.Q.append(['WRITE',str(self.regName.currentText()),self.getValue()])
+		else:
+			self.Q.append(['READ',str(self.regName.currentText()),self.setValue])
+
+	def changeType(self,event):
+		if self.type: #Was in write mode
+			self.type = 0 #Change to read mode
+			self.typeLabel.setText(u'READ\u2191')
+		else:
+			self.type = 1 #Change to write mode
+			self.typeLabel.setText(u'WRITE\u2193')
+		for a in self.bits:
+			a.setEnabled(self.type)
+
+	def setRegs(self,reglist):
+		if self.DDR in reglist:
+			self.L1.setText('%s\n%s'%(self.DDR,self.format.format(reglist.get(self.DDR))) )
+		if self.PORT in reglist:
+			self.L2.setText('%s\n%s'%(self.PORT,self.format.format(reglist.get(self.PORT))) )
+		if self.PIN in reglist:
+			self.L3.setText('%s\n%s'%(self.PIN,self.format.format(reglist.get(self.PIN))) )
+		self.reglist = reglist
+
+	def getValue(self):
+		val = 0
+		for a in reversed(self.bits):
+			val = val<<1
+			if a.isChecked(): val|=1
+		return val
+
+	def setValue(self,val):
+		for a in self.bits:
+			a.setChecked(val&1)
+			val =val>>1
+
+	def valueMouseClick(self, event):
+		if self.format == '{0:d}':
+			self.format = '{0:08b}'
+		elif self.format == '{0:08b}':
+			self.format = '0x{0:02X}'
+		elif self.format == '0x{0:02X}':
+			self.format = '{0:d}'
+		self.valueRefresh()
+
+	def valueRefresh(self):
+		self.valueLabel.setText(self.format.format(self.getValue()))
 
 
 

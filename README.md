@@ -11,6 +11,10 @@ The kuttyPy hardware is an ATMEGA32 microcontroller development board developed 
 ![Screencast](/docs/monitor.gif?raw=true "Monitor your code!")
 Monitor your code's activity while it executes
 
+![Screencast](/docs/custom_registers.gif?raw=true "Add Register widgets, twiddle bits, and see what happens!")
+Add custom register blocks, twiddle bits, and observe!
+
+
 ## Plotting ADC values using matplotlib
 ![Screenshot](/docs/code.gif?raw=true "Recording of the ADC logging example")
 

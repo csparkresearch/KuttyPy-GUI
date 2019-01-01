@@ -3,7 +3,7 @@ Code snippet for reading data from the 1024 bin MCA
 
 '''
 import serial, struct, time,platform,os,sys
-import PORTS
+from utilities import PORTS
 
 if 'inux' in platform.system(): #Linux based system
 	import fcntl
