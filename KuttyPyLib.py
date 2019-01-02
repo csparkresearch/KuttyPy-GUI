@@ -167,7 +167,7 @@ class KUTTYPY:
 		version = self.__get_version__(fd)
 		if len(version)==1:
 			if ord(version)==ord(self.VERSIONNUM):
-				return fd,version,True
+				return fd,ord(version),True
 		print ('version check failed',len(version),version)
 		return None,'',False
 		

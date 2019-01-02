@@ -2,11 +2,11 @@
 '''
 #!/usr/bin/python3
 
-import os,sys,time,re
+import os,sys,time,re,traceback
 from utilities.Qt import QtGui, QtCore, QtWidgets
 
 from utilities.templates import ui_layout as layout
-from utilities import dio,PORTS
+from utilities import dio,REGISTERS
 import constants
 from functools import partial
 from collections import OrderedDict
@@ -35,14 +35,18 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 	def __init__(self, parent=None,**kwargs):
 		super(AppWindow, self).__init__(parent)
 		self.setupUi(self)
-
+		self.VERSION = REGISTERS.VERSION_ATMEGA32 #This needs to be dynamically changed when hardware is connected
+		self.SPECIALS = REGISTERS.VERSIONS[self.VERSION]['SPECIALS']
+		self.REGISTERS = REGISTERS.VERSIONS[self.VERSION]['REGISTERS']
+		self.EXAMPLES_DIR = REGISTERS.VERSIONS[self.VERSION]['examples directory']
+		
 		self.docks = [self.padock,self.pbdock,self.pcdock,self.pddock]
 		self.monitoring = True
 		self.autoUpdateUserRegisters = False
 		self.registerLayout.setAlignment(QtCore.Qt.AlignTop)
 
 		self.setTheme("material")
-		examples = [a for a in os.listdir(path["examples"]) if '.py' in a]
+		examples = [a for a in os.listdir(os.path.join(path["examples"],self.EXAMPLES_DIR)) if ('.py' in a) and a is not 'kuttyPy.py'] #.py files except the library
 		self.exampleList.addItems(examples)
 		blinkindex = self.exampleList.findText('blink.py')
 		if blinkindex!=-1: #default example. blink.py present in examples directory
@@ -50,15 +54,13 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 
 
 		self.codeThread = QtCore.QThread()
-		self.codeEval = self.codeObject()
+		self.codeEval = self.codeObject(self.REGISTERS)
 		self.codeEval.moveToThread(self.codeThread)
 		self.codeEval.finished.connect(self.codeThread.quit)
 		self.codeEval.logThis.connect(self.appendLog) #Connect to the log window
 
 		self.codeThread.started.connect(self.codeEval.execute)
 		self.codeThread.finished.connect(self.codeFinished)
-
-		self.codeThread.start()
 
 		self.commandQ = []
 		self.btns={}
@@ -108,7 +110,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 			if port == 'C':seq = reversed(seq) #PORTC pins are ordered top to bottom
 			for a in seq:
 				name = 'P'+port+str(a)
-				checkbox = dio.widget(name,self.commandQ,extra = PORTS.SPECIALS.get(name,''))
+				checkbox = dio.widget(name,self.commandQ,extra = self.SPECIALS.get(name,''))
 				dock.addWidget(checkbox)
 				self.btns[name] = checkbox
 
@@ -128,10 +130,10 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		logThis = QtCore.pyqtSignal(str)
 		code = ''
 		stopFlag = False
-		PORTMAP = {v: k for k, v in PORTS.PORTS.items()} #Lookup port name based on number
 
-		def __init__(self):
+		def __init__(self,REGISTERS):
 			super(AppWindow.codeObject, self).__init__()
+			self.PORTMAP = {v: k for k, v in REGISTERS.items()} #Lookup port name based on number
 			self.compiled = ''
 			self.SR = None
 			self.GR = None
@@ -160,7 +162,25 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 			return value
 
 		def execute(self):
-			exec(self.compiled,{},self.evalGlobals)
+			#old = sys.stdout
+			#olde = sys.stderr
+			#sys.stdout = self.toLog(self.logThis)
+			#sys.stderr = self.toLog(self.logThis)
+			try:
+				exec(self.compiled,{},self.evalGlobals)
+			except SyntaxError as err:
+				error_class = err.__class__.__name__
+				detail = err.args[0]
+				line_number = err.lineno
+				self.logThis.emit('''<span style="color:red;">%s at line %d : %s</span''' % (error_class, line_number, detail))
+			except Exception as err:
+				error_class = err.__class__.__name__
+				detail = err.args[0]
+				cl, exc, tb = sys.exc_info()
+				line_number = traceback.extract_tb(tb)[-1][1]
+				self.logThis.emit('''<span style="color:red;">%s at line %d: %s</span>''' % (error_class, line_number, detail))
+			#sys.stdout = old
+			#sys.stderr = olde
 			self.logThis.emit("Finished executing user code")
 			self.finished.emit()
 	
@@ -231,7 +251,6 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 	def updateEverything(self):
 		self.locateDevices()
 		if not self.checkConnectionStatus():return
-		self.setTheme("material")
 
 		if self.codeThread.isRunning():
 			return
@@ -305,7 +324,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 					self.commandQ.append(['CNTR1',btn.slider])
 
 	def loadExample(self,filename):
-		self.userCode.setPlainText(open(os.path.join(path["examples"],filename), "r").read())
+		self.userCode.setPlainText(open(os.path.join(path["examples"],self.EXAMPLES_DIR,filename), "r").read())
 
 
 	def setTheme(self,theme):

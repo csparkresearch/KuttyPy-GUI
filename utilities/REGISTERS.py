@@ -1,11 +1,11 @@
 def genlist(**kwargs):
 	return kwargs
 
-PORTS = genlist(
+ATMEGA32_REGISTERS = genlist(
 UBRRL	= 0X29,
 UCSRB	= 0X2A,
 UCSRA	= 0X2B,
-UDR		= 0X2C,
+UDR	= 0X2C,
 SPCR	= 0X2D,
 SPSR	= 0X2E,
 SPDR	= 0X2F,
@@ -65,19 +65,8 @@ SPH		= 0x5E,
 SREG	= 0X5F,
 )
 
-BITS = genlist(
-# Register bit definitions
-REF_EXT	= 0,			# Feed reference voltage externally
-REF_INT	= (3<<6),	# use the 2.56 V internal reference
-REF_AVCC = (1<<6),	# Connect AVCC internally to reference
-ADMAX = 7,			# channels 0 to 7 
-ADC_SPEED = 7,		# ADCClk = (8 MHz/ 128) = 62.5 KHz =>208 usec
-ADEN   = 7,
-ADIF   = 4,
-ADSC   = 6,
 
-)
-SPECIALS = genlist(
+ATMEGA32_SPECIALS = genlist(
 PD5 = 'OC1A',
 PD7 = 'OC2',
 PB3 = 'OC0',
@@ -91,4 +80,16 @@ PA5 = 'ADC5',
 PA6 = 'ADC6',
 PA7 = 'ADC7',
 )
+################################
+VERSION_ATMEGA32 = 99
+VERSIONS = {}
+VERSIONS[99] = {
+'REGISTERS':ATMEGA32_REGISTERS,
+'SPECIALS':ATMEGA32_SPECIALS,
+'examples directory':'atmega32',
+'RESTRICTED_REGISTERS':['UBRRL']
+}
+
+
+
 

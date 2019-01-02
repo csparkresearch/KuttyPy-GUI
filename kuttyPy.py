@@ -65,14 +65,3 @@ OCR0	= 0x5C
 SPL		= 0X5D
 SPH		= 0x5E
 SREG	= 0X5F
-
-# Register bit definitions
-REF_EXT	= 0			# Feed reference voltage externally
-REF_INT	= (3<<6)	# use the 2.56 V internal reference
-REF_AVCC = (1<<6)	# Connect AVCC internally to reference
-ADMAX = 7			# channels 0 to 7 
-ADC_SPEED = 7		# ADCClk = (8 MHz/ 128) = 62.5 KHz =>208 usec
-ADEN   = 7
-ADIF   = 4
-ADSC   = 6
-

@@ -1,6 +1,6 @@
 from .Qt import QtGui,QtCore,QtWidgets
 from utilities.templates import ui_dio,ui_dio_pwm,ui_dio_adc,ui_regvals,ui_dio_cntr,ui_regedit
-from . import PORTS
+from . import REGISTERS
 
 def widget(name,Q,**kwargs):
 	if 'OC' in kwargs.get('extra',''):
@@ -225,7 +225,8 @@ class REGEDIT(QtWidgets.QFrame,ui_regedit.Ui_Frame):
 		self.setupUi(self)
 		self.name = name
 		self.Q = Q
-		self.regName.addItems(PORTS.PORTS.keys())
+		self.regName.addItems([k for k in REGISTERS.VERSIONS[99]['REGISTERS'].keys() if k not in REGISTERS.VERSIONS[99]['RESTRICTED_REGISTERS']])
+
 		self.type = 0 # 0=read. 1 =write
 		self.bits = [self.b0,self.b1,self.b2,self.b3,self.b4,self.b5,self.b6,self.b7]
 		for a in self.bits:
