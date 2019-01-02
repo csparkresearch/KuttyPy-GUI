@@ -1,10 +1,12 @@
 import serial, time, platform, sys,struct
 
-VERSION = 99        # uC return this when GETVER is send
+Byte =     struct.Struct("B") # size 1
 
-GETVER = 1			# Codes for the uC communication
-READB  = 2   		
-WRITEB = 3        
+VERSION = Byte.pack(99)        # uC return this when GETVER is send
+
+GETVER = Byte.pack(1)			# Codes for the uC communication
+READB  = Byte.pack(2)   		
+WRITEB = Byte.pack(3)        
 
 # Register addresses of ATmega32 micro-controller
 TWAR	= 0X22
@@ -93,13 +95,13 @@ def connectKP(s):  	 # Establish connection to ATmega32 connected to USB port
 			return None
 		fd.setRTS(0)				# Set the RTS LED ON
 		fd.flush()
-		fd.write(chr(GETVER))			# Look for kuttyPy signature
+		fd.write(GETVER)			# Look for kuttyPy signature
 		res = fd.read()
-		ver = ord(res)
+		ver = res
 		if ver == VERSION:
 			return fd
 		else:
-			print 'Found port %s, but no kuttyPy on it',s
+			print ('Found port %s, but no kuttyPy on it',s)
 			return None
 	except:
 		pass
@@ -121,21 +123,21 @@ def findKP():
 	for dev in device_list:
 		res = connectKP(dev)
 		if res != None:
-			print 'KuttyPy found on port ',dev
+			print ('KuttyPy found on port ',dev)
 			return res
 	
 
 def setReg(reg, data):
-	fd.write(chr(WRITEB))
+	fd.write(WRITEB)
 	time.sleep(0.01)
-	fd.write(chr(reg))
+	fd.write(Byte.pack(reg))
 	time.sleep(0.01)
-	fd.write(chr(data))
+	fd.write(Byte.pack(data))
 
 def getReg(port):
-	fd.write(chr(READB))
+	fd.write(READB)
 	time.sleep(0.01)
-	fd.write(chr(port))
+	fd.write(Byte.pack(port))
 	val = fd.read()
 	return ord(val)
 
@@ -152,6 +154,6 @@ def readADC(ch):        # Read the ADC channel
 
 KP = findKP()
 if KP == None:
-	print 'Hardware NOT detected. Exiting'
+	print ('Hardware NOT detected. Exiting')
 	sys.exit(0)
 	
