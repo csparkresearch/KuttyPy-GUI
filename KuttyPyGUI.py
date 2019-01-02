@@ -89,7 +89,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		self.startTime = time.time()
 		self.timer = QtCore.QTimer()
 		self.timer.timeout.connect(self.updateEverything)
-		self.timer.start(10)
+		self.timer.start(20)
 
 		
 		#Auto-Detector
@@ -390,9 +390,16 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		menu.addAction(self.themeAction)
 
 		self.pushbutton.setMenu(menu)
+
+		self.speedbutton = QtWidgets.QComboBox(); self.speedbutton.addItems(['Slow','Fast','Ultra']);
+		self.speedbutton.setCurrentIndex(1);
+		self.speedbutton.currentIndexChanged['int'].connect(self.setSpeed)
+		self.statusBar.addPermanentWidget(self.speedbutton)
+
 		self.statusBar.addPermanentWidget(self.pushbutton)
 
-
+	def setSpeed(self,index):
+		self.timer.setInterval([100,20,5][index])
 
 	def locateDevices(self):
 		try:L = KuttyPyLib.getFreePorts()
