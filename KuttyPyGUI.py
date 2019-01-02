@@ -96,9 +96,16 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		self.shortlist=KuttyPyLib.getFreePorts()
 
 	def newRegister(self):
-		reg = dio.REGEDIT('DDRD',self.commandQ)
-		self.registerLayout.addWidget(reg)
-		self.registers.append(reg)
+		reg = dio.REGEDIT(self.commandQ)
+		#self.registerLayout.addWidget(reg)
+		#self.registers.append(reg)
+
+		#TODO: Convert layout to listwidget to enable re-ordering
+		regItem = QtWidgets.QListWidgetItem()
+		regItem.setSizeHint(QtCore.QSize(200,35))
+		self.registerList.addItem(regItem)
+		self.registerList.setItemWidget(regItem,reg)
+		self.registers.append(regItem)
 
 	def addPins(self):
 		for port,dock in zip(self.ports,[self.palayout,self.pblayout,self.pclayout,self.pdlayout]):
@@ -239,7 +246,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 					<td>{0:s}</td>
 					<td>{1:s}</td>
 					<td>{2:d}</td>
-					<td>0x{2:02x} / 0b{2:08b}</td>
+					<td>0b{2:08b} | 0x{2:02x}</td>
 				</tr>
 				'''.format(u'W \u2193' if row[0] else u'R \u2191',a,row[1])
 		html+="</tbody></table>"	
@@ -256,8 +263,8 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 			return
 
 		if self.autoUpdateUserRegisters:
-			for a in self.registers:
-				a.execute()
+			for a in range(self.registerList.count()):
+				self.registerList.itemWidget(self.registerList.item(a)).execute()
 			
 		if len(self.commandQ) and self.clearLog.isChecked()and self.enableLog.isChecked():
 			self.log.clear()

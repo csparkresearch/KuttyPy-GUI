@@ -18,6 +18,9 @@ QMainWindow {
 QDockWidget{
 	color: #aca;
 }
+QListWidget{
+	background-color:#1e1d23;
+}
 
 QDockWidget:disabled{
 	color: #333;
@@ -90,6 +93,20 @@ QToolButton:hover{
 	padding-bottom: 1px;
 	background-color: #1e1d23;
 }
+
+QLabel[clickable=true]:hover{
+	border-style: solid;
+	border-top-color: transparent;
+	border-right-color: transparent;
+	border-left-color: transparent;
+	border-bottom-color: #37efba;
+	border-bottom-width: 2px;
+	border-style: solid;
+	color: #FFFFFF;
+	padding-bottom: 1px;
+	background-color: #1e1d23;
+}
+
 QPushButton:hover{
 	border-style: solid;
 	border-top-color: transparent;
@@ -353,7 +370,7 @@ QComboBox {
 QComboBox:editable {
 	background: #1e1d23;
 	color: #a9b7c6;
-	selection-background-color: #1e1d23;
+	selection-background-color: #9e4d73;
 }
 QComboBox QAbstractItemView {
 	color: #fff;

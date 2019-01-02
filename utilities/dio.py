@@ -220,10 +220,9 @@ class DIOCNTR(QtWidgets.QFrame,ui_dio_cntr.Ui_Frame):
 		self.Q.append(['DSTATE',self.name,state])
 
 class REGEDIT(QtWidgets.QFrame,ui_regedit.Ui_Frame):
-	def __init__(self,name,Q):
+	def __init__(self,Q):
 		super(REGEDIT, self).__init__()
 		self.setupUi(self)
-		self.name = name
 		self.Q = Q
 		self.regName.addItems([k for k in REGISTERS.VERSIONS[99]['REGISTERS'].keys() if k not in REGISTERS.VERSIONS[99]['RESTRICTED_REGISTERS']])
 
