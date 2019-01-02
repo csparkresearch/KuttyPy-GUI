@@ -208,7 +208,6 @@ class KUTTYPY:
 		if reg in self.REGS:
 			self.__sendByte__(self.REGS[reg])
 		else:
-			print('custom')
 			self.__sendByte__(reg)
 		self.__sendByte__(data)
 

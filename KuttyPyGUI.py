@@ -89,7 +89,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		self.startTime = time.time()
 		self.timer = QtCore.QTimer()
 		self.timer.timeout.connect(self.updateEverything)
-		self.timer.start(50)
+		self.timer.start(10)
 
 		
 		#Auto-Detector
@@ -150,9 +150,23 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 			self.evalGlobals['print']  = self.printer
 
 		def setCode(self,code,SR,GR):
-			self.compiled = compile(code.encode(), '<string>', mode='exec')
+			try:
+				self.compiled = compile(code.encode(), '<string>', mode='exec')
+			except SyntaxError as err:
+				error_class = err.__class__.__name__
+				detail = err.args[0]
+				line_number = err.lineno
+				return '''<span style="color:red;">%s at line %d : %s</span>''' % (error_class, line_number, detail)
+			except Exception as err:
+				error_class = err.__class__.__name__
+				detail = err.args[0]
+				cl, exc, tb = sys.exc_info()
+				line_number = traceback.extract_tb(tb)[-1][1]
+				return '''<span style="color:red;">%s at line %d: %s</span>''' % (error_class, line_number, detail)
 			self.SR = SR
 			self.GR = GR
+			return ''
+			
 
 		def printer(self,*args):
 			self.logThis.emit('''<span style="color:cyan;">%s</span>'''%(' '.join([str(a) for a in args])))
@@ -179,7 +193,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 				error_class = err.__class__.__name__
 				detail = err.args[0]
 				line_number = err.lineno
-				self.logThis.emit('''<span style="color:red;">%s at line %d : %s</span''' % (error_class, line_number, detail))
+				self.logThis.emit('''<span style="color:red;">%s at line %d : %s</span>''' % (error_class, line_number, detail))
 			except Exception as err:
 				error_class = err.__class__.__name__
 				detail = err.args[0]
@@ -201,13 +215,16 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 			print('one code is already running')
 			return
 
-		self.codeEval.setCode('{0:s}'.format(self.userCode.toPlainText()),self.p.setReg, self.p.getReg)
+		self.log.clear() #clear the log window
+		self.log.setText('''<span style="color:green;">----------User Code Started-----------</span>''')
+		compilemsg = self.codeEval.setCode('{0:s}'.format(self.userCode.toPlainText()),self.p.setReg, self.p.getReg)
+		if len(compilemsg):
+			self.log.append(compilemsg)
+			return
 		self.codeThread.start()
 
 		self.userCode.setStyleSheet("border: 3px dashed #53ffff;")
-		self.log.clear() #clear the log window
 		self.tabs.setTabEnabled(0,False)
-		self.log.setText('''<span style="color:green;">----------User Code Started-----------</span>''')
 
 	def codeFinished(self):
 		self.tabs.setTabEnabled(0,True)
