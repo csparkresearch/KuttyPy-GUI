@@ -102,7 +102,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 
 		#TODO: Convert layout to listwidget to enable re-ordering
 		regItem = QtWidgets.QListWidgetItem()
-		regItem.setSizeHint(QtCore.QSize(200,35))
+		regItem.setSizeHint(QtCore.QSize(200,40))
 		self.registerList.addItem(regItem)
 		self.registerList.setItemWidget(regItem,reg)
 		self.registers.append(regItem)

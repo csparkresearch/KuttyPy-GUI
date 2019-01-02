@@ -15,6 +15,7 @@ Monitor your code's activity while it executes
 
 ![Screencast](/docs/custom_registers.gif?raw=true "Add Register widgets, twiddle bits, and see what happens!")
 Add custom register blocks, twiddle bits, and observe!
+In this demo, the ADC is read by first setting the bits in the ADCSRA(control and status register), then reading back ADCL(8LSB)+ADCH(2MSB), and also checking the new status of ADCSRA after the operation.
 
 ## Plotting ADC values using matplotlib
 ![Screenshot](/docs/code.gif?raw=true "Recording of the ADC logging example")
@@ -22,7 +23,7 @@ Add custom register blocks, twiddle bits, and observe!
 
 
 ### Installing on Ubuntu
-+ sudo apt-get install python3 python3-pyqt5
++ sudo apt-get install python3 python3-pyqt5 python3-serial
 
 
 ---
