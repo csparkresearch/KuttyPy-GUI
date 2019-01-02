@@ -3,7 +3,7 @@ Code snippet for reading data from the 1024 bin MCA
 
 '''
 import serial, struct, time,platform,os,sys
-from utilities import PORTS
+from utilities import REGISTERS
 
 if 'inux' in platform.system(): #Linux based system
 	import fcntl
@@ -84,9 +84,9 @@ class KUTTYPY:
 
 	BAUD = 38400
 	version = 0
-	REGS = PORTS.PORTS # A map of alphanumeric port names to the 8-bit register locations
+	REGS = REGISTERS.VERSIONS[99]['REGISTERS'] # A map of alphanumeric port names to the 8-bit register locations
 	REGSTATES = {} #Store the last written state of the registers
-	SPECIALS = PORTS.SPECIALS
+	SPECIALS = REGISTERS.VERSIONS[99]['SPECIALS']
 	def __init__(self,**kwargs):
 		self.connected=False
 		if 'port' in kwargs:
