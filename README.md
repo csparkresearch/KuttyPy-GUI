@@ -11,9 +11,11 @@ The kuttyPy (/kʊtipʌɪ/) hardware is an ATMEGA32 microcontroller development b
 ![Screenshot](/docs/blink.gif?raw=true "Write Python code to blink all of PORT D")
 
 ![Screencast](/docs/monitor.gif?raw=true "Monitor your code!")
+
 Monitor your code's activity while it executes
 
 ![Screencast](/docs/custom_registers.gif?raw=true "Add Register widgets, twiddle bits, and see what happens!")
+
 Add custom register blocks, twiddle bits, and observe!
 In this demo, the ADC is read by first setting the bits in the ADCSRA(control and status register), then reading back ADCL(8LSB)+ADCH(2MSB), and also checking the new status of ADCSRA after the operation.
 
@@ -25,6 +27,9 @@ In this demo, the ADC is read by first setting the bits in the ADCSRA(control an
 ### Installing on Ubuntu
 + sudo apt-get install python3 python3-pyqt5 python3-serial
 
+### Installing on windows.
++ This code can be run from source, provided python3 and pyqt5 are installed.
++ [Download Bundled Installer](https://drive.google.com/uc?export=download&id=1giJuDNIql8X5oaIcOLFACXD05-hmkBAy)
 
 ---
 + python3 KuttyPy.py
@@ -35,4 +40,5 @@ License: MIT
 
 
 ---
-Developed by Jithin B.P @CSpark Research, 2018
+Developed by Jithin B.P @CSpark Research, 2018.  
+Special thanks to Georges Khazanadar for Debianizing efforts.
