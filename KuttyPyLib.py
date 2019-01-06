@@ -121,8 +121,9 @@ class KUTTYPY:
 
 
 	def __get_version__(self,fd):
+		fd.setRTS(0)
+		time.sleep(0.01)
 		fd.setRTS(1)
-		#fd.setRTS(0)
 		time.sleep(0.15)
 		fd.write(self.GET_VERSION)
 		return fd.read()

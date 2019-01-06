@@ -280,7 +280,9 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 
 		if self.userHexRunning: #KuttyPy monitor has handed over control to native code. act as serial monitor
 			t = self.p.fd.read(200)
-			if len(t):self.log.insertPlainText(t.decode())
+			if len(t):
+				self.log.moveCursor(QtGui.QTextCursor.End)
+				self.log.insertPlainText(t.decode())
 			return
 
 		if self.codeThread.isRunning():
@@ -388,7 +390,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 					a.setEnabled(False)
 				self.tabs.setEnabled(False)
 				self.log.clear()
-				self.log.setText('''<span style="color:green;">-- Serial Port Monitor --</span>''')
+				self.log.setText('''<span style="color:cyan;">-- Serial Port Monitor --</span><br>''')
 
 			else:
 				self.p.fd.setRTS(0)  #Trigger a reset
@@ -581,6 +583,9 @@ if __name__ == "__main__":
 	r = app.exec_()
 	if myapp.p.connected:
 		myapp.p.fd.write(b'j')
+		#myapp.p.fd.setRTS(0)
+		#time.sleep(0.01)
+		#myapp.p.fd.setRTS(1)
 	app.deleteLater()
 	sys.exit(r)
 
