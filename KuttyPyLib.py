@@ -109,7 +109,7 @@ class KUTTYPY:
 						self.portname=a
 						self.fd,self.version,self.connected=self.connectToPort(self.portname)
 						if self.connected:
-							self.fd.setRTS(0)
+							#self.fd.setRTS(0)
 							for a in ['A','B','C','D']: #Initialize all inputs
 								self.setReg('DDR'+a,0) #All inputs
 								self.setReg('PORT'+a,0) #No Pullup
@@ -121,6 +121,9 @@ class KUTTYPY:
 
 
 	def __get_version__(self,fd):
+		fd.setRTS(1)
+		#fd.setRTS(0)
+		time.sleep(0.15)
 		fd.write(self.GET_VERSION)
 		return fd.read()
 
@@ -134,7 +137,7 @@ class KUTTYPY:
 		'''
 
 		try:
-			fd = serial.Serial(portname, self.BAUD, stopbits=1, timeout = 1.0)
+			fd = serial.Serial(portname, self.BAUD, stopbits=1, timeout = 0.1)
 			if fd.isOpen():
 				#try to lock down the serial port
 				if 'inux' in platform.system(): #Linux based system
@@ -154,7 +157,7 @@ class KUTTYPY:
 					fd.setTimeout(0.1)
 					fd.read(1000)
 					fd.flush()
-					fd.setTimeout(1.0)
+					#fd.setTimeout(1.0)
 
 			else:
 				#print('unable to open',portname)

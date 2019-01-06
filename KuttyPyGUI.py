@@ -42,6 +42,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		
 		self.docks = [self.padock,self.pbdock,self.pcdock,self.pddock]
 		self.monitoring = True
+		self.userHexRunning = False
 		self.autoUpdateUserRegisters = False
 		self.registerLayout.setAlignment(QtCore.Qt.AlignTop)
 
@@ -68,6 +69,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		self.addPins()
 
 		self.statusBar = self.statusBar()
+		self.makeBottomMenu()
 
 		global app
 
@@ -276,10 +278,15 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		self.locateDevices()
 		if not self.checkConnectionStatus():return
 
+		if self.userHexRunning: #KuttyPy monitor has handed over control to native code. act as serial monitor
+			t = self.p.fd.read(200)
+			if len(t):self.log.insertPlainText(t.decode())
+			return
+
 		if self.codeThread.isRunning():
 			return
 
-		if self.autoUpdateUserRegisters:
+		if self.autoUpdateUserRegisters and self.centralWidget().isEnabled():
 			for a in range(self.registerList.count()):
 				self.registerList.itemWidget(self.registerList.item(a)).execute()
 			
@@ -288,6 +295,8 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 			self.updatedRegs = OrderedDict()
 
 		while len(self.commandQ):
+			if not self.centralWidget().isEnabled():
+				return
 			a = self.commandQ.pop(0)
 			if a[0] == 'DSTATE': #Digital Out ['DSTATE','Pxx',state]
 				pname = 'PORT'+a[1][1].upper()
@@ -365,11 +374,34 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		else:
 			self.p = KuttyPyLib.connect(autoscan=True)
 		if self.p.connected:
+			self.userApplication.setChecked(False)
 			self.setWindowTitle('KuttyPy Interactive Console [{0:s}]'.format(self.p.portname))
 		else:
 			self.setWindowTitle('KuttyPy Interactive Console [ Hardware not detected ]')
-		self.makeBottomMenu()
 
+	def jumpToApplication(self,state):
+		if self.p:
+			if state:
+				self.userHexRunning=True
+				self.p.fd.write(b'j') #Skip to application (Bootloader resets) 
+				for a in self.docks:
+					a.setEnabled(False)
+				self.tabs.setEnabled(False)
+				self.log.clear()
+				self.log.setText('''<span style="color:green;">-- Serial Port Monitor --</span>''')
+
+			else:
+				self.p.fd.setRTS(0)  #Trigger a reset
+				time.sleep(0.01)
+				self.p.fd.setRTS(1)
+				time.sleep(0.2)
+				for a in self.docks:
+					a.setEnabled(True)
+				self.userHexRunning=False
+				self.tabs.setEnabled(True)		
+		else:
+			if self.isChecked():
+				self.setChecked(False)
 
 	def makeBottomMenu(self):
 		try:self.pushbutton.setParent(None)
@@ -377,7 +409,6 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		self.pushbutton = QtWidgets.QPushButton('Menu')
 		self.pushbutton.setStyleSheet("height: 13px;padding:3px;color: #FFFFFF;")
 		menu = QtWidgets.QMenu()
-
 
 		menu.addAction('Save Window as Svg', self.exportSvg)
 
@@ -390,6 +421,10 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		menu.addAction(self.themeAction)
 
 		self.pushbutton.setMenu(menu)
+
+		self.userApplication = QtWidgets.QCheckBox("User App");
+		self.userApplication.toggled['bool'].connect(self.jumpToApplication)
+		self.statusBar.addPermanentWidget(self.userApplication)
 
 		self.speedbutton = QtWidgets.QComboBox(); self.speedbutton.addItems(['Slow','Fast','Ultra']);
 		self.speedbutton.setCurrentIndex(1);
@@ -544,6 +579,8 @@ if __name__ == "__main__":
 	myapp = AppWindow(app=app, path=path)
 	myapp.show()
 	r = app.exec_()
+	if myapp.p.connected:
+		myapp.p.fd.write(b'j')
 	app.deleteLater()
 	sys.exit(r)
 

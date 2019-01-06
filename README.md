@@ -19,9 +19,20 @@ Monitor your code's activity while it executes
 Add custom register blocks, twiddle bits, and observe!
 In this demo, the ADC is read by first setting the bits in the ADCSRA(control and status register), then reading back ADCL(8LSB)+ADCH(2MSB), and also checking the new status of ADCSRA after the operation.
 
-## Plotting ADC values using matplotlib
+### Plotting ADC values using matplotlib
 ![Screenshot](/docs/code.gif?raw=true "Recording of the ADC logging example")
 
+
+### Seamless switching between the KuttyPy monitor, and user uploaded hex file.
+---
+
+This functionality is undergoing alpha testing, and is not applicable for existing KuttyPy
+boards where the user uploaded file overwrites the kuttypy monitor hex.
+![App Switching](/docs/switch.gif?raw=true "App Switching")
+
+This example shows how to skip to an LED scanning code written in C, and uploaded using
+the bootloader to the application section of the KuttyPy. To regain control, the kuttypy-gui
+simply triggers a reset.
 
 
 ### Installing on Ubuntu

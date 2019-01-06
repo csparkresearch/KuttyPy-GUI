@@ -30,7 +30,7 @@ class Ui_MainWindow(object):
         font = QtGui.QFont()
         font.setPointSize(9)
         self.log.setFont(font)
-        self.log.setLineWrapMode(QtWidgets.QTextEdit.NoWrap)
+        self.log.setLineWrapMode(QtWidgets.QTextEdit.WidgetWidth)
         self.log.setObjectName("log")
         self.gridLayout_2.addWidget(self.log, 3, 0, 2, 2)
         self.tabs = QtWidgets.QTabWidget(self.centralwidget)
