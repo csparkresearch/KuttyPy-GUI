@@ -319,9 +319,9 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 			elif a[0] == 'READ': #['READ','REGNAME',function]
 				val = self.getReg(a[1]);
 				a[2](val)
-			elif a[0] == 'ADC': #['ADC',channel,output with setValue function]
-				self.setReg('ADMUX',192|a[1]);
-				self.setReg('ADCSRA',196);
+			elif a[0] == 'ADC': #['ADC',ADMUX,output with setValue function]
+				self.setReg('ADMUX',a[1]);
+				self.setReg('ADCSRA',196|1);
 				adcl = self.getReg('ADCL');
 				adch = self.getReg('ADCH');
 				a[2].setValue(adcl|(adch<<8))
@@ -354,7 +354,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 			btn.nameIn.setChecked((value>>a)&1)
 			if portchar == 'A': #ADC
 				if btn.currentPage == 2: #ADC Page displayed
-					self.commandQ.append(['ADC',a,btn.slider])
+					self.commandQ.append(['ADC',btn.ADMUX,btn.slider])
 			elif type(btn)==dio.DIOCNTR and btn.currentPage==2: # CNTR
 					self.commandQ.append(['CNTR1',btn.slider])
 

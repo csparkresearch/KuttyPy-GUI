@@ -1,5 +1,5 @@
 from .Qt import QtGui,QtCore,QtWidgets
-from utilities.templates import ui_dio,ui_dio_pwm,ui_dio_adc,ui_regvals,ui_dio_cntr,ui_regedit
+from utilities.templates import ui_dio,ui_dio_pwm,ui_dio_adc,ui_dio_adcConfig,ui_regvals,ui_dio_cntr,ui_regedit
 from . import REGISTERS
 
 def widget(name,Q,**kwargs):
@@ -144,19 +144,48 @@ class DIOPWM(QtWidgets.QStackedWidget,ui_dio_pwm.Ui_stack):
 			self.Q.append(['WRITE','OCR1AL',(val)&0xFF]) 
 
 
+class DIOADCCONFIG(QtWidgets.QDialog,ui_dio_adcConfig.Ui_Dialog):
+	def __init__(self,parent,name,opts,accepted):
+		super(DIOADCCONFIG, self).__init__(parent)
+		self.setupUi(self)
+		self.label.setText(name)
+		self.options.addItems(opts)
+		self.onFinished = accepted
+	def accept(self):
+		self.onFinished(self.options.currentText())
+		self.close()
 
 class DIOADC(QtWidgets.QStackedWidget,ui_dio_adc.Ui_stack):
 	def __init__(self,name,Q,**kwargs):
 		super(DIOADC, self).__init__()
 		self.setupUi(self)
 		self.name = name
-		
+		self.chan = int(self.name[2])
+		self.ADMUX = 64|self.chan #  AREF With Capacitor | PA[x]
+		self.muxOptions = {
+			self.name:self.chan,
+			'ADC1-ADC0 @10x':0b01001,
+			'ADC1-ADC0 @200x':0b01011,
+			'ADC3-ADC2 @10x':0b01101,
+			'ADC3-ADC2 @200x':0b01111,
+			self.name+'-ADC1 @1x':0b10000|self.chan,
+			'1.22V(BandGap Reference)':0b11110,
+			'0V (Ground)':0b11111,
+		}
 		self.Q = Q #Command Queue
 		self.nameOut.setText(name)
 		self.nameIn.setText(name)
 		self.nameIn.setEnabled(False)
 		self.currentPage = 0
-		
+		self.lcdNumber.mousePressEvent = self.configMux
+
+	def configMux(self,evt):
+		self.config = DIOADCCONFIG(self,'ADMUX',self.muxOptions.keys(),self.setMux)
+		self.config.exec_()
+
+	def setMux(self,val):
+		self.ADMUX = 64|self.muxOptions.get(val,self.chan)
+
 	def next(self):
 		self.currentPage+=1
 		if self.currentPage >= self.count():
