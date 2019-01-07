@@ -42,6 +42,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		
 		self.docks = [self.padock,self.pbdock,self.pcdock,self.pddock]
 		self.monitoring = True
+		self.logRegisters = True
 		self.userHexRunning = False
 		self.autoUpdateUserRegisters = False
 		self.registerLayout.setAlignment(QtCore.Qt.AlignTop)
@@ -239,14 +240,16 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 			self.codeThread.terminate()
 		
 
-	def getReg(self,reg):
+	def getReg(self,reg,record = True):
 		val = self.p.getReg(reg)
-		self.updatedRegs[reg] = [0,val]
+		if record:
+			self.updatedRegs[reg] = [0,val]
 		return val
 
-	def setReg(self,reg,val):
+	def setReg(self,reg,val,record = True):
 		self.p.setReg(reg,val)
-		self.updatedRegs[reg] = [1,val]
+		if record:
+			self.updatedRegs[reg] = [1,val]
 		return val
 
 	def appendLog(self,txt):
@@ -288,13 +291,10 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		if self.codeThread.isRunning():
 			return
 
-		if self.autoUpdateUserRegisters and self.centralWidget().isEnabled():
+		if self.autoUpdateUserRegisters:
 			for a in range(self.registerList.count()):
 				self.registerList.itemWidget(self.registerList.item(a)).execute()
 			
-		if len(self.commandQ) and self.clearLog.isChecked()and self.enableLog.isChecked():
-			self.log.clear()
-			self.updatedRegs = OrderedDict()
 
 		while len(self.commandQ):
 			if not self.centralWidget().isEnabled():
@@ -319,19 +319,23 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 			elif a[0] == 'READ': #['READ','REGNAME',function]
 				val = self.getReg(a[1]);
 				a[2](val)
-			elif a[0] == 'ADC': #['ADC',ADMUX,output with setValue function]
-				self.setReg('ADMUX',a[1]);
-				self.setReg('ADCSRA',196|1);
-				adcl = self.getReg('ADCL');
-				adch = self.getReg('ADCH');
-				a[2].setValue(adcl|(adch<<8))
 			elif a[0] == 'CNTR1': #['CNTR1',output with setValue function]
-				cl = self.getReg('TCNT1L');
-				ch = self.getReg('TCNT1H');
+				cl = self.getReg('TCNT1L',False);
+				ch = self.getReg('TCNT1H',False);
 				a[1].setValue(cl|(ch<<8))
+			elif a[0] == 'ADC': #['ADC',ADMUX,output with setValue function, to log, or not to log]
+				self.setReg('ADMUX',a[1],a[3]);
+				self.setReg('ADCSRA',196|1,a[3]);
+				adcl = self.getReg('ADCL',a[3]);
+				adch = self.getReg('ADCH',a[3]);
+				a[2].setValue(adcl|(adch<<8))
 			
-			if self.enableLog.isChecked():
+		if self.enableLog.isChecked():
+			if self.clearLog.isChecked() and len(self.updatedRegs):
+				self.log.clear()
+			if len(self.updatedRegs):
 				self.genLog()
+				self.updatedRegs = OrderedDict()
 
 		if self.pending['status'].ready() and self.monitoring:
 			val = self.p.getReg(self.getRegs[self.currentRegister][0])
@@ -354,7 +358,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 			btn.nameIn.setChecked((value>>a)&1)
 			if portchar == 'A': #ADC
 				if btn.currentPage == 2: #ADC Page displayed
-					self.commandQ.append(['ADC',btn.ADMUX,btn.slider])
+					self.commandQ.append(['ADC',btn.ADMUX,btn.slider,btn.logstate])
 			elif type(btn)==dio.DIOCNTR and btn.currentPage==2: # CNTR
 					self.commandQ.append(['CNTR1',btn.slider])
 

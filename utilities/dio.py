@@ -145,14 +145,15 @@ class DIOPWM(QtWidgets.QStackedWidget,ui_dio_pwm.Ui_stack):
 
 
 class DIOADCCONFIG(QtWidgets.QDialog,ui_dio_adcConfig.Ui_Dialog):
-	def __init__(self,parent,name,opts,accepted):
+	def __init__(self,parent,name,opts,logstate,accepted):
 		super(DIOADCCONFIG, self).__init__(parent)
 		self.setupUi(self)
 		self.label.setText(name)
+		self.log.setChecked(logstate)
 		self.options.addItems(opts)
 		self.onFinished = accepted
 	def accept(self):
-		self.onFinished(self.options.currentText())
+		self.onFinished(self.options.currentText(),self.log.isChecked())
 		self.close()
 
 class DIOADC(QtWidgets.QStackedWidget,ui_dio_adc.Ui_stack):
@@ -161,6 +162,7 @@ class DIOADC(QtWidgets.QStackedWidget,ui_dio_adc.Ui_stack):
 		self.setupUi(self)
 		self.name = name
 		self.chan = int(self.name[2])
+		self.logstate = False
 		self.ADMUX = 64|self.chan #  AREF With Capacitor | PA[x]
 		self.muxOptions = {
 			self.name:self.chan,
@@ -177,14 +179,15 @@ class DIOADC(QtWidgets.QStackedWidget,ui_dio_adc.Ui_stack):
 		self.nameIn.setText(name)
 		self.nameIn.setEnabled(False)
 		self.currentPage = 0
-		self.lcdNumber.mousePressEvent = self.configMux
+		self.lcdNumber.mousePressEvent = self.config
 
-	def configMux(self,evt):
-		self.config = DIOADCCONFIG(self,'ADMUX',self.muxOptions.keys(),self.setMux)
+	def config(self,evt):
+		self.config = DIOADCCONFIG(self,'ADMUX',self.muxOptions.keys(),self.logstate,self.setConfig)
 		self.config.exec_()
 
-	def setMux(self,val):
+	def setConfig(self,val,log):
 		self.ADMUX = 64|self.muxOptions.get(val,self.chan)
+		self.logstate = log
 
 	def next(self):
 		self.currentPage+=1

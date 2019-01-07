@@ -37,13 +37,13 @@ simply triggers a reset.
 
 ### Installing on Ubuntu
 + sudo apt-get install python3 python3-pyqt5 python3-serial
+---
++ python3 KuttyPyGUI.py
 
 ### Installing on windows.
 + This code can be run from source, provided python3 and pyqt5 are installed.
 + [Download Bundled Installer](https://drive.google.com/uc?export=download&id=1giJuDNIql8X5oaIcOLFACXD05-hmkBAy)
 
----
-+ python3 KuttyPy.py
 
 
 License: MIT

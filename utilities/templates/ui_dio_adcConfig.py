@@ -11,7 +11,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
         Dialog.setObjectName("Dialog")
-        Dialog.resize(356, 78)
+        Dialog.resize(375, 106)
         self.gridLayout = QtWidgets.QGridLayout(Dialog)
         self.gridLayout.setObjectName("gridLayout")
         self.label = QtWidgets.QLabel(Dialog)
@@ -29,7 +29,10 @@ class Ui_Dialog(object):
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
         self.buttonBox.setStandardButtons(QtWidgets.QDialogButtonBox.Cancel|QtWidgets.QDialogButtonBox.Ok)
         self.buttonBox.setObjectName("buttonBox")
-        self.gridLayout.addWidget(self.buttonBox, 1, 0, 1, 2)
+        self.gridLayout.addWidget(self.buttonBox, 3, 0, 1, 2)
+        self.log = QtWidgets.QCheckBox(Dialog)
+        self.log.setObjectName("log")
+        self.gridLayout.addWidget(self.log, 1, 0, 1, 1)
 
         self.retranslateUi(Dialog)
         self.buttonBox.accepted.connect(Dialog.accept)
@@ -40,4 +43,5 @@ class Ui_Dialog(object):
         _translate = QtCore.QCoreApplication.translate
         Dialog.setWindowTitle(_translate("Dialog", "ADC Configuration"))
         self.label.setText(_translate("Dialog", "ADMUX"))
+        self.log.setText(_translate("Dialog", "Log Read/Write calls"))
 
