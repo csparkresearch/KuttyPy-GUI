@@ -5,7 +5,7 @@
 ---
 The kuttyPy (/kʊtipʌɪ/) Microcontroller training utility allows real-time manipulation of the registers in microcontrollers via a connected computer containing its python library.  setReg and getReg function calls act as a real-time debugging and monitoring utility, and combined with Python's visualization and analytical utilities, this approach has immense pedagogical potential for beginners. 
 
-The kuttyPy (/kʊtipʌɪ/) hardware is an ATMEGA32 microcontroller development board developed by the [ExpEYES](http://expeyes.in), and is currently supported by this software. It contains the kuttyPy firmware, but can also be used to run other programs via its bootloader.
+The kuttyPy (/kʊtipʌɪ/) hardware is an ATMEGA32 microcontroller development board developed by the [ExpEYES](http://expeyes.in) project, and is currently supported by this software. It contains the kuttyPy firmware, but can also be used to run other programs via its bootloader.
 
 ## Simple blink.py example
 ![Screenshot](/docs/blink.gif?raw=true "Write Python code to blink all of PORT D")
@@ -24,7 +24,7 @@ In this demo, the ADC is read by first setting the bits in the ADCSRA(control an
 
 ![Screencast](/docs/monitor.gif?raw=true "Monitor your code!")
 
-![Screencast](/docs/hall_sensor.gif?raw=true "Hall sensor!") ![Screencast](/docs/servo_motor.gif?raw=true "Hall sensor!")
+![Screencast](/docs/hall_sensor.webp?raw=true "Hall sensor!") ![Screencast](/docs/servo_motor.webp?raw=true "Hall sensor!")
 
 Plug and play various accessories such as this Hall Sensor, & servo motor.
 
@@ -39,7 +39,7 @@ This example shows how to skip to an LED scanning code written in C, and uploade
 the bootloader to the application section of the KuttyPy. To regain control, the kuttypy-gui
 simply triggers a reset.
 
-![Screencast](/docs/pov_display.gif?raw=true "POV display!")
+![Screencast](/docs/pov_display.webp?raw=true "POV display!")
 
 A persistence of vision display made with C code! Write text in thin air using 8 LEDs on PORTB.
 
