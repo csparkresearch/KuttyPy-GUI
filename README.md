@@ -22,6 +22,11 @@ In this demo, the ADC is read by first setting the bits in the ADCSRA(control an
 ### Plotting ADC values using matplotlib
 ![Screenshot](/docs/code.gif?raw=true "Recording of the ADC logging example")
 
+![Screencast](/docs/monitor.gif?raw=true "Monitor your code!")
+
+![Screencast](/docs/hall_sensor.gif?raw=true "Hall sensor!") ![Screencast](/docs/servo_motor.gif?raw=true "Hall sensor!")
+
+Plug and play various accessories such as this Hall Sensor, & servo motor.
 
 ### Seamless switching between the KuttyPy monitor, and user uploaded hex file.
 ---
@@ -34,6 +39,9 @@ This example shows how to skip to an LED scanning code written in C, and uploade
 the bootloader to the application section of the KuttyPy. To regain control, the kuttypy-gui
 simply triggers a reset.
 
+![Screencast](/docs/pov_display.gif?raw=true "POV display!")
+
+A persistence of vision display made with C code! Write text in thin air using 8 LEDs on PORTB.
 
 ### Installing on Ubuntu
 + sudo apt-get install python3 python3-pyqt5 python3-serial
