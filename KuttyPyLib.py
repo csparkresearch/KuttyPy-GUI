@@ -87,6 +87,7 @@ class KUTTYPY:
 
 	BAUD = 38400
 	version = 0
+	portname = None
 	REGS = REGISTERS.VERSIONS[99]['REGISTERS'] # A map of alphanumeric port names to the 8-bit register locations
 	REGSTATES = {} #Store the last written state of the registers
 	SPECIALS = REGISTERS.VERSIONS[99]['SPECIALS']

@@ -30,14 +30,17 @@ Plug and play various accessories such as this Hall Sensor, & servo motor.
 
 ### Seamless switching between the KuttyPy monitor, and user uploaded hex file.
 ---
+The KuttyPy monitor code is part of the bootloader. This allows users to upload their own Hex files without losing the training utility features.
 
-This functionality is undergoing alpha testing, and is not applicable for existing KuttyPy
-boards where the user uploaded file overwrites the kuttypy monitor hex.
 ![App Switching](/docs/switch.gif?raw=true "App Switching")
 
-This example shows how to skip to an LED scanning code written in C, and uploaded using
-the bootloader to the application section of the KuttyPy. To regain control, the kuttypy-gui
-simply triggers a reset.
+This example shows how to skip back and forth to an LED scanning code (which also prints letters to the serial port) written in C and uploaded.
+
+In the animation, after fiddling a little with the PWM controls on the monitor, the 'user app' button is clicked. This triggers the following:
++ Within a few ten milliseconds the user uploaded hex file starts executing
++ The console turns into a serial monitor, and shows any text sent by the user uploaded hex.
+
+The user can switch back to the monitoring utility in a snap!
 
 ![Screencast](/docs/pov_display.webp?raw=true "POV display!")
 

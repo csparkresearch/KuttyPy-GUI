@@ -278,7 +278,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 
 	def appendLogPlain(self,txt):
 		self.log.moveCursor(QtGui.QTextCursor.End)
-		self.log.append(txt.decode().strip())
+		self.log.insertPlainText(txt.decode('ascii'))
 
 	def genLog(self):
 		html='''<table border="1" align="center" cellpadding="1" cellspacing="0" style="font-family:arial,helvetica,sans-serif;font-size:9pt;">
