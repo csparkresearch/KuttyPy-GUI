@@ -37,6 +37,7 @@ uint8_t i;
 
 int main (void)
   {
+  char i;
   DDRB = 255;		// Data Direction Register for port B
 DDRD=255;
 TCCR2 = 105;
@@ -50,11 +51,11 @@ uart_init(38400);
 delay_ms_spl(100);
 
 while(1){
-	uart_send_byte('f');
-	uart_send_byte('d');
+	for(i='a';i<='z';i++)uart_send_byte(i);
+	uart_send_byte('\n');
 	blinkforward();  
-	uart_send_byte('b');
-	uart_send_byte('w');
+	for(i='A';i<='Z';i++)uart_send_byte(i);
+	uart_send_byte('\n');
 	blinkreverse();  
 
 }

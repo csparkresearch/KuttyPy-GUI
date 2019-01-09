@@ -18,7 +18,12 @@ QMainWindow {
 QDockWidget{
 	color: #aca;
 }
+
 QListWidget{
+	background-color:#1e1d23;
+}
+
+QListWidget::item:selected{
 	background-color:#1e1d23;
 }
 
@@ -382,8 +387,8 @@ QComboBox:!editable:on, QComboBox::drop-down:editable:on {
 }
 
 /*----------jithin */
-QComboBox::drop-down {border-width: 0px;}
-QComboBox::down-arrow {image: url(noimg); border-width: 0px;}
+/*QComboBox::drop-down {border-width: 0px;}
+QComboBox::down-arrow {image: url(noimg); border-width: 0px;}*/
 
 QComboBox{
 	border-style: solid;

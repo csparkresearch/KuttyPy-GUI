@@ -6,8 +6,10 @@ import os,sys,time,re,traceback
 from utilities.Qt import QtGui, QtCore, QtWidgets
 
 from utilities.templates import ui_layout as layout
-from utilities import dio,REGISTERS
+from utilities import dio,REGISTERS,uploader
 import constants
+
+
 from functools import partial
 from collections import OrderedDict
 
@@ -32,6 +34,8 @@ class myTimer():
 class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 	p=None
 	ports = ['A','B','C','D']
+	logThis = QtCore.pyqtSignal(str)
+	logThisPlain = QtCore.pyqtSignal(bytes)
 	def __init__(self, parent=None,**kwargs):
 		super(AppWindow, self).__init__(parent)
 		self.setupUi(self)
@@ -44,8 +48,8 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		self.monitoring = True
 		self.logRegisters = True
 		self.userHexRunning = False
+		self.uploadingHex = False
 		self.autoUpdateUserRegisters = False
-		self.registerLayout.setAlignment(QtCore.Qt.AlignTop)
 
 		self.setTheme("material")
 		examples = [a for a in os.listdir(os.path.join(path["examples"],self.EXAMPLES_DIR)) if ('.py' in a) and a is not 'kuttyPy.py'] #.py files except the library
@@ -54,15 +58,29 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		if blinkindex!=-1: #default example. blink.py present in examples directory
 			self.exampleList.setCurrentIndex(blinkindex)
 
-
+		######## PYTHON CODE
 		self.codeThread = QtCore.QThread()
 		self.codeEval = self.codeObject(self.REGISTERS)
 		self.codeEval.moveToThread(self.codeThread)
 		self.codeEval.finished.connect(self.codeThread.quit)
 		self.codeEval.logThis.connect(self.appendLog) #Connect to the log window
+		self.logThis.connect(self.appendLog) #Connect to the log window
+		self.logThisPlain.connect(self.appendLogPlain) #Connect to the log window
 
 		self.codeThread.started.connect(self.codeEval.execute)
 		self.codeThread.finished.connect(self.codeFinished)
+
+		######### C CODE UPLOADER
+		self.uploadThread = QtCore.QThread()
+		self.UploadObject = self.uploadObject()
+		self.UploadObject.moveToThread(self.uploadThread)
+		self.UploadObject.finished.connect(self.uploadThread.quit)
+		self.UploadObject.logThis.connect(self.appendLog) #Connect to the log window
+		self.UploadObject.logThisPlain.connect(self.appendLogPlain) #Connect to the log window. add plain text
+		self.logThis.connect(self.appendLog) #Connect to the log window
+
+		self.uploadThread.started.connect(self.UploadObject.execute)
+		self.uploadThread.finished.connect(self.codeFinished)
 
 		self.commandQ = []
 		self.btns={}
@@ -131,6 +149,8 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 				a.hide()		
 		else: #Playground . enable monitoring and control.
 			self.monitoring = True
+			self.autoRefreshUserRegisters.setChecked(False)
+			self.userRegistersAutoRefresh(False)
 			for a in self.docks:
 				a.show()		
 
@@ -139,7 +159,6 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		finished = QtCore.pyqtSignal()
 		logThis = QtCore.pyqtSignal(str)
 		code = ''
-		stopFlag = False
 
 		def __init__(self,REGISTERS):
 			super(AppWindow.codeObject, self).__init__()
@@ -230,8 +249,10 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		self.tabs.setTabEnabled(0,False)
 
 	def codeFinished(self):
+		print ('hello')
 		self.tabs.setTabEnabled(0,True)
 		self.userCode.setStyleSheet("")
+		self.uploadingHex = False
 
 	def abort(self):
 		if self.codeThread.isRunning():
@@ -254,6 +275,10 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 
 	def appendLog(self,txt):
 		self.log.append(txt)
+
+	def appendLogPlain(self,txt):
+		self.log.moveCursor(QtGui.QTextCursor.End)
+		self.log.append(txt.decode().strip())
 
 	def genLog(self):
 		html='''<table border="1" align="center" cellpadding="1" cellspacing="0" style="font-family:arial,helvetica,sans-serif;font-size:9pt;">
@@ -280,13 +305,18 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 	def updateEverything(self):
 		self.locateDevices()
 		if not self.checkConnectionStatus():return
-
-		if self.userHexRunning: #KuttyPy monitor has handed over control to native code. act as serial monitor
-			t = self.p.fd.read(200)
-			if len(t):
-				self.log.moveCursor(QtGui.QTextCursor.End)
-				self.log.insertPlainText(t.decode())
+		#KuttyPy monitor has handed over control to native code. act as serial monitor/ debug window
+		if self.uploadingHex:
 			return
+
+		
+		if self.userHexRunning:
+			t = self.p.fd.read(self.p.fd.in_waiting)
+			if len(t):
+				self.logThisPlain.emit(t)
+			return
+		
+		#self.setTheme('material')
 
 		if self.codeThread.isRunning():
 			return
@@ -366,6 +396,57 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		self.userCode.setPlainText(open(os.path.join(path["examples"],self.EXAMPLES_DIR,filename), "r").read())
 
 
+	########################### UPLOAD HEX FILE #######################
+
+	class uploadObject(QtCore.QObject):
+		finished = QtCore.pyqtSignal()
+		logThis = QtCore.pyqtSignal(str)
+		logThisPlain = QtCore.pyqtSignal(bytes)
+		fname = ''
+		p = None
+		def __init__(self):
+			super(AppWindow.uploadObject, self).__init__()
+		def config(self,mode,p,fname):
+			self.p = p
+			self.fname = fname
+			self.mode = mode
+
+		def execute(self):
+			if self.p.connected:
+				if self.mode == 'upload':
+					try:
+						self.p.fd.setRTS(0);time.sleep(0.01);self.p.fd.setRTS(1);time.sleep(0.2)
+						dude = uploader.Uploader(self.p.fd, hexfile=self.fname,logger = self.logThis)
+						dude.program()
+						dude.verify()
+					except Exception as err:
+						self.logThis.emit('''<span style="color:red;">Failed to upload</span>''')
+					self.p.fd.setRTS(0);time.sleep(0.01);self.p.fd.setRTS(1);time.sleep(0.2)
+					self.logThis.emit('''<span style="color:green;">Finished upload</span>''')
+				'''
+				elif self.mode == 'monitor':
+					while self.mode == 'monitor':
+						t = self.p.fd.readline()
+						if len(t):
+							self.logThisPlain.emit(t)
+				'''
+			self.finished.emit()
+	
+
+
+	def uploadHex(self):
+		filename = QtWidgets.QFileDialog.getOpenFileName(self," Open a hex file to upload to your KuttyPy", "", "Hex Files (*.hex)")
+		if len(filename[0]):
+			#self.userCode.setStyleSheet("border: 3px dashed #53ffff;")
+			#self.tabs.setTabEnabled(0,False)
+			self.uploadingHex = True
+			self.log.clear()
+			self.log.setText('''<span style="color:cyan;">-- Uploading Code --</span><br>''')
+			self.UploadObject.config('upload',self.p,filename[0])
+			self.uploadThread.start()
+
+
+	##############################
 	def setTheme(self,theme):
 		self.setStyleSheet("")
 		self.setStyleSheet(open(os.path.join(path["themes"],theme+".qss"), "r").read())
@@ -390,6 +471,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 			if state:
 				self.userHexRunning=True
 				self.p.fd.write(b'j') #Skip to application (Bootloader resets) 
+
 				for a in self.docks:
 					a.setEnabled(False)
 				self.tabs.setEnabled(False)
@@ -400,7 +482,9 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 				self.p.fd.setRTS(0)  #Trigger a reset
 				time.sleep(0.01)
 				self.p.fd.setRTS(1)
-				time.sleep(0.2)
+				time.sleep(0.1)
+				while self.p.fd.in_waiting:
+					self.p.fd.read()
 				for a in self.docks:
 					a.setEnabled(True)
 				self.userHexRunning=False
@@ -432,6 +516,11 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		self.userApplication.toggled['bool'].connect(self.jumpToApplication)
 		self.statusBar.addPermanentWidget(self.userApplication)
 
+		self.hexUploadButton = QtWidgets.QPushButton("Upload Hex");
+		self.hexUploadButton.clicked.connect(self.uploadHex)
+		self.statusBar.addPermanentWidget(self.hexUploadButton)
+
+
 		self.speedbutton = QtWidgets.QComboBox(); self.speedbutton.addItems(['Slow','Fast','Ultra']);
 		self.speedbutton.setCurrentIndex(1);
 		self.speedbutton.currentIndexChanged['int'].connect(self.setSpeed)
@@ -443,18 +532,19 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		self.timer.setInterval([100,20,5][index])
 
 	def locateDevices(self):
-		try:L = KuttyPyLib.getFreePorts()
+		try:L = KuttyPyLib.getFreePorts(self.p.portname)
 		except Exception as e:print(e)
 		total = len(L)
 		menuChanged = False
 		if L != self.shortlist:
 			menuChanged = True
-
 			if self.p.connected:
 				if self.p.portname not in L:
 						self.setWindowTitle('Error : Device Disconnected')
 						QtWidgets.QMessageBox.warning(self, 'Connection Error', 'Device Disconnected. Please check the connections')
-						try:self.p.fd.close()
+						try:
+							self.p.fd.close()
+							self.p.portname = None
 						except:pass
 						self.p.connected = False
 						self.setWindowTitle('KuttyPy Interactive Console [ Hardware not detected ]')
@@ -585,11 +675,13 @@ if __name__ == "__main__":
 	myapp = AppWindow(app=app, path=path)
 	myapp.show()
 	r = app.exec_()
+	'''
 	if myapp.p.connected:
 		myapp.p.fd.write(b'j')
 		#myapp.p.fd.setRTS(0)
 		#time.sleep(0.01)
 		#myapp.p.fd.setRTS(1)
+	'''
 	app.deleteLater()
 	sys.exit(r)
 

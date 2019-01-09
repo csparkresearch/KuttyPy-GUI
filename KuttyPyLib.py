@@ -66,13 +66,16 @@ def isPortFree(portname):
 	except serial.SerialException as ex:
 		return False #Port is not available
 
-def getFreePorts():
+def getFreePorts(openPort=None):
 	'''
 	Find out which ports are currently free 
 	'''
 	portlist={}
 	for a in listPorts():
-		portlist[a] = isPortFree(a)
+		if a != openPort:
+			portlist[a] = isPortFree(a)
+		else:
+			portlist[a] = False
 	return portlist
 
 
@@ -94,7 +97,7 @@ class KUTTYPY:
 			try:
 				self.fd,self.version,self.connected=self.connectToPort(self.portname)
 				if self.connected:
-					self.fd.setRTS(0)
+					#self.fd.setRTS(0)
 					for a in ['A','B','C','D']: #Initialize all inputs
 						self.setReg('DDR'+a,0)
 					return
@@ -124,7 +127,9 @@ class KUTTYPY:
 		fd.setRTS(0)
 		time.sleep(0.01)
 		fd.setRTS(1)
-		time.sleep(0.15)
+		time.sleep(0.25)
+		while fd.in_waiting:
+			fd.read(fd.in_waiting)
 		fd.write(self.GET_VERSION)
 		return fd.read()
 
@@ -138,7 +143,7 @@ class KUTTYPY:
 		'''
 
 		try:
-			fd = serial.Serial(portname, self.BAUD, stopbits=1, timeout = 0.1)
+			fd = serial.Serial(portname, self.BAUD, timeout = 0.1)
 			if fd.isOpen():
 				#try to lock down the serial port
 				if 'inux' in platform.system(): #Linux based system
@@ -154,11 +159,9 @@ class KUTTYPY:
 					pass
 					#print ('not on linux',platform.system())
 
-				if(fd.inWaiting()):
-					fd.setTimeout(0.1)
-					fd.read(1000)
+				if(fd.in_waiting):
 					fd.flush()
-					#fd.setTimeout(1.0)
+					fd.readall()
 
 			else:
 				#print('unable to open',portname)
