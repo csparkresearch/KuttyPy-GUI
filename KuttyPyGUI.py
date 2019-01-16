@@ -39,6 +39,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 	def __init__(self, parent=None,**kwargs):
 		super(AppWindow, self).__init__(parent)
 		self.setupUi(self)
+
 		self.VERSION = REGISTERS.VERSION_ATMEGA32 #This needs to be dynamically changed when hardware is connected
 		self.SPECIALS = REGISTERS.VERSIONS[self.VERSION]['SPECIALS']
 		self.REGISTERS = REGISTERS.VERSIONS[self.VERSION]['REGISTERS']

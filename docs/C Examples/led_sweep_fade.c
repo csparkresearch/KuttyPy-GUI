@@ -1,5 +1,6 @@
 #include "mh-uart.c"
 int pwm=0,dir=1;
+char mychar = 'a';
 
 void delay_ms_spl (uint16_t k)  // idle for k milliseconds, only for 8MHz clock
     {
@@ -13,6 +14,9 @@ void delay_ms_spl (uint16_t k)  // idle for k milliseconds, only for 8MHz clock
     	OCR1AH = pwm>>8;
     	OCR1AL = pwm&0xFF;
     	}
+    	uart_send_byte(mychar++);
+    	if(mychar=='z'+1)
+    		{mychar = 'a';uart_send_byte('\n');}
     }
 
 void blinkforward(void){
@@ -20,7 +24,7 @@ uint8_t i;
   for(i=0;i<8;i++)
     {
     PORTB = 1<<i;
-    delay_ms_spl(50);
+    delay_ms_spl(5);
   }
 
 }
@@ -30,7 +34,7 @@ uint8_t i;
   for(i=0;i<8;i++)
     {
     PORTB = 1<<(7-i);
-    delay_ms_spl(50);
+    delay_ms_spl(20);
   }
 
 }
@@ -51,11 +55,7 @@ uart_init(38400);
 delay_ms_spl(100);
 
 while(1){
-	for(i='a';i<='z';i++)uart_send_byte(i);
-	uart_send_byte('\n');
 	blinkforward();  
-	for(i='A';i<='Z';i++)uart_send_byte(i);
-	uart_send_byte('\n');
 	blinkreverse();  
 
 }
