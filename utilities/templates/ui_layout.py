@@ -265,7 +265,7 @@ class Ui_MainWindow(object):
         self.tabs.setTabText(self.tabs.indexOf(self.examples), _translate("MainWindow", "Scripting"))
         self.filenameLabel.setText(_translate("MainWindow", ":"))
         self.commandLinkButton_2.setText(_translate("MainWindow", "Open File"))
-        self.commandLinkButton_3.setText(_translate("MainWindow", "Compile"))
+        self.commandLinkButton_3.setText(_translate("MainWindow", "Compile+Upload"))
         self.tabs.setTabText(self.tabs.indexOf(self.tab_2), _translate("MainWindow", "C Code"))
         self.enableLog.setText(_translate("MainWindow", "Enabled"))
         self.clearLog.setText(_translate("MainWindow", "Auto-Clear"))
