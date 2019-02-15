@@ -119,7 +119,7 @@
       </widget>
       <widget class="QWidget" name="tab">
        <attribute name="title">
-        <string>Tweak Registers</string>
+        <string>Registers</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_4">
         <property name="margin">
@@ -173,7 +173,7 @@
       </widget>
       <widget class="QWidget" name="examples">
        <attribute name="title">
-        <string>Python Code</string>
+        <string>Scripting</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_3">
         <property name="horizontalSpacing">
@@ -250,6 +250,53 @@ for a in range(5):   #Run this loop 5 times.
         </item>
        </layout>
       </widget>
+      <widget class="QWidget" name="tab_2">
+       <attribute name="title">
+        <string>C Code</string>
+       </attribute>
+       <layout class="QGridLayout" name="gridLayout_5">
+        <item row="0" column="1">
+         <widget class="QLabel" name="filenameLabel">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <spacer name="verticalSpacer">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="0" column="0">
+         <widget class="QCommandLinkButton" name="commandLinkButton_2">
+          <property name="text">
+           <string>Open File</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QCommandLinkButton" name="commandLinkButton_3">
+          <property name="text">
+           <string>Compile</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
      </widget>
     </item>
     <item row="6" column="0">
@@ -297,7 +344,7 @@ for a in range(5):   #Run this loop 5 times.
      </widget>
     </item>
     <item row="2" column="0" colspan="2">
-     <widget class="QLabel" name="label_2">
+     <widget class="QLabel" name="logLabel">
       <property name="minimumSize">
        <size>
         <width>0</width>
@@ -502,6 +549,38 @@ for a in range(5):   #Run this loop 5 times.
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>commandLinkButton_2</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>openFile()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>149</x>
+     <y>52</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>56</x>
+     <y>57</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>commandLinkButton_3</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>compileAndUpload()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>147</x>
+     <y>95</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>57</x>
+     <y>99</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>runCode()</slot>
@@ -510,9 +589,9 @@ for a in range(5):   #Run this loop 5 times.
   <slot>loadExample(QString)</slot>
   <slot>compile()</slot>
   <slot>upload()</slot>
-  <slot>saveCFile()</slot>
-  <slot>openCFile()</slot>
   <slot>newRegister()</slot>
   <slot>userRegistersAutoRefresh(bool)</slot>
+  <slot>openFile()</slot>
+  <slot>compileAndUpload()</slot>
  </slots>
 </ui>

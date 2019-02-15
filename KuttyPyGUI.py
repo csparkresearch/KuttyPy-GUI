@@ -2,7 +2,7 @@
 '''
 #!/usr/bin/python3
 
-import os,sys,time,re,traceback
+import os,sys,time,re,traceback,platform
 from utilities.Qt import QtGui, QtCore, QtWidgets
 
 from utilities.templates import ui_layout as layout
@@ -12,6 +12,9 @@ import constants
 
 from functools import partial
 from collections import OrderedDict
+
+
+
 
 class myTimer():
 	def __init__(self,interval):
@@ -51,6 +54,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		self.userHexRunning = False
 		self.uploadingHex = False
 		self.autoUpdateUserRegisters = False
+		self.CFile = None #'~/kuttyPy.c'
 
 		self.setTheme("material")
 		examples = [a for a in os.listdir(os.path.join(path["examples"],self.EXAMPLES_DIR)) if ('.py' in a) and a is not 'kuttyPy.py'] #.py files except the library
@@ -250,7 +254,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		self.tabs.setTabEnabled(0,False)
 
 	def codeFinished(self):
-		print ('hello')
+		print('finished')
 		self.tabs.setTabEnabled(0,True)
 		self.userCode.setStyleSheet("")
 		self.uploadingHex = False
@@ -389,7 +393,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 			btn.nameIn.setChecked((value>>a)&1)
 			if portchar == 'A': #ADC
 				if btn.currentPage == 2: #ADC Page displayed
-					self.commandQ.append(['ADC',btn.ADMUX,btn.slider,btn.logstate])
+					self.commandQ.append(['ADC',btn.ADMUX,btn,btn.logstate])
 			elif type(btn)==dio.DIOCNTR and btn.currentPage==2: # CNTR
 					self.commandQ.append(['CNTR1',btn.slider])
 
@@ -413,6 +417,27 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 			self.mode = mode
 
 		def execute(self):
+			if self.mode == 'compileupload':
+				try:
+					import subprocess
+					fname = self.fname.split(".")[0]
+					cmd = 'avr-gcc -Wall -O2 -mmcu=%s -o %s %s' %('atmega32',fname,self.fname)
+					res = subprocess.getstatusoutput(cmd)
+					if res[0] != 0:
+						self.logThis.emit('''<span style="color:red;">Compile Error: %s</span>'''%res[1])
+					else:
+						self.logThis.emit('''<span style="color:white;">%s</span><br>'''%res[1])
+					cmd = 'avr-objcopy -j .text -j .data -O ihex %s %s.hex' %(fname,fname)
+					res = subprocess.getstatusoutput(cmd)
+					self.logThis.emit('''<span style="color:white;">%s</span><br>'''%res[1])
+					cmd = 'avr-objdump -S %s > %s.lst'%(fname,fname)
+					res = subprocess.getstatusoutput(cmd)
+					self.logThis.emit('''<span style="color:white;">%s</span><br>'''%res[1])
+					self.mode = 'upload'
+					self.logThis.emit('''<span style="color:green;">Finished Compiling: Generated Hex File</span>''')
+				except Exception as err:
+					self.logThis.emit('''<span style="color:red;">Failed to Compile:%s</span>'''%str(err))
+
 			if self.p.connected:
 				if self.mode == 'upload':
 					try:
@@ -420,17 +445,10 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 						dude = uploader.Uploader(self.p.fd, hexfile=self.fname,logger = self.logThis)
 						dude.program()
 						dude.verify()
+						self.p.fd.setRTS(0);time.sleep(0.01);self.p.fd.setRTS(1);time.sleep(0.2)
+						self.logThis.emit('''<span style="color:green;">Finished upload</span>''')
 					except Exception as err:
 						self.logThis.emit('''<span style="color:red;">Failed to upload</span>''')
-					self.p.fd.setRTS(0);time.sleep(0.01);self.p.fd.setRTS(1);time.sleep(0.2)
-					self.logThis.emit('''<span style="color:green;">Finished upload</span>''')
-				'''
-				elif self.mode == 'monitor':
-					while self.mode == 'monitor':
-						t = self.p.fd.readline()
-						if len(t):
-							self.logThisPlain.emit(t)
-				'''
 			self.finished.emit()
 	
 
@@ -446,6 +464,27 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 			self.UploadObject.config('upload',self.p,filename[0])
 			self.uploadThread.start()
 
+
+	def openFile(self):
+		filename = QtWidgets.QFileDialog.getOpenFileName(self," Open a C file to edit", "", "C Files (*.c)")
+		if len(filename[0]):
+			self.filenameLabel.setText(filename[0])
+			self.CFile = filename[0]
+			self.log.clear()
+			self.log.setText('''<span style="color:cyan;">-- Opened File: %s --</span><br>'''%filename[0])
+			if 'inux' in platform.system(): #Linux based system
+				os.system('%s %s' % ('xdg-open', filename[0]))
+			else:
+				os.system('%s %s' % ('open', filename[0]))
+
+	def compileAndUpload(self):
+		if self.CFile:
+			self.uploadingHex = True
+			self.log.clear()
+			self.log.setText('''<span style="color:cyan;">-- Compiling and Uploading Code --</span><br>''')
+			self.UploadObject.config('compileupload',self.p,self.CFile)
+			self.uploadThread.start()
+			
 
 	##############################
 	def setTheme(self,theme):

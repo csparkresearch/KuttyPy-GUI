@@ -19,6 +19,9 @@ Monitor your code's activity while it executes
 Add custom register blocks, twiddle bits, and observe!
 In this demo, the ADC is read by first setting the bits in the ADCSRA(control and status register), then reading back ADCL(8LSB)+ADCH(2MSB), and also checking the new status of ADCSRA after the operation.
 
+### 7 channel voltmeter [ 0-5000mV without analog frontend ]
+![Screenshot](/docs/voltmeter.gif?raw=true "Voltmeter")
+
 ### Plotting ADC values using matplotlib
 ![Screenshot](/docs/code.gif?raw=true "Recording of the ADC logging example")
 

@@ -148,10 +148,26 @@ class DIOADCCONFIG(QtWidgets.QDialog,ui_dio_adcConfig.Ui_Dialog):
 	def __init__(self,parent,name,opts,logstate,accepted):
 		super(DIOADCCONFIG, self).__init__(parent)
 		self.setupUi(self)
+		self.setWindowTitle('Configure ADC Pin : %s'%parent.name)
 		self.label.setText(name)
+		self.scale = 1.
 		self.log.setChecked(logstate)
 		self.options.addItems(opts)
 		self.onFinished = accepted
+		self.gauge.update_value(200)
+		self.gauge.set_MaxValue(1023)
+		self.options.currentIndexChanged['QString'].connect(self.update)
+
+	def changeRange(self,state):
+		self.scale = 5000./1023. if state else 1.
+		self.gauge.set_MaxValue(5000. if state else 1023)
+
+	def setValue(self,val):
+		self.gauge.update_value(val*self.scale)
+
+	def update(self,i):
+		self.onFinished(i,self.log.isChecked())
+
 	def accept(self):
 		self.onFinished(self.options.currentText(),self.log.isChecked())
 		self.close()
@@ -161,6 +177,7 @@ class DIOADC(QtWidgets.QStackedWidget,ui_dio_adc.Ui_stack):
 		super(DIOADC, self).__init__()
 		self.setupUi(self)
 		self.name = name
+		self.configWindow = None
 		self.chan = int(self.name[2])
 		self.logstate = False
 		self.ADMUX = 64|self.chan #  AREF With Capacitor | PA[x]
@@ -182,8 +199,10 @@ class DIOADC(QtWidgets.QStackedWidget,ui_dio_adc.Ui_stack):
 		self.lcdNumber.mousePressEvent = self.config
 
 	def config(self,evt):
-		self.config = DIOADCCONFIG(self,'ADMUX',self.muxOptions.keys(),self.logstate,self.setConfig)
-		self.config.exec_()
+		if not self.configWindow:
+			self.configWindow = DIOADCCONFIG(self,'ADMUX',self.muxOptions.keys(),self.logstate,self.setConfig)
+		#self.configWindow.exec_() #Blocks UI (Modal), and only one instance can be shown
+		self.configWindow.show() # Non blocking. Multiple.
 
 	def setConfig(self,val,log):
 		self.ADMUX = 64|self.muxOptions.get(val,self.chan)
@@ -207,7 +226,11 @@ class DIOADC(QtWidgets.QStackedWidget,ui_dio_adc.Ui_stack):
 		self.pullup.setChecked(state)
 		self.Q.append(['DSTATE',self.name,state])
 
-
+	def setValue(self,val):
+		self.slider.setValue(val)
+		if self.configWindow:
+			self.configWindow.setValue(val)
+		
 class DIOCNTR(QtWidgets.QFrame,ui_dio_cntr.Ui_Frame):
 	def __init__(self,name,Q,**kwargs):
 		super(DIOCNTR, self).__init__()
@@ -308,7 +331,5 @@ class REGEDIT(QtWidgets.QFrame,ui_regedit.Ui_Frame):
 
 	def valueRefresh(self):
 		self.valueLabel.setText(self.format.format(self.getValue()))
-
-
 
 
