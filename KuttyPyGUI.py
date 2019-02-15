@@ -433,7 +433,10 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 					cmd = 'avr-objdump -S %s > %s.lst'%(fname,fname)
 					res = subprocess.getstatusoutput(cmd)
 					self.logThis.emit('''<span style="color:white;">%s</span><br>'''%res[1])
-					self.mode = 'upload'
+					if self.fname[-2:]=='.c':
+						self.fname = self.fname[:-2]+'.hex' #Replace .c with .hex
+						self.mode = 'upload'
+						self.logThis.emit('''<span style="color:green;">Generated Hex File</span>''')
 					self.logThis.emit('''<span style="color:green;">Finished Compiling: Generated Hex File</span>''')
 				except Exception as err:
 					self.logThis.emit('''<span style="color:red;">Failed to Compile:%s</span>'''%str(err))
@@ -441,11 +444,12 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 			if self.p.connected:
 				if self.mode == 'upload':
 					try:
-						self.p.fd.setRTS(0);time.sleep(0.01);self.p.fd.setRTS(1);time.sleep(0.2)
+						self.p.fd.setRTS(0);time.sleep(0.01);self.p.fd.setRTS(1);time.sleep(0.4)
 						dude = uploader.Uploader(self.p.fd, hexfile=self.fname,logger = self.logThis)
 						dude.program()
 						dude.verify()
 						self.p.fd.setRTS(0);time.sleep(0.01);self.p.fd.setRTS(1);time.sleep(0.2)
+						self.p.get_version()
 						self.logThis.emit('''<span style="color:green;">Finished upload</span>''')
 					except Exception as err:
 						self.logThis.emit('''<span style="color:red;">Failed to upload</span>''')
@@ -525,6 +529,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 				time.sleep(0.1)
 				while self.p.fd.in_waiting:
 					self.p.fd.read()
+				self.p.get_version()
 				for a in self.docks:
 					a.setEnabled(True)
 				self.userHexRunning=False
