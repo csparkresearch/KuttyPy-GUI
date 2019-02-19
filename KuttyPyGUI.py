@@ -49,6 +49,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		self.EXAMPLES_DIR = REGISTERS.VERSIONS[self.VERSION]['examples directory']
 		
 		self.docks = [self.padock,self.pbdock,self.pcdock,self.pddock]
+		self.sensorList = []
 		self.monitoring = True
 		self.logRegisters = True
 		self.userHexRunning = False
@@ -364,6 +365,10 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 				adcl = self.getReg('ADCL',a[3]);
 				adch = self.getReg('ADCH',a[3]);
 				a[2].setValue(adcl|(adch<<8))
+		
+		for a in self.sensorList:
+			if a[0].isVisible():
+				a[0].setValue(a[0].read())
 			
 		if self.enableLog.isChecked():
 			if self.clearLog.isChecked() and len(self.updatedRegs):
@@ -396,6 +401,25 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 					self.commandQ.append(['ADC',btn.ADMUX,btn,btn.logstate])
 			elif type(btn)==dio.DIOCNTR and btn.currentPage==2: # CNTR
 					self.commandQ.append(['CNTR1',btn.slider])
+
+	############ I2C SENSORS #################
+	def I2CScan(self):
+		if self.p.connected:
+			x = self.p.I2CScan()
+			print('Responses from: ',x)
+			for a in self.sensorList:
+				a[0].setParent(None)
+				a[1].setParent(None)
+			self.sensorList = []
+			for a in x:
+				s = self.p.sensors.get(a,None)
+				if s is not None:
+					btn = QtWidgets.QPushButton(s['name']+':'+hex(a))
+					dialog = dio.DIOSENSOR(self,s)
+					btn.clicked.connect(dialog.launch)
+					self.sensorLayout.addWidget(btn)
+					self.sensorList.append([dialog,btn])
+				
 
 	def loadExample(self,filename):
 		self.userCode.setPlainText(open(os.path.join(path["examples"],self.EXAMPLES_DIR,filename), "r").read())
@@ -433,7 +457,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 					cmd = 'avr-objdump -S %s > %s.lst'%(fname,fname)
 					res = subprocess.getstatusoutput(cmd)
 					self.logThis.emit('''<span style="color:white;">%s</span><br>'''%res[1])
-					if self.fname[-2:]=='.c':
+					if self.fname[-2:] in ['.c','.C']:
 						self.fname = self.fname[:-2]+'.hex' #Replace .c with .hex
 						self.mode = 'upload'
 						self.logThis.emit('''<span style="color:green;">Generated Hex File</span>''')
@@ -470,7 +494,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 
 
 	def openFile(self):
-		filename = QtWidgets.QFileDialog.getOpenFileName(self," Open a C file to edit", "", "C Files (*.c)")
+		filename = QtWidgets.QFileDialog.getOpenFileName(self," Open a C file to edit", "", "C Files (*.c *.C)")
 		if len(filename[0]):
 			self.filenameLabel.setText(filename[0])
 			self.CFile = filename[0]

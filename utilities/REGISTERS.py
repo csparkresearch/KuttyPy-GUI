@@ -26,6 +26,11 @@ EEDR	= 0X3D,
 EEARL	= 0X3E,
 EEARH	= 0X3F,
 
+TWBR    = 0X20,
+TWSR    = 0X21,
+TWAR    = 0X22,
+TWDR    = 0X23,
+
 ADCL	= 0X24,       # ADC data
 ADCH	= 0X25,
 ADCSRA	= 0X26,	# ADC status/control

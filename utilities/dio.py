@@ -1,6 +1,7 @@
 from .Qt import QtGui,QtCore,QtWidgets
-from utilities.templates import ui_dio,ui_dio_pwm,ui_dio_adc,ui_dio_adcConfig,ui_regvals,ui_dio_cntr,ui_regedit
+from utilities.templates import ui_dio,ui_dio_pwm,ui_dio_adc,ui_dio_adcConfig,ui_dio_sensor,ui_regvals,ui_dio_cntr,ui_regedit
 from . import REGISTERS
+from utilities.templates.gauge import Gauge
 
 def widget(name,Q,**kwargs):
 	if 'OC' in kwargs.get('extra',''):
@@ -333,3 +334,56 @@ class REGEDIT(QtWidgets.QFrame,ui_regedit.Ui_Frame):
 		self.valueLabel.setText(self.format.format(self.getValue()))
 
 
+class DIOSENSOR(QtWidgets.QDialog,ui_dio_sensor.Ui_Dialog):
+	def __init__(self,parent,sensor):
+		super(DIOSENSOR, self).__init__(parent)
+		name = sensor['name']
+		self.initialize = sensor['init']
+		self.read = sensor['read']
+		self.setupUi(self)
+		self.currentPage = 0
+		self.scale = 1.
+		self.max = sensor.get('max',None)
+		self.min = sensor.get('min',None)
+		self.fields = sensor.get('fields',None)
+		self.gauges = {}
+		for a,b,c in zip(self.fields,self.min,self.max):
+			gauge = Gauge(self)
+			gauge.setObjectName(a)
+			gauge.set_MinValue(b)
+			gauge.set_MaxValue(c)
+			#listItem = QtWidgets.QListWidgetItem()
+			#self.listWidget.addItem(listItem)
+			#self.listWidget.setItemWidget(listItem, gauge)
+			self.gaugeLayout.addWidget(gauge)
+			self.gauges[gauge] = [a,b,c] #Name ,min, max value
+
+		self.setWindowTitle('Sensor : %s'%name)
+
+	def next(self):
+		if self.currentPage==1:
+			self.currentPage = 0
+			self.switcher.setText("Data Logger")
+		else:
+			self.currentPage = 1
+			self.switcher.setText("Analog Gauge")
+
+		self.monitors.setCurrentIndex(self.currentPage)
+
+	def changeRange(self,state):
+		for a in self.gauges:
+			self.scale = self.gauges[a][1]/65535. if state else 1.
+			a.set_MaxValue(self.gauges[a][1] if state else 65535)
+
+	def setValue(self,vals):
+		p=0
+		if vals is None:
+			print('check connections')
+			return
+		for a in self.gauges:
+			a.update_value(vals[p]*self.scale)
+			p+=1
+
+	def launch(self):
+		self.initialize()
+		self.show()

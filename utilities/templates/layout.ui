@@ -30,25 +30,7 @@
     <property name="spacing">
      <number>0</number>
     </property>
-    <item row="3" column="0" rowspan="2" colspan="2">
-     <widget class="QTextBrowser" name="log">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="font">
-       <font>
-        <pointsize>9</pointsize>
-       </font>
-      </property>
-      <property name="lineWrapMode">
-       <enum>QTextEdit::WidgetWidth</enum>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="0" colspan="2">
+    <item row="0" column="0" colspan="6">
      <widget class="QTabWidget" name="tabs">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Expanding" vsizetype="Maximum">
@@ -302,7 +284,7 @@ for a in range(5):   #Run this loop 5 times.
     <item row="6" column="0">
      <widget class="QCheckBox" name="enableLog">
       <property name="sizePolicy">
-       <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+       <sizepolicy hsizetype="Maximum" vsizetype="Expanding">
         <horstretch>0</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
@@ -321,29 +303,25 @@ for a in range(5):   #Run this loop 5 times.
       </property>
      </widget>
     </item>
-    <item row="6" column="1">
-     <widget class="QCheckBox" name="clearLog">
+    <item row="3" column="0" rowspan="2" colspan="6">
+     <widget class="QTextBrowser" name="log">
       <property name="sizePolicy">
-       <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
-        <horstretch>1</horstretch>
+       <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
+        <horstretch>0</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
       </property>
       <property name="font">
        <font>
         <pointsize>9</pointsize>
-        <italic>true</italic>
        </font>
       </property>
-      <property name="text">
-       <string>Auto-Clear</string>
-      </property>
-      <property name="checked">
-       <bool>true</bool>
+      <property name="lineWrapMode">
+       <enum>QTextEdit::WidgetWidth</enum>
       </property>
      </widget>
     </item>
-    <item row="2" column="0" colspan="2">
+    <item row="2" column="0" colspan="6">
      <widget class="QLabel" name="logLabel">
       <property name="minimumSize">
        <size>
@@ -363,6 +341,64 @@ for a in range(5):   #Run this loop 5 times.
       <property name="alignment">
        <set>Qt::AlignBottom|Qt::AlignLeading|Qt::AlignLeft</set>
       </property>
+     </widget>
+    </item>
+    <item row="6" column="1">
+     <widget class="QCheckBox" name="clearLog">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Maximum" vsizetype="Expanding">
+        <horstretch>1</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>9</pointsize>
+        <italic>true</italic>
+       </font>
+      </property>
+      <property name="text">
+       <string>Auto-Clear</string>
+      </property>
+      <property name="checked">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </item>
+    <item row="6" column="5">
+     <widget class="QToolButton" name="toolButton_4">
+      <property name="text">
+       <string>...</string>
+      </property>
+      <property name="icon">
+       <iconset resource="res.qrc">
+        <normaloff>:/control/refresh.svg</normaloff>:/control/refresh.svg</iconset>
+      </property>
+     </widget>
+    </item>
+    <item row="6" column="2" colspan="3">
+     <widget class="QFrame" name="frame">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::StyledPanel</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Raised</enum>
+      </property>
+      <layout class="QHBoxLayout" name="sensorLayout">
+       <property name="spacing">
+        <number>2</number>
+       </property>
+       <property name="margin">
+        <number>0</number>
+       </property>
+      </layout>
+      <zorder>clearLog</zorder>
      </widget>
     </item>
    </layout>
@@ -581,6 +617,22 @@ for a in range(5):   #Run this loop 5 times.
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>toolButton_4</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>I2CScan()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>403</x>
+     <y>617</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>409</x>
+     <y>659</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>runCode()</slot>
@@ -593,5 +645,6 @@ for a in range(5):   #Run this loop 5 times.
   <slot>userRegistersAutoRefresh(bool)</slot>
   <slot>openFile()</slot>
   <slot>compileAndUpload()</slot>
+  <slot>I2CScan()</slot>
  </slots>
 </ui>
