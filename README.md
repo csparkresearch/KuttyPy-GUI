@@ -22,6 +22,14 @@ In this demo, the ADC is read by first setting the bits in the ADCSRA(control an
 ### 7 channel voltmeter [ 0-5000mV without analog frontend ]
 ![Screenshot](/docs/voltmeter.gif?raw=true "Voltmeter")
 
+### Monitor I2C Sensors
+Implemented Support for I2C sensors: Light sensor added. | Video recording
+---|---
+![sensor](https://user-images.githubusercontent.com/19327143/52988950-5c64f580-3427-11e9-8516-d6708ef2532b.gif) | ![ezgif com-optimize](https://user-images.githubusercontent.com/19327143/52989158-2bd18b80-3428-11e9-9b26-21f21f8fe99a.gif)
+
++ Scan for Sensors
++ Click to monitor via analog gauge
+
 ### Plotting ADC values using matplotlib
 ![Screenshot](/docs/code.gif?raw=true "Recording of the ADC logging example")
 
