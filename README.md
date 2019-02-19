@@ -3,7 +3,7 @@
 ![Screenshot](/docs/main.gif?raw=true "Recording of the User Interface")
 
 ---
-The kuttyPy (/kʊtipʌɪ/) Microcontroller training utility allows real-time manipulation of the registers in microcontrollers via a connected computer containing its python library.  setReg and getReg function calls act as a real-time debugging and monitoring utility, and combined with Python's visualization and analytical utilities, this approach has immense pedagogical potential for beginners. 
+The kuttyPy (/kʊtipʌɪ/) Microcontroller training utility allows live manipulation of the registers in microcontrollers via a connected computer containing its python library.  setReg and getReg function calls act as debugging and monitoring tools, and combined with Python's visualization and analytical utilities, this approach has immense pedagogical potential for beginners to the microcontroller world. 
 
 The kuttyPy (/kʊtipʌɪ/) hardware is an ATMEGA32 microcontroller development board developed by the [ExpEYES](http://expeyes.in) project, and is currently supported by this software. It contains the kuttyPy firmware, but can also be used to run other programs via its bootloader.
 
