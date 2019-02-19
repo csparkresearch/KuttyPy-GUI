@@ -103,7 +103,18 @@ class KUTTYPY:
 				'read':self.TSL2561_all,
 				'fields':['total','IR'],
 				'min':[0,0],
-				'max':[2**15,2**15]},
+				'max':[2**15,2**15],
+				'config':[{
+							'name':'gain',
+							'options':['1x','16x'],
+							'function':self.TSL2561_gain
+							},
+							{
+							'name':'Integration Time',
+							'options':['3 mS','101 mS','402 mS'],
+							'function':self.TSL2561_timing
+							}
+					] },
 			0x68:{
 				'name':'MPU6050',
 				'init':self.MPU6050_init,
@@ -387,11 +398,13 @@ class KUTTYPY:
 		if tmt:return None
 		if None not in b:
 			return [(b[x*2+1]<<8)|b[x*2] for x in range(3)] #X,Y,Z
+
 	def MPU6050_gyro(self):
 		b,tmt = self.I2CReadBulk(0x68, 0x3B+6 ,6)
 		if tmt:return None
 		if None not in b:
 			return [(b[x*2+1]<<8)|b[x*2] for x in range(3)] #X,Y,Z
+
 	def MPU6050_all(self):
 		'''
 		returns a 7 element list. Ax,Ay,Az,T,Gx,Gy,Gz
@@ -402,9 +415,22 @@ class KUTTYPY:
 		if None not in b:
 			return [ int16((b[x*2]<<8)|b[x*2+1]) for x in range(7) ] #Ax,Ay,Az, Temp, Gx, Gy,Gz
 
+	TSL_GAIN = 0x00 # 0x00=1x , 0x10 = 16x
+	TSL_TIMING = 0x00 # 0x00=3 mS , 0x01 = 101 mS, 0x02 = 402mS
 	def TSL2561_init(self):
 		self.I2CWriteBulk(0x39,[0x80 , 0x03 ]) #poweron
-		self.I2CWriteBulk(0x39,[0x80 | 0x01, 0x01 | 0x10 ]) 
+		self.I2CWriteBulk(0x39,[0x80 | 0x01, self.TSL_GAIN|self.TSL_TIMING ]) 
+
+	def TSL2561_gain(self,gain):
+		self.TSL_GAIN = gain<<4
+		self.TSL2561_config(self.TSL_GAIN,self.TSL_TIMING)
+		
+	def TSL2561_timing(self,timing):
+		self.TSL_TIMING = timing
+		self.TSL2561_config(self.TSL_GAIN,self.TSL_TIMING)
+
+	def TSL2561_config(self,gain,timing):
+		self.I2CWriteBulk(0x39,[0x80 | 0x01, gain|timing]) #Timing register 0x01. gain[1x,16x] | timing[13mS,100mS,400mS]
 
 	def TSL2561_all(self):
 		'''

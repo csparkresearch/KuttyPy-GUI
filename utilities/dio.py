@@ -2,6 +2,9 @@ from .Qt import QtGui,QtCore,QtWidgets
 from utilities.templates import ui_dio,ui_dio_pwm,ui_dio_adc,ui_dio_adcConfig,ui_dio_sensor,ui_regvals,ui_dio_cntr,ui_regedit
 from . import REGISTERS
 from utilities.templates.gauge import Gauge
+import numpy as np
+
+colors=[(0,255,0),(255,0,0),(255,255,100),(10,255,255)]+[(50+np.random.random(200),50+np.random.random(200),150+np.random.random(100)) for a in range(10)]
 
 def widget(name,Q,**kwargs):
 	if 'OC' in kwargs.get('extra',''):
@@ -346,7 +349,18 @@ class DIOSENSOR(QtWidgets.QDialog,ui_dio_sensor.Ui_Dialog):
 		self.max = sensor.get('max',None)
 		self.min = sensor.get('min',None)
 		self.fields = sensor.get('fields',None)
+		self.widgets =[]
+		for a in sensor.get('config',[]): #Load configuration menus
+			l = QtWidgets.QLabel(a.get('name',''))
+			self.configLayout.addWidget(l) ; self.widgets.append(l)
+			l = QtWidgets.QComboBox(); l.addItems(a.get('options',[]))
+			l.currentIndexChanged['int'].connect(a.get('function',None))
+			self.configLayout.addWidget(l) ; self.widgets.append(l)
+			
+		self.graph.setRange(xRange=[-300, 0])
+		self.curves = {}
 		self.gauges = {}
+		self.datapoints=0
 		for a,b,c in zip(self.fields,self.min,self.max):
 			gauge = Gauge(self)
 			gauge.setObjectName(a)
@@ -357,7 +371,10 @@ class DIOSENSOR(QtWidgets.QDialog,ui_dio_sensor.Ui_Dialog):
 			#self.listWidget.setItemWidget(listItem, gauge)
 			self.gaugeLayout.addWidget(gauge)
 			self.gauges[gauge] = [a,b,c] #Name ,min, max value
-
+			
+			curve = self.graph.plot(pen=colors[len(self.curves)])
+			self.curves[curve] = np.empty(300)
+		
 		self.setWindowTitle('Sensor : %s'%name)
 
 	def next(self):
@@ -376,13 +393,27 @@ class DIOSENSOR(QtWidgets.QDialog,ui_dio_sensor.Ui_Dialog):
 			a.set_MaxValue(self.gauges[a][1] if state else 65535)
 
 	def setValue(self,vals):
-		p=0
 		if vals is None:
 			print('check connections')
 			return
-		for a in self.gauges:
-			a.update_value(vals[p]*self.scale)
-			p+=1
+		if self.currentPage == 0: #Update Analog Gauges
+			p=0
+			for a in self.gauges:
+				a.update_value(vals[p]*self.scale)
+				p+=1
+		elif self.currentPage == 1: #Update Data Logger
+			p=0
+			for a in self.curves:
+				self.curves[a][self.datapoints] = vals[p] * self.scale
+				if not p: self.datapoints += 1 #Increment datapoints once per set. it's shared
+
+				if self.datapoints >= self.curves[a].shape[0]-1:
+					tmp = self.curves[a]
+					self.curves[a] = np.empty(self.curves[a].shape[0] * 2) #double the size
+					self.curves[a][:tmp.shape[0]] = tmp
+				a.setData(self.curves[a][:self.datapoints])
+				a.setPos(-self.datapoints, 0)
+				p+=1
 
 	def launch(self):
 		self.initialize()
