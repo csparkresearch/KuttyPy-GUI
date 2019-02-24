@@ -2,8 +2,8 @@
   <qresource prefix="control">
     <file>refresh.svg</file>
     <file>plus.svg</file>
-    <file>kpy.jpg</file>
     <file>stop.svg</file>
+    <file>kuttypy.png</file>
     <file>play.svg</file>
     <file>document-open.png</file>
     <file>folder.png</file>

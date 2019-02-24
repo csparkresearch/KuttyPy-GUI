@@ -3,7 +3,7 @@
 # This simple demo can be used to make a thermostat
 
 import time
-from kuttyPy import *
+#from kuttyPy import *
 setReg(DDRC,1)
 setReg(ADMUX, (1<<6) | 5) #REF_AVCC | Channel 5
 for a in range(50): 

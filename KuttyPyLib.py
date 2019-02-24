@@ -1,5 +1,5 @@
 '''
-Code snippet for reading data from the 1024 bin MCA
+Code snippet for reading data from the kuttypy
 
 '''
 import serial, struct, time,platform,os,sys
@@ -248,7 +248,7 @@ class KUTTYPY:
 		if reg in self.REGS:
 			self.__sendByte__(self.REGS[reg])
 		else:
-			print('missing register',reg)
+			#print('missing register',reg)
 			self.__sendByte__(reg)
 		self.__sendByte__(data)
 
@@ -257,7 +257,7 @@ class KUTTYPY:
 		if reg in self.REGS:
 			self.__sendByte__(self.REGS[reg])
 		else:
-			print('missing register',reg)
+			#print('missing register',reg)
 			self.__sendByte__(reg)
 		val = self.__getByte__()
 		self.REGSTATES[reg] = val
@@ -420,6 +420,7 @@ class KUTTYPY:
 	def TSL2561_init(self):
 		self.I2CWriteBulk(0x39,[0x80 , 0x03 ]) #poweron
 		self.I2CWriteBulk(0x39,[0x80 | 0x01, self.TSL_GAIN|self.TSL_TIMING ]) 
+		return self.TSL2561_all()
 
 	def TSL2561_gain(self,gain):
 		self.TSL_GAIN = gain<<4

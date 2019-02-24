@@ -1,6 +1,6 @@
 # Read ADC Values and plot them
 import time
-from kuttyPy import *
+#from kuttyPy import *
 from matplotlib import pyplot as plt
 
 setReg(ADMUX, (1<<6) | 5) #REF_AVCC | Channel 5

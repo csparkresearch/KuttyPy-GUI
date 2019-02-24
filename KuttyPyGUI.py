@@ -7,7 +7,7 @@ from utilities.Qt import QtGui, QtCore, QtWidgets
 
 from utilities.templates import ui_layout as layout
 from utilities import dio,REGISTERS,uploader
-import constants
+import constants,inspect
 
 
 from functools import partial
@@ -173,11 +173,12 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 			self.SR = None
 			self.GR = None
 			self.evalGlobals = {}
+
 			self.evalGlobals['getReg']  = self.getReg
 			self.evalGlobals['setReg']  = self.setReg
 			self.evalGlobals['print']  = self.printer
 
-		def setCode(self,code,SR,GR):
+		def setCode(self,code,**kwargs):
 			try:
 				self.compiled = compile(code.encode(), '<string>', mode='exec')
 			except SyntaxError as err:
@@ -191,8 +192,13 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 				cl, exc, tb = sys.exc_info()
 				line_number = traceback.extract_tb(tb)[-1][1]
 				return '''<span style="color:red;">%s at line %d: %s</span>''' % (error_class, line_number, detail)
-			self.SR = SR
-			self.GR = GR
+
+			self.SR = kwargs.get('setReg')
+			self.GR = kwargs.get('getReg')
+			self.evalGlobals = kwargs
+			self.evalGlobals['getReg']  = self.getReg #Overwrite these three. They will be wrapped.
+			self.evalGlobals['setReg']  = self.setReg
+			self.evalGlobals['print']  = self.printer
 			return ''
 			
 
@@ -245,7 +251,13 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 
 		self.log.clear() #clear the log window
 		self.log.setText('''<span style="color:green;">----------User Code Started-----------</span>''')
-		compilemsg = self.codeEval.setCode('{0:s}'.format(self.userCode.toPlainText()),self.p.setReg, self.p.getReg)
+		kwargs = {}
+		for a in dir(self.p):
+			attr = getattr(self.p, a)
+			if inspect.ismethod(attr) and a[:2]!='__':
+				kwargs[a] = attr
+
+		compilemsg = self.codeEval.setCode('{0:s}'.format(self.userCode.toPlainText()),**kwargs)
 		if len(compilemsg):
 			self.log.append(compilemsg)
 			return
@@ -479,8 +491,6 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 						self.logThis.emit('''<span style="color:red;">Failed to upload</span>''')
 			self.finished.emit()
 	
-
-
 	def uploadHex(self):
 		filename = QtWidgets.QFileDialog.getOpenFileName(self," Open a hex file to upload to your KuttyPy", "", "Hex Files (*.hex)")
 		if len(filename[0]):
@@ -494,7 +504,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 
 
 	def openFile(self):
-		filename = QtWidgets.QFileDialog.getOpenFileName(self," Open a C file to edit", "", "C Files (*.c *.C)")
+		filename = QtWidgets.QFileDialog.getOpenFileName(self," Open a C file to edit", path["examples"], "C Files (*.c *.C)")
 		if len(filename[0]):
 			self.filenameLabel.setText(filename[0])
 			self.CFile = filename[0]

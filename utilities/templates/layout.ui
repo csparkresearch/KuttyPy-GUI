@@ -7,11 +7,15 @@
     <x>0</x>
     <y>0</y>
     <width>473</width>
-    <height>649</height>
+    <height>652</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>KuttyPy Interactive Console</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="res.qrc">
+    <normaloff>:/control/kuttypy.png</normaloff>:/control/kuttypy.png</iconset>
   </property>
   <property name="styleSheet">
    <string notr="true"/>
@@ -398,7 +402,6 @@ for a in range(5):   #Run this loop 5 times.
         <number>0</number>
        </property>
       </layout>
-      <zorder>clearLog</zorder>
      </widget>
     </item>
    </layout>
