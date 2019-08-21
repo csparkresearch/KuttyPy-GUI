@@ -431,7 +431,26 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 					btn.clicked.connect(dialog.launch)
 					self.sensorLayout.addWidget(btn)
 					self.sensorList.append([dialog,btn])
-				
+					continue
+
+				s = self.p.controllers.get(a,None)
+				if s is not None:
+					btn = QtWidgets.QPushButton(s['name']+':'+hex(a))
+					dialog = dio.DIOCONTROL(self,s)
+					btn.clicked.connect(dialog.launch)
+					self.sensorLayout.addWidget(btn)
+					#self.sensorList.append([dialog,btn])
+					continue
+
+				s = self.p.special.get(a,None)
+				if s is not None:
+					btn = QtWidgets.QPushButton(s['name']+':'+hex(a))
+					dialog = dio.DIOROBOT(self,s)
+					btn.clicked.connect(dialog.launch)
+					self.sensorLayout.addWidget(btn)
+					#self.sensorList.append([dialog,btn])
+					continue
+
 
 	def loadExample(self,filename):
 		self.userCode.setPlainText(open(os.path.join(path["examples"],self.EXAMPLES_DIR,filename), "r").read())

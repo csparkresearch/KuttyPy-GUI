@@ -2,9 +2,10 @@
 Code snippet for reading data from the kuttypy
 
 '''
-import serial, struct, time,platform,os,sys
+import serial, struct, time,platform,os,sys,functools
 from utilities import REGISTERS
-from numpy import int16,std
+from collections import OrderedDict
+import numpy as np
 
 if 'inux' in platform.system(): #Linux based system
 	import fcntl
@@ -115,14 +116,94 @@ class KUTTYPY:
 							'function':self.TSL2561_timing
 							}
 					] },
+			0x1E:{
+				'name':'HMC5883L',
+				'init':self.HMC5883L_init,
+				'read':self.HMC5883L_all,
+				'fields':['Mx','My','Mz'],
+				'min':[-5000,-5000,-5000],
+				'max':[5000,5000,5000],
+				'config':[{
+							'name':'gain',
+							'options':['1x','16x'],
+							'function':self.TSL2561_gain
+							},
+							{
+							'name':'Integration Time',
+							'options':['3 mS','101 mS','402 mS'],
+							'function':self.TSL2561_timing
+							}
+					] },
+			0x48:{
+				'name':'ADS1115',
+				'init':self.ADS1115_init,
+				'read':self.ADS1115_read,
+				'fields':['Voltage'],
+				'min':[0],
+				'max':[2**16],
+				'config':[{
+							'name':'channel',
+							'options':['UNI_0','UNI_1','UNI_2','UNI_3','DIFF_01','DIFF_23'],
+							'function':self.ADS1115_channel
+							},
+							{
+							'name':'Data Rate',
+							'options':['8 SPS','16 SPS','32 SPS','64 SPS','128 SPS','250 SPS','475 SPS','860 SPS'],
+							'function':self.TSL2561_rate
+							}
+					] },
 			0x68:{
 				'name':'MPU6050',
 				'init':self.MPU6050_init,
 				'read':self.MPU6050_all,
 				'fields':['Ax','Ay','Az','Temp','Gx','Gy','Gz'],
 				'min':[-1*2**15,-1*2**15,-1*2**15,0,-1*2**15,-1*2**15,-1*2**15],
-				'max':[2**15,2**15,2**15,100,2**15,2**15,2**15]}
+				'max':[2**15,2**15,2**15,2**16,2**15,2**15,2**15],
+				'config':[{
+					'name':'Gyroscope Range',
+					'options':['250','500','1000','2000'],
+					'function':self.MPU6050_gyro_range
+					},
+					{
+					'name':'Accelerometer Range',
+					'options':['2x','4x','8x','16x'],
+					'function':self.MPU6050_accel_range
+					},
+					{
+					'name':'Kalman',
+					'options':['OFF','0.001','0.01','0.1','1','10'],
+					'function':self.MPU6050_kalman_set
+					}
+			]},
+			0x5A:{
+				'name':'MLX90614',
+				'init':self.MLX90614_init,
+				'read':self.MLX90614_all,
+				'fields':['TEMP'],
+				'min':[0],
+				'max':[350]}
 		}
+		self.controllers={
+			0x62:{
+				'name':'MCP4725',
+				'init':self.MCP4725_init,
+				'write':[['CH0',0,4095,0,self.MCP4725_set]],
+				},
+		}
+
+		self.special={
+			0x40:{
+				'name':'PCA9685 PWM',
+				'init':self.PCA9685_init,
+				'write':[['Channel 1',0,180,90,functools.partial(self.PCA9685_set,1)], #name, start, stop, default, function
+						['Channel 2',0,180,90,functools.partial(self.PCA9685_set,2)],
+						['Channel 3',0,180,90,functools.partial(self.PCA9685_set,3)],
+						['Channel 4',0,180,90,functools.partial(self.PCA9685_set,4)],
+						],
+				}
+		}
+
+
 		self.connected=False
 		if 'port' in kwargs:
 			self.portname=kwargs.get('port',None)
@@ -364,6 +445,8 @@ class KUTTYPY:
 			addrs.append(val)
 			val = self.__getByte__()
 		if(val==254):print('timed out')
+		#self.setReg('TWBR',0xFF) #I2C speed minimal. testing purposes
+
 		return addrs
 
 	def I2CWriteBulk(self,address,bytestream): 
@@ -388,10 +471,52 @@ class KUTTYPY:
 		tmt = self.__getByte__()		
 		return data,True if not tmt else False
 
+	class KalmanFilter(object):
+		'''
+		Credits:http://scottlobdell.me/2014/08/kalman-filtering-python-reading-sensor-input/
+		'''
+		def __init__(self, var, est,initial_values): #var = process variance. est = estimated measurement var
+			self.var = np.array(var)
+			self.est = np.array(est)
+			self.posteri_estimate = np.array(initial_values)
+			self.posteri_error_estimate = np.ones(len(var),dtype=np.float16)
+
+		def input(self, vals):
+			vals = np.array(vals)
+			priori_estimate = self.posteri_estimate
+			priori_error_estimate = self.posteri_error_estimate + self.var
+
+			blending_factor = priori_error_estimate / (priori_error_estimate + self.est)
+			self.posteri_estimate = priori_estimate + blending_factor * (vals - priori_estimate)
+			self.posteri_error_estimate = (1 - blending_factor) * priori_error_estimate
+
+		def output(self):
+			return self.posteri_estimate
+
+
+	MPU6050_kalman = 0
 	def MPU6050_init(self):
-		self.I2CWriteBulk(0x68,[0x1B,3<<3]) #Gyro Range . 2000
-		self.I2CWriteBulk(0x68,[0x1C,3<<3]) #Accelerometer Range. 16
+		self.I2CWriteBulk(0x68,[0x1B,0<<3]) #Gyro Range . 250
+		self.I2CWriteBulk(0x68,[0x1C,0<<3]) #Accelerometer Range. 2
 		self.I2CWriteBulk(0x68,[0x6B, 0x00]) #poweron
+
+	def MPU6050_gyro_range(self,val):
+		self.I2CWriteBulk(0x68,[0x1B,val<<3]) #Gyro Range . 250,500,1000,2000 -> 0,1,2,3 -> shift left by 3 positions
+
+	def MPU6050_accel_range(self,val):
+		print(val)
+		self.I2CWriteBulk(0x68,[0x1C,val<<3]) #Accelerometer Range. 2,4,8,16 -> 0,1,2,3 -> shift left by 3 positions
+
+	def MPU6050_kalman_set(self,val):
+		if not val:
+			self.MPU6050_kalman = 0
+			return
+		noise=[]
+		for a in range(50):
+			noise.append(np.array(self.MPU6050_all(disableKalman=True)))
+		noise = np.array(noise)
+		self.MPU6050_kalman = self.KalmanFilter(1e6*np.ones(noise.shape[1])/(10**val), np.std(noise,0)**2, noise[-1])
+
 
 	def MPU6050_accel(self):
 		b,tmt = self.I2CReadBulk(0x68, 0x3B ,6)
@@ -405,15 +530,20 @@ class KUTTYPY:
 		if None not in b:
 			return [(b[x*2+1]<<8)|b[x*2] for x in range(3)] #X,Y,Z
 
-	def MPU6050_all(self):
+	def MPU6050_all(self,disableKalman=False):
 		'''
 		returns a 7 element list. Ax,Ay,Az,T,Gx,Gy,Gz
 		returns None if communication timed out with I2C sensor
+		disableKalman can be set to True if Kalman was previously enabled.
 		'''
 		b,tmt = self.I2CReadBulk(0x68, 0x3B ,14)
 		if tmt:return None
 		if None not in b:
-			return [ int16((b[x*2]<<8)|b[x*2+1]) for x in range(7) ] #Ax,Ay,Az, Temp, Gx, Gy,Gz
+			if (not self.MPU6050_kalman) or disableKalman:
+				return [ np.int16((b[x*2]<<8)|b[x*2+1]) for x in range(7) ] #Ax,Ay,Az, Temp, Gx, Gy,Gz
+			else:
+				self.MPU6050_kalman.input([ np.int16((b[x*2]<<8)|b[x*2+1]) for x in range(7) ])
+				return self.MPU6050_kalman.output()
 
 	TSL_GAIN = 0x00 # 0x00=1x , 0x10 = 16x
 	TSL_TIMING = 0x00 # 0x00=3 mS , 0x01 = 101 mS, 0x02 = 402mS
@@ -430,6 +560,10 @@ class KUTTYPY:
 		self.TSL_TIMING = timing
 		self.TSL2561_config(self.TSL_GAIN,self.TSL_TIMING)
 
+	def TSL2561_rate(self,timing):
+		self.TSL_TIMING = timing
+		self.TSL2561_config(self.TSL_GAIN,self.TSL_TIMING)
+
 	def TSL2561_config(self,gain,timing):
 		self.I2CWriteBulk(0x39,[0x80 | 0x01, gain|timing]) #Timing register 0x01. gain[1x,16x] | timing[13mS,100mS,400mS]
 
@@ -443,7 +577,218 @@ class KUTTYPY:
 		if None not in b:
 			return [ (b[x*2+1]<<8)|b[x*2] for x in range(2) ] #total, IR
 
+	def MLX90614_init(self):
+		pass
 
+	def MLX90614_all(self):
+		'''
+		return a single element list.  None if failed
+		'''
+		vals,tmt = self.I2CReadBulk(0x5A, 0x07 ,3)
+		if tmt:return None
+		if vals:
+			if len(vals)==3:
+				return [((((vals[1]&0x007f)<<8)+vals[0])*0.02)-0.01 - 273.15]
+			else:
+				return None
+		else:
+			return None
+
+	def MCP4725_init(self):
+		pass
+
+	def MCP4725_set(self,val):
+		'''
+		Set the DAC value. 0 - 4095
+		'''
+		self.I2CWriteBulk(0x62, [0x40,(val>>4)&0xFF,(val&0xF)<<4])
+
+	####################### HMC5883L MAGNETOMETER ###############
+
+	HMC5883L_ADDRESS = 0x1E
+	HMC_CONFA=0x00
+	HMC_CONFB=0x01
+	HMC_MODE=0x02
+	HMC_STATUS=0x09
+
+	#--------CONFA register bits. 0x00-----------
+	HMCSamplesToAverage=0
+	HMCSamplesToAverage_choices=[1,2,4,8]
+	
+	HMCDataOutputRate=6
+	HMCDataOutputRate_choices=[0.75,1.5,3,7.5,15,30,75]
+	
+	HMCMeasurementConf=0
+	
+	#--------CONFB register bits. 0x01-----------
+	HMCGainValue = 7 #least sensitive
+	HMCGain_choices = [8,7,6,5,4,3,2,1]
+	HMCGainScaling=[1370.,1090.,820.,660.,440.,390.,330.,230.]
+
+	def HMC5883L_init(self):
+		self.__writeHMCCONFA__()
+		self.__writeHMCCONFB__()
+		self.I2CWriteBulk(self.HMC5883L_ADDRESS,[self.HMC_MODE,0]) #enable continuous measurement mode
+
+	def __writeHMCCONFB__(self):
+		self.I2CWriteBulk(self.HMC5883L_ADDRESS,[self.HMC_CONFB,self.HMCGainValue<<5]) #set gain
+
+	def __writeHMCCONFA__(self):
+		self.I2CWriteBulk(self.HMC5883L_ADDRESS,[self.HMC_CONFA,(self.HMCDataOutputRate<<2)|(self.HMCSamplesToAverage<<5)|(self.HMCMeasurementConf)])
+
+	def HMC5883L_getVals(self,addr,bytes):
+		vals = self.I2C.readBulk(self.ADDRESS,addr,bytes) 
+		return vals
+	
+	def HMC5883L_all(self):
+		vals=self.HMC5883L_getVals(0x03,6)
+		if vals:
+			if len(vals)==6:
+				return [np.int16(vals[a*2]<<8|vals[a*2+1])/self.HMCGainScaling[self.HMCGainValue] for a in range(3)]
+			else:
+				return False
+		else:
+			return False
+
+	PCA9685_address = 64
+	def PCA9685_init(self):
+		prescale_val = int((25000000.0 / 4096 / 60.)  - 1) # default clock at 25MHz
+		#self.I2CWriteBulk(self.PCA9685_address, [0x00,0x10]) #MODE 1 , Sleep
+		print('clock set to,',prescale_val)
+		self.I2CWriteBulk(self.PCA9685_address, [0xFE,prescale_val]) #PRESCALE , prescale value
+		self.I2CWriteBulk(self.PCA9685_address, [0x00,0x80]) #MODE 1 , restart
+		self.I2CWriteBulk(self.PCA9685_address, [0x01,0x04]) #MODE 2 , Totem Pole
+		
+		pass
+
+	CH0 = 0x6	 		    #LED0 start register
+	CH0_ON_L =  0x6		#channel0 output and brightness control byte 0
+	CH0_ON_H =  0x7		#channel0 output and brightness control byte 1
+	CH0_OFF_L = 0x8		#channel0 output and brightness control byte 2
+	CH0_OFF_H = 0x9		#channel0 output and brightness control byte 3
+	CHAN_WIDTH = 4
+	def PCA9685_set(self,chan,angle):
+		'''
+		chan: 1-16
+		Set the servo angle for SG90: angle(0 - 180)
+		'''
+		Min = 180
+		Max = 650
+		val = int((( Max-Min ) * ( angle/180. ))+Min)
+		print(chan,angle,val)
+		self.I2CWriteBulk(self.PCA9685_address, [self.CH0_ON_L + self.CHAN_WIDTH * (chan - 1),0]) #
+		self.I2CWriteBulk(self.PCA9685_address, [self.CH0_ON_H + self.CHAN_WIDTH * (chan - 1),0]) # Turn on immediately. At 0.
+		self.I2CWriteBulk(self.PCA9685_address, [self.CH0_OFF_L + self.CHAN_WIDTH * (chan - 1),val&0xFF]) #Turn off after val width 0-4095
+		self.I2CWriteBulk(self.PCA9685_address, [self.CH0_OFF_H + self.CHAN_WIDTH * (chan - 1),(val>>8)&0xFF])
+
+	## ADS1115
+	REG_POINTER_MASK    = 0x3
+	REG_POINTER_CONVERT = 0
+	REG_POINTER_CONFIG  = 1
+	REG_POINTER_LOWTHRESH=2
+	REG_POINTER_HITHRESH =3
+
+	REG_CONFIG_OS_MASK      =0x8000
+	REG_CONFIG_OS_SINGLE    =0x8000
+	REG_CONFIG_OS_BUSY      =0x0000
+	REG_CONFIG_OS_NOTBUSY   =0x8000
+
+	REG_CONFIG_MUX_MASK     =0x7000
+	REG_CONFIG_MUX_DIFF_0_1 =0x0000  # Differential P = AIN0, N = AIN1 =default)
+	REG_CONFIG_MUX_DIFF_0_3 =0x1000  # Differential P = AIN0, N = AIN3
+	REG_CONFIG_MUX_DIFF_1_3 =0x2000  # Differential P = AIN1, N = AIN3
+	REG_CONFIG_MUX_DIFF_2_3 =0x3000  # Differential P = AIN2, N = AIN3
+	REG_CONFIG_MUX_SINGLE_0 =0x4000  # Single-ended AIN0
+	REG_CONFIG_MUX_SINGLE_1 =0x5000  # Single-ended AIN1
+	REG_CONFIG_MUX_SINGLE_2 =0x6000  # Single-ended AIN2
+	REG_CONFIG_MUX_SINGLE_3 =0x7000  # Single-ended AIN3
+
+	REG_CONFIG_PGA_MASK     =0x0E00  #bits 11:9
+	REG_CONFIG_PGA_6_144V   =(0<<9)  # +/-6.144V range = Gain 2/3
+	REG_CONFIG_PGA_4_096V   =(1<<9)  # +/-4.096V range = Gain 1
+	REG_CONFIG_PGA_2_048V   =(2<<9)  # +/-2.048V range = Gain 2 =default)
+	REG_CONFIG_PGA_1_024V   =(3<<9)  # +/-1.024V range = Gain 4
+	REG_CONFIG_PGA_0_512V   =(4<<9)  # +/-0.512V range = Gain 8
+	REG_CONFIG_PGA_0_256V   =(5<<9)  # +/-0.256V range = Gain 16
+
+	REG_CONFIG_MODE_MASK    =0x0100   #bit 8
+	REG_CONFIG_MODE_CONTIN  =(0<<8)   # Continuous conversion mode
+	REG_CONFIG_MODE_SINGLE  =(1<<8)   # Power-down single-shot mode =default)
+
+	REG_CONFIG_DR_MASK      =0x00E0  
+	REG_CONFIG_DR_8SPS    =(0<<5)   #8 SPS
+	REG_CONFIG_DR_16SPS    =(1<<5)   #16 SPS
+	REG_CONFIG_DR_32SPS    =(2<<5)   #32 SPS
+	REG_CONFIG_DR_64SPS    =(3<<5)   #64 SPS
+	REG_CONFIG_DR_128SPS   =(4<<5)   #128 SPS
+	REG_CONFIG_DR_250SPS   =(5<<5)   #260 SPS
+	REG_CONFIG_DR_475SPS   =(6<<5)   #475 SPS
+	REG_CONFIG_DR_860SPS   =(7<<5)   #860 SPS
+
+	REG_CONFIG_CMODE_MASK   =0x0010
+	REG_CONFIG_CMODE_TRAD   =0x0000
+	REG_CONFIG_CMODE_WINDOW =0x0010
+
+	REG_CONFIG_CPOL_MASK    =0x0008
+	REG_CONFIG_CPOL_ACTVLOW =0x0000
+	REG_CONFIG_CPOL_ACTVHI  =0x0008
+
+	REG_CONFIG_CLAT_MASK    =0x0004
+	REG_CONFIG_CLAT_NONLAT  =0x0000
+	REG_CONFIG_CLAT_LATCH   =0x0004
+
+	REG_CONFIG_CQUE_MASK    =0x0003
+	REG_CONFIG_CQUE_1CONV   =0x0000
+	REG_CONFIG_CQUE_2CONV   =0x0001
+	REG_CONFIG_CQUE_4CONV   =0x0002
+	REG_CONFIG_CQUE_NONE    =0x0003
+	gains = OrderedDict([('GAIN_TWOTHIRDS',REG_CONFIG_PGA_6_144V),('GAIN_ONE',REG_CONFIG_PGA_4_096V),('GAIN_TWO',REG_CONFIG_PGA_2_048V),('GAIN_FOUR',REG_CONFIG_PGA_1_024V),('GAIN_EIGHT',REG_CONFIG_PGA_0_512V),('GAIN_SIXTEEN',REG_CONFIG_PGA_0_256V)])
+	gain_scaling =  OrderedDict([('GAIN_TWOTHIRDS',0.1875),('GAIN_ONE',0.125),('GAIN_TWO',0.0625),('GAIN_FOUR',0.03125),('GAIN_EIGHT',0.015625),('GAIN_SIXTEEN',0.0078125)])
+	type_selection = OrderedDict([('UNI_0',0),('UNI_1',1),('UNI_2',2),('UNI_3',3),('DIFF_01','01'),('DIFF_23','23')])
+	sdr_selection = OrderedDict([(8,REG_CONFIG_DR_8SPS),(16,REG_CONFIG_DR_16SPS),(32,REG_CONFIG_DR_32SPS),(64,REG_CONFIG_DR_64SPS),(128,REG_CONFIG_DR_128SPS),(250,REG_CONFIG_DR_250SPS),(475,REG_CONFIG_DR_475SPS),(860,REG_CONFIG_DR_860SPS)]) #sampling data rate
+	conversion_time = [8,16,32,64,128,250,460,860]
+	ADS1115_DATARATE = 5 #250SPS [ 8, 16, 32, 64, 128, 250, 475, 860 ]
+	ADS1115_GAIN = REG_CONFIG_PGA_4_096V  # +/-4.096V range = Gain 1 . [+-6, +-4, +-2, +-1, +-0.5, +- 0.25]
+	ADS1115_CHANNEL = REG_CONFIG_MUX_SINGLE_0 # ref: type_selection
+	TSL_TIMING = 0x00 # 0x00=3 mS , 0x01 = 101 mS, 0x02 = 402mS
+	ADS1115_ADDRESS = 0x48
+	
+	def ADS1115_init(self):
+		self.I2CWriteBulk(0x39,[0x80 , 0x03 ]) #poweron
+	def ADS1115_channel(self):
+		pass
+	def ADS1115_read(self):
+		'''
+		returns a voltage from ADS1115 channel selected using ADS1115_channel. default UNI_0 (Unipolar from channel 0)
+		'''
+		if chan<=3:
+			config = (self.REG_CONFIG_CQUE_NONE # Disable the comparator (default val)
+			|self.REG_CONFIG_CLAT_NONLAT        # Non-latching (default val)
+			|self.REG_CONFIG_CPOL_ACTVLOW 	    #Alert/Rdy active low   (default val)
+			|self.REG_CONFIG_CMODE_TRAD         # Traditional comparator (default val)
+			|(self.ADS1115_DATARATE<<5)               # 1600 samples per second (default)
+			|(self.REG_CONFIG_MODE_SINGLE)        # Single-shot mode (default)
+			|self.ADS1115_GAIN)
+
+			if self.ADS1115_CHANNEL == 0   : config |= self.REG_CONFIG_MUX_SINGLE_0
+			elif self.ADS1115_CHANNEL == 1 : config |= self.REG_CONFIG_MUX_SINGLE_1
+			elif self.ADS1115_CHANNEL == 2 : config |= self.REG_CONFIG_MUX_SINGLE_2
+			elif self.ADS1115_CHANNEL == 3 : config |= self.REG_CONFIG_MUX_SINGLE_3
+			#Set 'start single-conversion' bit
+			config |= self.REG_CONFIG_OS_SINGLE
+			self.I2CWriteBulk(self.ADS1115_ADDRESS,[self.REG_POINTER_CONFIG,(config>>8)&0xFF,config&0xFF])
+			time.sleep(1./self.rate+.002) #convert to mS to S
+			return self.readRegister(self.REG_POINTER_CONVERT)*self.gain_scaling[self.gain]
+
+
+
+		b,tmt = self.I2CReadBulk(0x68, 0x3B ,14)
+		if tmt:return None
+		if None not in b:
+			return [ np.int16((b[x*2]<<8)|b[x*2+1]) for x in range(7) ] #Ax,Ay,Az, Temp, Gx, Gy,Gz
+
+	
+	
 if __name__ == '__main__':
 	a=connect(autoscan=True)
 	print ('version' , a.version)
@@ -452,6 +797,13 @@ if __name__ == '__main__':
 		sys.exit(1)
 	time.sleep(0.01)
 	print(a.I2CScan())
+	a.PCA9685_init()
+	#a.PCA9685_set(1,650)
+
+	for x in range(180):
+		a.PCA9685_set(1,x)
+		time.sleep(0.01)
+
 	'''
 	a.TSL2561_init()
 	s=time.time()

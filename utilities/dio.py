@@ -1,10 +1,15 @@
 from .Qt import QtGui,QtCore,QtWidgets
-from utilities.templates import ui_dio,ui_dio_pwm,ui_dio_adc,ui_dio_adcConfig,ui_dio_sensor,ui_regvals,ui_dio_cntr,ui_regedit
+from utilities.templates import ui_dio,ui_dio_pwm,ui_dio_adc,ui_dio_adcConfig,ui_dio_sensor,ui_regvals,ui_dio_cntr,ui_regedit,ui_dio_control
+from utilities.templates import ui_dio_robot
+
 from . import REGISTERS
 from utilities.templates.gauge import Gauge
 import numpy as np
+from functools import partial
+from collections import OrderedDict
+import time
 
-colors=[(0,255,0),(255,0,0),(255,255,100),(10,255,255)]+[(50+np.random.random(200),50+np.random.random(200),150+np.random.random(100)) for a in range(10)]
+colors=[(0,255,0),(255,0,0),(255,255,100),(10,255,255)]+[(50+np.random.randint(200),50+np.random.randint(200),150+np.random.randint(100)) for a in range(10)]
 
 def widget(name,Q,**kwargs):
 	if 'OC' in kwargs.get('extra',''):
@@ -361,6 +366,7 @@ class DIOSENSOR(QtWidgets.QDialog,ui_dio_sensor.Ui_Dialog):
 		self.curves = {}
 		self.gauges = {}
 		self.datapoints=0
+		row = 1; col=1;
 		for a,b,c in zip(self.fields,self.min,self.max):
 			gauge = Gauge(self)
 			gauge.setObjectName(a)
@@ -369,10 +375,14 @@ class DIOSENSOR(QtWidgets.QDialog,ui_dio_sensor.Ui_Dialog):
 			#listItem = QtWidgets.QListWidgetItem()
 			#self.listWidget.addItem(listItem)
 			#self.listWidget.setItemWidget(listItem, gauge)
-			self.gaugeLayout.addWidget(gauge)
+			self.gaugeLayout.addWidget(gauge,row,col)
+			col+= 1
+			if col == 4:
+				row += 1
+				col = 1
 			self.gauges[gauge] = [a,b,c] #Name ,min, max value
 			
-			curve = self.graph.plot(pen=colors[len(self.curves)])
+			curve = self.graph.plot(pen=colors[len(self.curves.keys())])
 			self.curves[curve] = np.empty(300)
 		
 		self.setWindowTitle('Sensor : %s'%name)
@@ -418,3 +428,103 @@ class DIOSENSOR(QtWidgets.QDialog,ui_dio_sensor.Ui_Dialog):
 	def launch(self):
 		self.initialize()
 		self.show()
+
+
+class DIOCONTROL(QtWidgets.QDialog,ui_dio_control.Ui_Dialog):
+	def __init__(self,parent,sensor):
+		super(DIOCONTROL, self).__init__(parent)
+		name = sensor['name']
+		self.initialize = sensor['init']
+		self.setupUi(self)
+		self.widgets =[]
+		self.gauges = {}
+		self.functions = {}
+
+		for a in sensor.get('write',[]): #Load configuration menus
+			l = QtWidgets.QSlider(self); l.setMinimum(a[1]); l.setMaximum(a[2]);l.setValue(a[3]);
+			l.setOrientation(QtCore.Qt.Horizontal)
+			l.valueChanged['int'].connect(partial(self.write,l))
+			self.configLayout.addWidget(l) ; self.widgets.append(l)
+			
+			gauge = Gauge(self)
+			gauge.setObjectName(a[0])
+			gauge.set_MinValue(a[1])
+			gauge.set_MaxValue(a[2])
+			gauge.update_value(a[3])
+			self.gaugeLayout.addWidget(gauge)
+			self.gauges[l] = gauge #Name ,min, max value,default value, func
+			self.functions[l] = a[4]
+			
+		self.setWindowTitle('Control : %s'%name)
+
+	def write(self,w,val):
+		self.gauges[w].update_value(val)
+		self.functions[w](val)
+
+
+	def launch(self):
+		self.initialize()
+		self.show()
+
+
+
+
+class DIOROBOT(QtWidgets.QDialog,ui_dio_robot.Ui_Dialog):
+	def __init__(self,parent,sensor):
+		super(DIOROBOT, self).__init__(parent)
+		name = sensor['name']
+		self.initialize = sensor['init']
+		self.setupUi(self)
+		self.widgets =[]
+		self.gauges = OrderedDict()
+		self.lastPos = OrderedDict()
+		self.functions = OrderedDict()
+		self.positions = []
+
+		for a in sensor.get('write',[]): #Load configuration menus
+			l = QtWidgets.QSlider(self); l.setMinimum(a[1]); l.setMaximum(a[2]);l.setValue(a[3]);
+			l.setOrientation(QtCore.Qt.Horizontal)
+			l.valueChanged['int'].connect(partial(self.write,l))
+			self.configLayout.addWidget(l) ; self.widgets.append(l)
+			
+			gauge = Gauge(self)
+			gauge.setObjectName(a[0])
+			gauge.set_MinValue(a[1])
+			gauge.set_MaxValue(a[2])
+			gauge.update_value(a[3])
+			self.lastPos[l] = a[3]
+			self.gaugeLayout.addWidget(gauge)
+			self.gauges[l] = gauge #Name ,min, max value,default value, func
+			self.functions[l] = a[4]
+			
+		self.setWindowTitle('Control : %s'%name)
+
+	def write(self,w,val):
+		self.gauges[w].update_value(val)
+		self.lastPos[w] = val
+		self.functions[w](val)
+
+	def add(self):
+		self.positions.append([a.value() for a in self.lastPos.keys()])
+		item = QtWidgets.QListWidgetItem("%s" % str(self.positions[-1]))
+		self.listWidget.addItem(item)
+		print(self.positions)
+
+	def play(self):
+		mypos = [a.value() for a in self.lastPos.keys()] # Current position
+		sliders = list(self.gauges.keys())
+		for nextpos in self.positions:
+			dx = [(x-y) for x,y in zip(nextpos,mypos)]  #difference between next position and current
+			distance = max(dx)
+			for travel in range(20):
+				for step in range(4):
+						self.write(sliders[step],int(mypos[step]))
+						mypos[step] += dx[step]/20.
+				time.sleep(0.01)
+							
+						
+
+	def launch(self):
+		self.initialize()
+		self.show()
+
