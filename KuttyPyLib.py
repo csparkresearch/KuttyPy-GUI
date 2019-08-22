@@ -175,6 +175,14 @@ class KUTTYPY:
 					'function':self.MPU6050_kalman_set
 					}
 			]},
+			118:{
+				'name':'BMP280',
+				'init':self.BMP280_init,
+				'read':self.BMP280_all,
+				'fields':['Pressure','Temp','Alt'],
+				'min':[300,0,0],
+				'max':[1100,100,10],
+				},
 			0x5A:{
 				'name':'MLX90614',
 				'init':self.MLX90614_init,
@@ -544,6 +552,87 @@ class KUTTYPY:
 			else:
 				self.MPU6050_kalman.input([ np.int16((b[x*2]<<8)|b[x*2+1]) for x in range(7) ])
 				return self.MPU6050_kalman.output()
+
+
+	####### BMP280 ###################
+	## Ported from https://github.com/farmerkeith/BMP280-library/blob/master/farmerkeith_BMP280.cpp
+	BMP280_ADDRESS = 118
+	BMP280_REG_CONTROL = 0xF4
+	BMP280_REG_RESULT = 0xF6
+	BMP280_oversampling = 0
+	_BMP280_PRESSURE_MIN_HPA = 300
+	_BMP280_PRESSURE_MAX_HPA = 1100
+	_BMP280_sea_level_pressure = 1013.25 #for calibration.. from circuitpython library
+	def BMP280_init(self):
+		b,tmt = self.I2CReadBulk(self.BMP280_ADDRESS, 0xD0 ,1)
+		if tmt:return
+		b = b[0]
+		if b in [0x58,0x56,0x57]:
+			print('BMP280. ID:',b)
+		elif b==0x60:
+			print('BME280 . includes humidity')
+		else:
+			print('ID unknown',b)
+		# get calibration data
+		b,tmt = self.I2CReadBulk(self.BMP280_ADDRESS, 0x88 ,24) #24 bytes containing calibration data
+		coeff = list(struct.unpack('<HhhHhhhhhhhh', bytes(b)))
+		coeff = [float(i) for i in coeff]
+		self._BMP280_temp_calib = coeff[:3]
+		self._BMP280_pressure_calib = coeff[3:]
+		self._BMP280_t_fine = 0.
+
+		#details of register 0xF4
+		#mode[1:0] F4bits[1:0] 00=sleep, 01,10=forced, 11=normal
+		#osrs_p[2:0] F4bits[4:2] 000=skipped, 001=16bit, 010=17bit, 011=18bit, 100=19bit, 101,110,111=20 bit
+		#osrs_t[2:0] F4bits[7:5] 000=skipped, 001=16bit, 010=17bit, 011=18bit, 100=19bit, 101,110,111=20 bit
+		#VALUE = (osrs_t & 0x7) << 5 | (osrs_p & 0x7) << 2 | (mode & 0x3); #
+		self.I2CWriteBulk(self.BMP280_ADDRESS, [0xF4,0xFF]) #
+
+
+	def _BMP280_calcTemperature(self,adc_t):
+		v1 = (adc_t / 16384.0 - self._BMP280_temp_calib[0] / 1024.0) * self._BMP280_temp_calib[1]
+		v2 = ((adc_t / 131072.0 - self._BMP280_temp_calib[0] / 8192.0) * (
+			adc_t / 131072.0 - self._BMP280_temp_calib[0] / 8192.0)) * self._BMP280_temp_calib[2]
+		self._BMP280_t_fine = int(v1+v2)
+		return (v1+v2) / 5120.0  #actual temperature. 
+
+	def _BMP280_calcPressure(self,adc_p,adc_t):
+		self._BMP280_calcTemperature(adc_t) #t_fine has been set now.
+		# Algorithm from the BMP280 driver. adapted from adafruit adaptation
+		# https://github.com/BoschSensortec/BMP280_driver/blob/master/bmp280.c
+		var1 = float(self._BMP280_t_fine) / 2.0 - 64000.0
+		var2 = var1 * var1 * self._BMP280_pressure_calib[5] / 32768.0
+		var2 = var2 + var1 * self._BMP280_pressure_calib[4] * 2.0
+		var2 = var2 / 4.0 + self._BMP280_pressure_calib[3] * 65536.0
+		var3 = self._BMP280_pressure_calib[2] * var1 * var1 / 524288.0
+		var1 = (var3 + self._BMP280_pressure_calib[1] * var1) / 524288.0
+		var1 = (1.0 + var1 / 32768.0) * self._BMP280_pressure_calib[0]
+		if not var1:
+			return _BMP280_PRESSURE_MIN_HPA
+		pressure = 1048576.0 - adc_p
+		pressure = ((pressure - var2 / 4096.0) * 6250.0) / var1
+		var1 = self._BMP280_pressure_calib[8] * pressure * pressure / 2147483648.0
+		var2 = pressure * self._BMP280_pressure_calib[7] / 32768.0
+		pressure = pressure + (var1 + var2 + self._BMP280_pressure_calib[6]) / 16.0
+		pressure /= 100
+		if pressure < self._BMP280_PRESSURE_MIN_HPA:
+			return self._BMP280_PRESSURE_MIN_HPA
+		if pressure > self._BMP280_PRESSURE_MAX_HPA:
+			return self._BMP280_PRESSURE_MAX_HPA
+		return pressure
+
+	def BMP280_all(self):
+		#os = [0x34,0x74,0xb4,0xf4]
+		#delays=[0.005,0.008,0.014,0.026]
+		#self.I2CWriteBulk(self.BMP280_ADDRESS,[self.BMP280_REG_CONTROL,os[self.BMP280_oversampling] ])
+		#time.sleep(delays[self.BMP280_oversampling])
+		data,tmt = self.I2CReadBulk(self.BMP280_ADDRESS, 0xF7,6)
+		if tmt:return None
+		if None not in data:
+			# Convert pressure and temperature data to 19-bits
+			adc_p = (((data[0] & 0xFF) * 65536) + ((data[1] & 0xFF) * 256) + (data[2] & 0xF0)) / 16;
+			adc_t = (((data[3] & 0xFF) * 65536) + ((data[4] & 0xFF) * 256) + (data[5] & 0xF0)) / 16;
+		return [self._BMP280_calcPressure(adc_p,adc_t), self._BMP280_calcTemperature(adc_t), 0]
 
 	TSL_GAIN = 0x00 # 0x00=1x , 0x10 = 16x
 	TSL_TIMING = 0x00 # 0x00=3 mS , 0x01 = 101 mS, 0x02 = 402mS
