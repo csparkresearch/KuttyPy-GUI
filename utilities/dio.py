@@ -426,7 +426,8 @@ class DIOSENSOR(QtWidgets.QDialog,ui_dio_sensor.Ui_Dialog):
 				p+=1
 
 	def launch(self):
-		self.initialize()
+		if self.initialize is not None:
+			self.initialize()
 		self.show()
 
 

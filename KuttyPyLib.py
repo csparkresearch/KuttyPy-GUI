@@ -180,8 +180,8 @@ class KUTTYPY:
 				'init':self.BMP280_init,
 				'read':self.BMP280_all,
 				'fields':['Pressure','Temp','Alt'],
-				'min':[300,0,0],
-				'max':[1100,100,10],
+				'min':[0,0,0],
+				'max':[1600,100,10],
 				},
 			0x5A:{
 				'name':'MLX90614',
@@ -560,8 +560,8 @@ class KUTTYPY:
 	BMP280_REG_CONTROL = 0xF4
 	BMP280_REG_RESULT = 0xF6
 	BMP280_oversampling = 0
-	_BMP280_PRESSURE_MIN_HPA = 300
-	_BMP280_PRESSURE_MAX_HPA = 1100
+	_BMP280_PRESSURE_MIN_HPA = 0
+	_BMP280_PRESSURE_MAX_HPA = 1600
 	_BMP280_sea_level_pressure = 1013.25 #for calibration.. from circuitpython library
 	def BMP280_init(self):
 		b,tmt = self.I2CReadBulk(self.BMP280_ADDRESS, 0xD0 ,1)
@@ -591,8 +591,7 @@ class KUTTYPY:
 
 	def _BMP280_calcTemperature(self,adc_t):
 		v1 = (adc_t / 16384.0 - self._BMP280_temp_calib[0] / 1024.0) * self._BMP280_temp_calib[1]
-		v2 = ((adc_t / 131072.0 - self._BMP280_temp_calib[0] / 8192.0) * (
-			adc_t / 131072.0 - self._BMP280_temp_calib[0] / 8192.0)) * self._BMP280_temp_calib[2]
+		v2 = ((adc_t / 131072.0 - self._BMP280_temp_calib[0] / 8192.0) * ( adc_t / 131072.0 - self._BMP280_temp_calib[0] / 8192.0)) * self._BMP280_temp_calib[2]
 		self._BMP280_t_fine = int(v1+v2)
 		return (v1+v2) / 5120.0  #actual temperature. 
 
@@ -630,8 +629,9 @@ class KUTTYPY:
 		if tmt:return None
 		if None not in data:
 			# Convert pressure and temperature data to 19-bits
-			adc_p = (((data[0] & 0xFF) * 65536) + ((data[1] & 0xFF) * 256) + (data[2] & 0xF0)) / 16;
-			adc_t = (((data[3] & 0xFF) * 65536) + ((data[4] & 0xFF) * 256) + (data[5] & 0xF0)) / 16;
+			adc_p = (((data[0] & 0xFF) * 65536) + ((data[1] & 0xFF) * 256) + (data[2] & 0xF0)) / 16
+			adc_t = (((data[3] & 0xFF) * 65536) + ((data[4] & 0xFF) * 256) + (data[5] & 0xF0)) / 16
+			print(adc_p)
 		return [self._BMP280_calcPressure(adc_p,adc_t), self._BMP280_calcTemperature(adc_t), 0]
 
 	TSL_GAIN = 0x00 # 0x00=1x , 0x10 = 16x

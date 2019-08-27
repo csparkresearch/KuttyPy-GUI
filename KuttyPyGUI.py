@@ -39,6 +39,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 	ports = ['A','B','C','D']
 	logThis = QtCore.pyqtSignal(str)
 	logThisPlain = QtCore.pyqtSignal(bytes)
+	serialGaugeSignal = QtCore.pyqtSignal(int)
 	def __init__(self, parent=None,**kwargs):
 		super(AppWindow, self).__init__(parent)
 		self.setupUi(self)
@@ -72,7 +73,8 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		self.codeEval.logThis.connect(self.appendLog) #Connect to the log window
 		self.logThis.connect(self.appendLog) #Connect to the log window
 		self.logThisPlain.connect(self.appendLogPlain) #Connect to the log window
-
+		self.serialGaugeSignal.connect(self.setSerialgauge)
+		
 		self.codeThread.started.connect(self.codeEval.execute)
 		self.codeThread.finished.connect(self.codeFinished)
 
@@ -112,6 +114,12 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		'status':myTimer(constants.STATUS_UPDATE_INTERVAL),
 		'update':myTimer(constants.AUTOUPDATE_INTERVAL),
 		}
+
+		serialgaugeoptions = {'name':'Serial Monitor', 'init':print, 'read':None,
+				'fields':['Value'],
+				'min':[0],
+				'max':[255]}
+		self.serialGauge = dio.DIOSENSOR(self,serialgaugeoptions)
 		
 		self.startTime = time.time()
 		self.timer = QtCore.QTimer()
@@ -298,6 +306,9 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		self.log.moveCursor(QtGui.QTextCursor.End)
 		self.log.insertPlainText(txt.decode('ascii'))
 
+	def setSerialgauge(self,val):
+		self.serialGauge.setValue([val])
+
 	def genLog(self):
 		html='''<table border="1" align="center" cellpadding="1" cellspacing="0" style="font-family:arial,helvetica,sans-serif;font-size:9pt;">
 		<tbody><tr><td colspan="4">%s</td></tr>'''%(time.ctime())
@@ -331,6 +342,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		if self.userHexRunning:
 			t = self.p.fd.read(self.p.fd.in_waiting)
 			if len(t):
+				self.serialGaugeSignal.emit(t[0])
 				self.logThisPlain.emit(t)
 			return
 		
@@ -365,17 +377,17 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 			elif a[0] == 'WRITE': #['WRITE','REGNAME',val]
 				self.setReg(a[1],a[2]);
 			elif a[0] == 'READ': #['READ','REGNAME',function]
-				val = self.getReg(a[1]);
+				val = self.getReg(a[1])
 				a[2](val)
 			elif a[0] == 'CNTR1': #['CNTR1',output with setValue function]
-				cl = self.getReg('TCNT1L',False);
-				ch = self.getReg('TCNT1H',False);
+				cl = self.getReg('TCNT1L',False)
+				ch = self.getReg('TCNT1H',False)
 				a[1].setValue(cl|(ch<<8))
 			elif a[0] == 'ADC': #['ADC',ADMUX,output with setValue function, to log, or not to log]
-				self.setReg('ADMUX',a[1],a[3]);
-				self.setReg('ADCSRA',196|1,a[3]);
-				adcl = self.getReg('ADCL',a[3]);
-				adch = self.getReg('ADCH',a[3]);
+				self.setReg('ADMUX',a[1],a[3])
+				self.setReg('ADCSRA',196|1,a[3])
+				adcl = self.getReg('ADCL',a[3])
+				adch = self.getReg('ADCH',a[3])
 				a[2].setValue(adcl|(adch<<8))
 		
 		for a in self.sensorList:
@@ -574,6 +586,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 				self.tabs.setEnabled(False)
 				self.log.clear()
 				self.log.setText('''<span style="color:cyan;">-- Serial Port Monitor --</span><br>''')
+				self.serialGauge.show()
 
 			else:
 				self.p.fd.setRTS(0)  #Trigger a reset
@@ -586,7 +599,8 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 				for a in self.docks:
 					a.setEnabled(True)
 				self.userHexRunning=False
-				self.tabs.setEnabled(True)		
+				self.tabs.setEnabled(True)
+				self.serialGauge.hide()
 		else:
 			if self.isChecked():
 				self.setChecked(False)
