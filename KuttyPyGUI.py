@@ -492,6 +492,9 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 					res = subprocess.getstatusoutput(cmd)
 					if res[0] != 0:
 						self.logThis.emit('''<span style="color:red;">Compile Error: %s</span>'''%res[1])
+						self.finished.emit()
+						return
+
 					else:
 						self.logThis.emit('''<span style="color:white;">%s</span><br>'''%res[1])
 					cmd = 'avr-objcopy -j .text -j .data -O ihex %s %s.hex' %(fname,fname)

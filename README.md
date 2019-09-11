@@ -35,6 +35,15 @@ Supports I2C sensors: Luminosity Example. | Video recording
 
 + Scan for Sensors
 + Click to monitor via analog gauge
++ List of I2C sensors supported thus far (Minimal data logging. Configuration options via the graphical utility might be incomplete)
+  + MPU6050 3 Axis Accelerometer, 3 axis Angular velocity (Gyro)
+  + TSL2561 Luminosity measurements
+  + BMP280 Pressure and Temperature sensor
+  + MCP4725 Single channel DAC
+  + PCA9685 PWM controller
+  + MLX90614 Passive IR
+
+![Screenshot](/docs/mpu6050.gif?raw=true "6 DOF inertial measurement unit MPU6050")
 
 ### Plotting ADC values using matplotlib
 ![Screenshot](/docs/code.gif?raw=true "Recording of the ADC logging example")

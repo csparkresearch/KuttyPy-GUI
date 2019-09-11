@@ -1,5 +1,5 @@
 from .Qt import QtGui,QtCore,QtWidgets
-from utilities.templates import ui_dio,ui_dio_pwm,ui_dio_adc,ui_dio_adcConfig,ui_dio_sensor,ui_regvals,ui_dio_cntr,ui_regedit,ui_dio_control
+from utilities.templates import ui_dio,ui_dio_pwm,ui_dio_adc,ui_dio_adcLog,ui_dio_sensor,ui_regvals,ui_dio_cntr,ui_regedit,ui_dio_control
 from utilities.templates import ui_dio_robot
 
 from . import REGISTERS
@@ -153,33 +153,65 @@ class DIOPWM(QtWidgets.QStackedWidget,ui_dio_pwm.Ui_stack):
 			self.Q.append(['WRITE','OCR1AL',(val)&0xFF]) 
 
 
-class DIOADCCONFIG(QtWidgets.QDialog,ui_dio_adcConfig.Ui_Dialog):
+class DIOADCCONFIG(QtWidgets.QDialog,ui_dio_adcLog.Ui_Dialog):
 	def __init__(self,parent,name,opts,logstate,accepted):
 		super(DIOADCCONFIG, self).__init__(parent)
+		self.onFinished = accepted
 		self.setupUi(self)
 		self.setWindowTitle('Configure ADC Pin : %s'%parent.name)
 		self.label.setText(name)
 		self.scale = 1.
 		self.log.setChecked(logstate)
 		self.options.addItems(opts)
-		self.onFinished = accepted
 		self.gauge.update_value(200)
 		self.gauge.set_MaxValue(1023)
-		self.options.currentIndexChanged['QString'].connect(self.update)
+		self.currentPage = 0
+		self.graph.setRange(xRange=[-300, 0])
+		self.curve = self.graph.plot(pen=colors[0])
+		self.datapoints=0
+		self.curvedata = np.empty(300)
 
 	def changeRange(self,state):
 		self.scale = 5000./1023. if state else 1.
 		self.gauge.set_MaxValue(5000. if state else 1023)
 
 	def setValue(self,val):
-		self.gauge.update_value(val*self.scale)
+		if self.currentPage == 0: #Update Analog Gauges
+			self.gauge.update_value(val*self.scale)
+		elif self.currentPage == 1: #Update Data Logger
+			self.curvedata[self.datapoints] = val * self.scale
+			self.datapoints += 1 #Increment datapoints once per set. it's shared
+			if self.datapoints >= self.curvedata.shape[0]-1:
+				tmp = self.curvedata
+				self.curvedata = np.empty(self.curvedata.shape[0] * 2) #double the size
+				self.curvedata[:tmp.shape[0]] = tmp
+			self.curve.setData(self.curvedata[:self.datapoints])
+			self.curve.setPos(-self.datapoints, 0)
 
-	def update(self,i):
-		self.onFinished(i,self.log.isChecked())
+
+
+
+
+	def update(self):
+		self.onFinished(self.options.currentText(),self.log.isChecked())
+
+	def config(self,val):
+		self.onFinished(self.options.currentText(),self.log.isChecked())
 
 	def accept(self):
 		self.onFinished(self.options.currentText(),self.log.isChecked())
 		self.close()
+
+	def next(self):
+		if self.currentPage==1:
+			self.currentPage = 0
+			self.switcher.setText("Data Logger")
+		else:
+			self.currentPage = 1
+			self.switcher.setText("Analog Gauge")
+
+		self.monitors.setCurrentIndex(self.currentPage)
+
 
 class DIOADC(QtWidgets.QStackedWidget,ui_dio_adc.Ui_stack):
 	def __init__(self,name,Q,**kwargs):
@@ -217,12 +249,6 @@ class DIOADC(QtWidgets.QStackedWidget,ui_dio_adc.Ui_stack):
 		self.ADMUX = 64|self.muxOptions.get(val,self.chan)
 		self.logstate = log
 
-	def next(self):
-		self.currentPage+=1
-		if self.currentPage >= self.count():
-			self.currentPage = 0
-		self.setCurrentIndex(self.currentPage)
-		self.initPage()
 
 	def initPage(self):
 		if self.currentPage == 0 or self.currentPage == 2: #Input or ADC
@@ -239,6 +265,13 @@ class DIOADC(QtWidgets.QStackedWidget,ui_dio_adc.Ui_stack):
 		self.slider.setValue(val)
 		if self.configWindow:
 			self.configWindow.setValue(val)
+
+	def next(self):
+		self.currentPage+=1
+		if self.currentPage >= self.count():
+			self.currentPage = 0
+		self.setCurrentIndex(self.currentPage)
+		self.initPage()
 		
 class DIOCNTR(QtWidgets.QFrame,ui_dio_cntr.Ui_Frame):
 	def __init__(self,name,Q,**kwargs):

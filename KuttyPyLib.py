@@ -599,7 +599,7 @@ class KUTTYPY:
 		self._BMP280_calcTemperature(adc_t) #t_fine has been set now.
 		# Algorithm from the BMP280 driver. adapted from adafruit adaptation
 		# https://github.com/BoschSensortec/BMP280_driver/blob/master/bmp280.c
-		var1 = float(self._BMP280_t_fine) / 2.0 - 64000.0
+		var1 = self._BMP280_t_fine / 2.0 - 64000.0
 		var2 = var1 * var1 * self._BMP280_pressure_calib[5] / 32768.0
 		var2 = var2 + var1 * self._BMP280_pressure_calib[4] * 2.0
 		var2 = var2 / 4.0 + self._BMP280_pressure_calib[3] * 65536.0
@@ -629,9 +629,8 @@ class KUTTYPY:
 		if tmt:return None
 		if None not in data:
 			# Convert pressure and temperature data to 19-bits
-			adc_p = (((data[0] & 0xFF) * 65536) + ((data[1] & 0xFF) * 256) + (data[2] & 0xF0)) / 16
-			adc_t = (((data[3] & 0xFF) * 65536) + ((data[4] & 0xFF) * 256) + (data[5] & 0xF0)) / 16
-			print(adc_p)
+			adc_p = (((data[0] & 0xFF) * 65536.) + ((data[1] & 0xFF) * 256.) + (data[2] & 0xF0)) / 16.
+			adc_t = (((data[3] & 0xFF) * 65536.) + ((data[4] & 0xFF) * 256.) + (data[5] & 0xF0)) / 16.
 		return [self._BMP280_calcPressure(adc_p,adc_t), self._BMP280_calcTemperature(adc_t), 0]
 
 	TSL_GAIN = 0x00 # 0x00=1x , 0x10 = 16x
