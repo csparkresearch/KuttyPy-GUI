@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>363</width>
-    <height>300</height>
+    <width>450</width>
+    <height>370</height>
    </rect>
   </property>
   <property name="font">
@@ -47,12 +47,8 @@
    <property name="spacing">
     <number>3</number>
    </property>
-   <item row="0" column="0">
-    <widget class="QPushButton" name="pushButton">
-     <property name="text">
-      <string>Initialize</string>
-     </property>
-    </widget>
+   <item row="1" column="0" colspan="4">
+    <layout class="QHBoxLayout" name="configLayout"/>
    </item>
    <item row="0" column="3">
     <widget class="QPushButton" name="switcher">
@@ -61,21 +57,12 @@
      </property>
     </widget>
    </item>
-   <item row="1" column="0" colspan="4">
-    <layout class="QHBoxLayout" name="configLayout"/>
-   </item>
-   <item row="0" column="2">
-    <spacer name="horizontalSpacer">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
+   <item row="0" column="0">
+    <widget class="QPushButton" name="pushButton">
+     <property name="text">
+      <string>Initialize</string>
      </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>40</width>
-       <height>20</height>
-      </size>
-     </property>
-    </spacer>
+    </widget>
    </item>
    <item row="0" column="1">
     <widget class="QCheckBox" name="log_2">
@@ -107,19 +94,62 @@
       </layout>
      </widget>
      <widget class="QWidget" name="page_2">
-      <layout class="QHBoxLayout" name="horizontalLayout_2">
-       <property name="spacing">
+      <layout class="QGridLayout" name="gridLayout_2">
+       <property name="horizontalSpacing">
+        <number>2</number>
+       </property>
+       <property name="verticalSpacing">
         <number>0</number>
        </property>
        <property name="margin">
         <number>0</number>
        </property>
-       <item>
+       <item row="2" column="1">
+        <widget class="QPushButton" name="pushButton_2">
+         <property name="text">
+          <string>SINE FIT</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QCheckBox" name="pauseBox">
+         <property name="maximumSize">
+          <size>
+           <width>70</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Pause</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="2">
+        <widget class="QPushButton" name="pushButton_3">
+         <property name="text">
+          <string>DAMPED SINE FIT</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0" colspan="3">
         <widget class="PlotWidget" name="graph"/>
        </item>
       </layout>
      </widget>
     </widget>
+   </item>
+   <item row="0" column="2">
+    <spacer name="horizontalSpacer">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>40</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
    </item>
   </layout>
  </widget>
@@ -141,7 +171,7 @@
    <slot>changeRange(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>156</x>
+     <x>149</x>
      <y>26</y>
     </hint>
     <hint type="destinationlabel">
@@ -161,7 +191,7 @@
      <y>25</y>
     </hint>
     <hint type="destinationlabel">
-     <x>-20</x>
+     <x>0</x>
      <y>30</y>
     </hint>
    </hints>
@@ -173,12 +203,60 @@
    <slot>next()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>325</x>
-     <y>18</y>
+     <x>443</x>
+     <y>21</y>
     </hint>
     <hint type="destinationlabel">
      <x>372</x>
      <y>17</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButton_2</sender>
+   <signal>clicked()</signal>
+   <receiver>Dialog</receiver>
+   <slot>sineFit()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>259</x>
+     <y>369</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>467</x>
+     <y>364</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pauseBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>Dialog</receiver>
+   <slot>pause(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>40</x>
+     <y>361</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>40</x>
+     <y>380</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButton_3</sender>
+   <signal>clicked()</signal>
+   <receiver>Dialog</receiver>
+   <slot>dampedSineFit()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>380</x>
+     <y>361</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>397</x>
+     <y>385</y>
     </hint>
    </hints>
   </connection>
@@ -187,5 +265,8 @@
   <slot>changeRange(bool)</slot>
   <slot>initialize()</slot>
   <slot>next()</slot>
+  <slot>sineFit()</slot>
+  <slot>pause(bool)</slot>
+  <slot>dampedSineFit()</slot>
  </slots>
 </ui>

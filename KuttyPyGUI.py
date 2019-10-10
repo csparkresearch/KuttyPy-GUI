@@ -51,6 +51,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		
 		self.docks = [self.padock,self.pbdock,self.pcdock,self.pddock]
 		self.sensorList = []
+		self.controllerList = []
 		self.monitoring = True
 		self.logRegisters = True
 		self.userHexRunning = False
@@ -285,7 +286,14 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 			self.log.append('''<span style="color:red;">----------Kill Signal(Doesn't work yet. Restart the application)-----------</span>''')
 			self.codeThread.quit()
 			self.codeThread.terminate()
-		
+			del self.codeThread
+			self.codeThread = QtCore.QThread()
+			self.codeEval = self.codeObject(self.REGISTERS)
+			self.codeEval.moveToThread(self.codeThread)
+			self.codeEval.finished.connect(self.codeThread.quit)
+			self.codeEval.logThis.connect(self.appendLog) #Connect to the log window			
+			self.codeThread.started.connect(self.codeEval.execute)
+			self.codeThread.finished.connect(self.codeFinished)
 
 	def getReg(self,reg,record = True):
 		val = self.p.getReg(reg)
@@ -355,7 +363,6 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 			for a in range(self.registerList.count()):
 				self.registerList.itemWidget(self.registerList.item(a)).execute()
 			
-
 		while len(self.commandQ):
 			if not self.centralWidget().isEnabled():
 				return
@@ -426,6 +433,13 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 			elif type(btn)==dio.DIOCNTR and btn.currentPage==2: # CNTR
 					self.commandQ.append(['CNTR1',btn.slider])
 
+	def newStepperController(self):
+		if self.p.connected:
+			dialog = dio.DIOSTEPPER(self,total=200,device=self.p)
+			dialog.launch()
+			self.sensorList.append([dialog,None])
+
+
 	############ I2C SENSORS #################
 	def I2CScan(self):
 		if self.p.connected:
@@ -435,6 +449,10 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 				a[0].setParent(None)
 				a[1].setParent(None)
 			self.sensorList = []
+			for a in self.controllerList:
+				a[0].setParent(None)
+				a[1].setParent(None)
+			self.controllerList = []
 			for a in x:
 				s = self.p.sensors.get(a,None)
 				if s is not None:
@@ -451,7 +469,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 					dialog = dio.DIOCONTROL(self,s)
 					btn.clicked.connect(dialog.launch)
 					self.sensorLayout.addWidget(btn)
-					#self.sensorList.append([dialog,btn])
+					self.controllerList.append([dialog,btn])
 					continue
 
 				s = self.p.special.get(a,None)
@@ -460,7 +478,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 					dialog = dio.DIOROBOT(self,s)
 					btn.clicked.connect(dialog.launch)
 					self.sensorLayout.addWidget(btn)
-					#self.sensorList.append([dialog,btn])
+					self.controllerList.append([dialog,btn])
 					continue
 
 
@@ -487,8 +505,9 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 			if self.mode == 'compileupload':
 				try:
 					import subprocess
-					fname = self.fname.split(".")[0]
-					cmd = 'avr-gcc -Wall -O2 -mmcu=%s -o %s %s' %('atmega32',fname,self.fname)
+					fname = '.'.join(self.fname.split('.')[:-1])
+					cmd = 'avr-gcc -Wall -O2 -mmcu=%s -o "%s" "%s"' %('atmega32',fname,self.fname)
+					print(cmd)
 					res = subprocess.getstatusoutput(cmd)
 					if res[0] != 0:
 						self.logThis.emit('''<span style="color:red;">Compile Error: %s</span>'''%res[1])
@@ -497,10 +516,10 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 
 					else:
 						self.logThis.emit('''<span style="color:white;">%s</span><br>'''%res[1])
-					cmd = 'avr-objcopy -j .text -j .data -O ihex %s %s.hex' %(fname,fname)
+					cmd = 'avr-objcopy -j .text -j .data -O ihex "%s" "%s.hex"' %(fname,fname)
 					res = subprocess.getstatusoutput(cmd)
 					self.logThis.emit('''<span style="color:white;">%s</span><br>'''%res[1])
-					cmd = 'avr-objdump -S %s > %s.lst'%(fname,fname)
+					cmd = 'avr-objdump -S "%s" > "%s.lst"'%(fname,fname)
 					res = subprocess.getstatusoutput(cmd)
 					self.logThis.emit('''<span style="color:white;">%s</span><br>'''%res[1])
 					if self.fname[-2:] in ['.c','.C']:
@@ -545,9 +564,9 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 			self.log.clear()
 			self.log.setText('''<span style="color:cyan;">-- Opened File: %s --</span><br>'''%filename[0])
 			if 'inux' in platform.system(): #Linux based system
-				os.system('%s %s' % ('xdg-open', filename[0]))
+				os.system('%s "%s"' % ('xdg-open', filename[0]))
 			else:
-				os.system('%s %s' % ('open', filename[0]))
+				os.system('%s "%s"' % ('open', filename[0]))
 
 	def compileAndUpload(self):
 		if self.CFile:
@@ -608,6 +627,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 			if self.isChecked():
 				self.setChecked(False)
 
+		
 	def makeBottomMenu(self):
 		try:self.pushbutton.setParent(None)
 		except:pass
@@ -616,6 +636,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		menu = QtWidgets.QMenu()
 
 		menu.addAction('Save Window as Svg', self.exportSvg)
+		menu.addAction('Open Stepper Controller', self.newStepperController)
 
 		#Theme
 		self.themeAction = QtWidgets.QWidgetAction(menu)

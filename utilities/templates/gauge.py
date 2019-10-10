@@ -26,6 +26,7 @@ from ..Qt import QtWidgets, QtCore, QtGui
 
 class Gauge(QtWidgets.QWidget):
     valueChanged = QtCore.pyqtSignal(int)
+    mouseReleased = QtCore.pyqtSignal(int)
 
     def __init__(self, parent=None):
         super(Gauge, self).__init__(parent)
@@ -638,6 +639,7 @@ class Gauge(QtWidgets.QWidget):
         if not self.use_timer_event:
             self.update()
         pass
+        self.mouseReleased.emit(int(self.value))
 
     def mouseMoveEvent(self, event):
         x, y = event.x() - (self.width() / 2), event.y() - (self.height() / 2)

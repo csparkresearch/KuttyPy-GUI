@@ -134,7 +134,7 @@ class KUTTYPY:
 							'function':self.TSL2561_timing
 							}
 					] },
-			0x48:{
+			0x49:{
 				'name':'ADS1115',
 				'init':self.ADS1115_init,
 				'read':self.ADS1115_read,
@@ -175,6 +175,20 @@ class KUTTYPY:
 					'function':self.MPU6050_kalman_set
 					}
 			]},
+			41:{
+				'name':'TCS34725: RGB Sensor',
+				'init':self.TCS34725_init,
+				'RGB':True,
+				'read':self.TCS34725_all,
+				'fields':['RED','GREEN','BLUE'],
+				'min':[0,0,0,0],
+				'max':[2**16,2**16,2**16],
+				'config':[{
+					'name':'Gain',
+					'options':['1','4','16','60'],
+					'function':self.TCS34725_gain
+					}
+			]},
 			118:{
 				'name':'BMP280',
 				'init':self.BMP280_init,
@@ -182,6 +196,30 @@ class KUTTYPY:
 				'fields':['Pressure','Temp','Alt'],
 				'min':[0,0,0],
 				'max':[1600,100,10],
+				},
+			12:{ #0xc
+				'name':'AK8963 Mag',
+				'init':self.AK8963_init,
+				'read':self.AK8963_all,
+				'fields':['X','Y','Z'],
+				'min':[-32767,-32767,-32767],
+				'max':[32767,32767,32767],
+				},
+			119:{
+				'name':'MS5611',
+				'init':self.MS5611_init,
+				'read':self.MS5611_all,
+				'fields':['Pressure','Temp','Alt'],
+				'min':[0,0,0],
+				'max':[1600,100,10],
+				},
+			0x41:{  #A0 pin connected to Vs . Otherwise address 0x40 conflicts with PCA board.
+				'name':'INA3221',
+				'init':self.INA3221_init,
+				'read':self.INA3221_all,
+				'fields':['CH1','CH2','CH3'],
+				'min':[0,0,0],
+				'max':[1000,1000,1000],
 				},
 			0x5A:{
 				'name':'MLX90614',
@@ -353,13 +391,12 @@ class KUTTYPY:
 		return val
 
 	def readADC(self,ch):        # Read the ADC channel
-		self.setReg(self.REGS.ADMUX, self.REGS.REF_INT | ch)
-		self.setReg(self.REGS.ADCSRA, 1 << self.REGS.ADEN | (1 << self.REGS.ADSC) | self.REGS.ADC_SPEED)		# Enable the ADC
-		low = self.getReg(self.REGS.ADCL);
-		hi = self.getReg(self.REGS.ADCH);
+		self.setReg(self.REGS['ADMUX'], 64 | ch)
+		self.setReg(self.REGS['ADCSRA'], 197)		# Enable the ADC
+		low = self.getReg(self.REGS['ADCL'])
+		hi = self.getReg(self.REGS['ADCH'])
 		return (hi << 8) | low
 
-	'''
 	# I2C Calls. Will be replaced with firmware level implementation
 	def initI2C(self): # Initialize I2C
 		self.setReg('TWSR',0x00)
@@ -407,7 +444,7 @@ class KUTTYPY:
 			return self.getReg('TWDR')
 		else:
 			return None
-
+	'''
 	def I2CWriteBulk(self,address,bytestream): 
 		# Individual register write based writing. takes a few hundred milliseconds
 		self.startI2C()
@@ -503,11 +540,17 @@ class KUTTYPY:
 
 
 	MPU6050_kalman = 0
+
 	def MPU6050_init(self):
 		self.I2CWriteBulk(0x68,[0x1B,0<<3]) #Gyro Range . 250
 		self.I2CWriteBulk(0x68,[0x1C,0<<3]) #Accelerometer Range. 2
 		self.I2CWriteBulk(0x68,[0x6B, 0x00]) #poweron
-
+		v,tmt = self.I2CReadBulk(0x68,0x75,1)
+		self.mag = False
+		if v[0] in [0x71,0x73]: #MPU9255, MPU9250. Has magnetometer. Enable it.
+			self.mag = True
+			self.I2CWriteBulk(0x68,[0x37,0x22]) #INT_PIN_CFG . I2C passthrough enabled. Rescan to detect magnetometer.
+			
 	def MPU6050_gyro_range(self,val):
 		self.I2CWriteBulk(0x68,[0x1B,val<<3]) #Gyro Range . 250,500,1000,2000 -> 0,1,2,3 -> shift left by 3 positions
 
@@ -552,6 +595,19 @@ class KUTTYPY:
 			else:
 				self.MPU6050_kalman.input([ np.int16((b[x*2]<<8)|b[x*2+1]) for x in range(7) ])
 				return self.MPU6050_kalman.output()
+
+	######## AK8963 magnetometer attacched to MPU925x #######
+	AK8963_ADDRESS =0x0C
+	_AK8963_CNTL = 0x0A
+	def AK8963_init(self):
+			self.I2CWriteBulk(self.AK8963_ADDRESS,[self._AK8963_CNTL,0]) #power down mag
+			self.I2CWriteBulk(self.AK8963_ADDRESS,[self._AK8963_CNTL,(1<<4)|6]) #mode   (0=14bits,1=16bits) <<4 | (2=8Hz , 6=100Hz)
+	def AK8963_all(self,disableKalman=False):
+		vals,tmt=self.I2CReadBulk(self.AK8963_ADDRESS,0x03,7) #6+1 . 1(ST2) should not have bit 4 (0x8) true. It's ideally 16 . overflow bit
+		if tmt:return None
+		ax,ay,az = struct.unpack('hhh',bytes(vals[:6]))
+		if not vals[6]&0x08:return [ax,ay,az]
+		else: return None
 
 
 	####### BMP280 ###################
@@ -633,6 +689,174 @@ class KUTTYPY:
 			adc_t = (((data[3] & 0xFF) * 65536.) + ((data[4] & 0xFF) * 256.) + (data[5] & 0xF0)) / 16.
 		return [self._BMP280_calcPressure(adc_p,adc_t), self._BMP280_calcTemperature(adc_t), 0]
 
+
+	########## TCS34725 RGB sensor ###########
+
+	_TCS34725_COMMAND_BIT       = 0x80
+	_TCS34725_REGISTER_STATUS   = 0x13
+	_TCS34725_REGISTER_CDATA    = 0x14
+	_TCS34725_REGISTER_RDATA    = 0x16
+	_TCS34725_REGISTER_GDATA    = 0x18
+	_TCS34725_REGISTER_BDATA    = 0x1a
+
+	_TCS34725_REGISTER_ENABLE   = 0x00
+	_TCS34725_REGISTER_ATIME    = 0x01
+	_TCS34725_REGISTER_AILT     = 0x04
+	_TCS34725_REGISTER_AIHT     = 0x06
+	_TCS34725_REGISTER_ID       = 0x12
+	_TCS34725_REGISTER_APERS    = 0x0c
+	_TCS34725_REGISTER_CONTROL  = 0x0f
+	_TCS34725_REGISTER_SENSORID = 0x12
+	_TCS34725_REGISTER_STATUS   = 0x13
+	_TCS34725_ENABLE_AIEN       = 0x10
+	_TCS34725_ENABLE_WEN        = 0x08
+	_TCS34725_ENABLE_AEN        = 0x02
+	_TCS34725_ENABLE_PON        = 0x01
+
+	_GAINS  = (1, 4, 16, 60)
+	_CYCLES = (0, 1, 2, 3, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60)
+	_INTEGRATION_TIME_THRESHOLD_LOW = 2.4
+	_INTEGRATION_TIME_THRESHOLD_HIGH = 614.4
+
+	TCS34725_ADDRESS = 41
+	def TCS34725_init(self):
+		enable,tmt = self.I2CReadBulk(self.TCS34725_ADDRESS, self._TCS34725_COMMAND_BIT|self._TCS34725_REGISTER_ENABLE,1)
+		enable = enable[0]
+		self.I2CWriteBulk(self.TCS34725_ADDRESS, [self._TCS34725_REGISTER_ENABLE,enable|self._TCS34725_ENABLE_PON]) #
+		time.sleep(0.003)
+		self.I2CWriteBulk(self.TCS34725_ADDRESS, [self._TCS34725_COMMAND_BIT|self._TCS34725_REGISTER_ENABLE,enable|self._TCS34725_ENABLE_PON | self._TCS34725_ENABLE_AEN| self._TCS34725_ENABLE_AIEN]) #
+		self.I2CWriteBulk(self.TCS34725_ADDRESS, [self._TCS34725_COMMAND_BIT|self._TCS34725_REGISTER_APERS,10]) 
+		self.I2CWriteBulk(self.TCS34725_ADDRESS, [self._TCS34725_COMMAND_BIT|self._TCS34725_REGISTER_ATIME,256-40]) 
+
+
+	def TCS34725_gain(self,g):
+		self.I2CWriteBulk(self.TCS34725_ADDRESS, [self._TCS34725_COMMAND_BIT|self._TCS34725_REGISTER_CONTROL,g]) #Gain
+		
+
+	def TCS34725_all(self):
+		R,tmt = self.I2CReadBulk(self.TCS34725_ADDRESS, self._TCS34725_COMMAND_BIT|self._TCS34725_REGISTER_RDATA,2)
+		G,tmt = self.I2CReadBulk(self.TCS34725_ADDRESS, self._TCS34725_COMMAND_BIT|self._TCS34725_REGISTER_GDATA,2)
+		B,tmt = self.I2CReadBulk(self.TCS34725_ADDRESS, self._TCS34725_COMMAND_BIT|self._TCS34725_REGISTER_BDATA,2)
+
+		if tmt:return None
+		return [R[0]|(R[1]<<8),G[0]|(G[1]<<8),B[0]|(B[1]<<8)]
+	def TCS34725_range(self):
+		pass
+
+	####### MS5611 Altimeter ###################
+	MS5611_ADDRESS = 119
+
+	def MS5611_init(self):
+		self.I2CWriteBulk(self.MS5611_ADDRESS, [0x1E]) # reset
+		time.sleep(0.5)
+		self._MS5611_calib = np.zeros(6)
+
+		#calibration data.
+		#pressure gain, offset . T coeff of P gain, offset. Ref temp. T coeff of T. all unsigned shorts.
+		b,tmt = self.I2CReadBulk(self.MS5611_ADDRESS, 0xA2 ,2) 
+		if tmt:return
+		self._MS5611_calib[0] = struct.unpack('!H', bytes(b))[0]
+		b,tmt = self.I2CReadBulk(self.MS5611_ADDRESS, 0xA4 ,2) 
+		self._MS5611_calib[1] = struct.unpack('!H', bytes(b))[0]
+		b,tmt = self.I2CReadBulk(self.MS5611_ADDRESS, 0xA6 ,2) 
+		self._MS5611_calib[2] = struct.unpack('!H', bytes(b))[0]
+		b,tmt = self.I2CReadBulk(self.MS5611_ADDRESS, 0xA8 ,2) 
+		self._MS5611_calib[3] = struct.unpack('!H', bytes(b))[0]
+		b,tmt = self.I2CReadBulk(self.MS5611_ADDRESS, 0xAA ,2) 
+		self._MS5611_calib[4] = struct.unpack('!H', bytes(b))[0]
+		b,tmt = self.I2CReadBulk(self.MS5611_ADDRESS, 0xAC ,2) 
+		self._MS5611_calib[5] = struct.unpack('!H', bytes(b))[0]
+		print('Calibration for MS5611:',self._MS5611_calib)
+		
+
+	def MS5611_all(self):
+		self.I2CWriteBulk(self.MS5611_ADDRESS, [0x48]) #  0x48 Pressure conversion(OSR = 4096) command
+		time.sleep(0.01) #10mS
+		b,tmt = self.I2CReadBulk(self.MS5611_ADDRESS, 0x00 ,3) #data.
+		D1 = b[0]*65536 + b[1]*256 + b[2] #msb2, msb1, lsb
+
+		self.I2CWriteBulk(self.MS5611_ADDRESS, [0x58]) #  0x58 Temperature conversion(OSR = 4096) command
+		time.sleep(0.01)
+		b,tmt = self.I2CReadBulk(self.MS5611_ADDRESS, 0x00 ,3) #data.
+		D2 = b[0]*65536 + b[1]*256 + b[2] #msb2, msb1, lsb
+		
+
+		dT = D2 - self._MS5611_calib[4] * 256
+		TEMP = 2000 + dT * self._MS5611_calib[5] / 8388608
+		OFF = self._MS5611_calib[1] * 65536 + (self._MS5611_calib[3] * dT) / 128
+		SENS = self._MS5611_calib[0] * 32768 + (self._MS5611_calib[2] * dT ) / 256
+		T2 = 0;	OFF2 = 0;	SENS2 = 0
+		if TEMP >= 2000 :
+			T2 = 0
+			OFF2 = 0
+			SENS2 = 0
+		elif TEMP < 2000 :
+			T2 = (dT * dT) / 2147483648
+			OFF2 = 5 * ((TEMP - 2000) * (TEMP - 2000)) / 2
+			SENS2 = 5 * ((TEMP - 2000) * (TEMP - 2000)) / 4
+			if TEMP < -1500 :
+				OFF2 = OFF2 + 7 * ((TEMP + 1500) * (TEMP + 1500))
+				SENS2 = SENS2 + 11 * ((TEMP + 1500) * (TEMP + 1500)) / 2
+
+		TEMP = TEMP - T2
+		OFF = OFF - OFF2
+		SENS = SENS - SENS2
+		pressure = ((((D1 * SENS) / 2097152) - OFF) / 32768.0) / 100.0
+		cTemp = TEMP / 100.0
+		return [pressure,cTemp,0]
+
+
+	### INA3221 3 channel , high side current sensor #############
+	INA3221_ADDRESS  = 0x41
+	_INA3221_REG_CONFIG = 0x0
+	_INA3221_SHUNT_RESISTOR_VALUE = 0.1
+	_INA3221_REG_SHUNTVOLTAGE = 0x01
+	_INA3221_REG_BUSVOLTAGE = 0x02
+
+	def INA3221_init(self):
+		self.I2CWriteBulk(self.INA3221_ADDRESS,[self._INA3221_REG_CONFIG, 0b01110101, 0b00100111 ])  #cont shunt.
+
+	def INA3221_all(self):
+		I = [0.,0.,0.]
+		b,tmt = self.I2CReadBulk(self.INA3221_ADDRESS,self._INA3221_REG_SHUNTVOLTAGE  , 2) 
+		if tmt:return None
+		b[1]&=0xF8; I[0] = struct.unpack('!h',bytes(b))[0]
+		b,tmt = self.I2CReadBulk(self.INA3221_ADDRESS,self._INA3221_REG_SHUNTVOLTAGE  +2 , 2) 
+		if tmt:return None
+		b[1]&=0xF8; I[1] = struct.unpack('!h',bytes(b))[0]
+		b,tmt = self.I2CReadBulk(self.INA3221_ADDRESS,self._INA3221_REG_SHUNTVOLTAGE  +4 , 2) 
+		if tmt:return None
+		b[1]&=0xF8; I[2] = struct.unpack('!h',bytes(b))[0]
+		return [0.005*I[0]/self._INA3221_SHUNT_RESISTOR_VALUE,0.005*I[1]/self._INA3221_SHUNT_RESISTOR_VALUE,0.005*I[2]/self._INA3221_SHUNT_RESISTOR_VALUE]
+	
+
+
+	### SHT21 HUMIDITY TEMPERATURE SENSOR #############
+	SHT21_ADDRESS  = 0x41
+	_SHT21_TEMP = 0xf3
+	_SHT21_HUM = 0xf5
+	_SHT21_RESET = 0xFE
+	_INA3221_REG_SHUNTVOLTAGE = 0x01
+	_INA3221_REG_BUSVOLTAGE = 0x02
+
+	def SHT21_init(self):
+		self.I2CWriteBulk(self.SHT21_ADDRESS,[self._SHT21_RESET ])  #reset
+		time.sleep(0.1)
+
+	def SHT21_all(self):
+		self.I2CWriteBulk(self.SHT21_ADDRESS,[self._SHT21_TEMP ])
+		time.sleep(.1)
+		self.startI2C()
+		self.writeI2C((self.SHT21_ADDRESS<<1)|1) #Read
+		b=[]
+		for a in range(2):b.append(self.readI2C(1) )
+		b.append(self.readI2C(0))
+		self.stopI2C()
+		temperature,checksum = struct.unpack('>HB',bytes(b))
+		return [temperature* 175.72 / 65536.0 - 46.85,0]
+
+
+	####### TSL2561 LIGHT SENSOR ###########
 	TSL_GAIN = 0x00 # 0x00=1x , 0x10 = 16x
 	TSL_TIMING = 0x00 # 0x00=3 mS , 0x01 = 101 mS, 0x02 = 402mS
 	def TSL2561_init(self):
@@ -884,15 +1108,19 @@ if __name__ == '__main__':
 	if not a.connected:
 		sys.exit(1)
 	time.sleep(0.01)
+	a.readADC(0)
 	print(a.I2CScan())
+	a.MS5611_init()
+	
+	'''
 	a.PCA9685_init()
-	#a.PCA9685_set(1,650)
+	a.PCA9685_set(1,650)
 
 	for x in range(180):
 		a.PCA9685_set(1,x)
 		time.sleep(0.01)
 
-	'''
+	
 	a.TSL2561_init()
 	s=time.time()
 	for x in range(1000):
