@@ -234,6 +234,13 @@ for a in range(5):   #Run this loop 5 times.
           </property>
          </widget>
         </item>
+        <item row="2" column="0" colspan="3">
+         <widget class="QPushButton" name="pushButton_2">
+          <property name="text">
+           <string>Launch iPython Console</string>
+          </property>
+         </widget>
+        </item>
        </layout>
       </widget>
       <widget class="QWidget" name="tab_2">
@@ -595,8 +602,8 @@ for a in range(5):   #Run this loop 5 times.
    <slot>openFile()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>149</x>
-     <y>52</y>
+     <x>144</x>
+     <y>39</y>
     </hint>
     <hint type="destinationlabel">
      <x>56</x>
@@ -611,8 +618,8 @@ for a in range(5):   #Run this loop 5 times.
    <slot>compileAndUpload()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>147</x>
-     <y>95</y>
+     <x>144</x>
+     <y>45</y>
     </hint>
     <hint type="destinationlabel">
      <x>57</x>
@@ -636,6 +643,22 @@ for a in range(5):   #Run this loop 5 times.
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>pushButton_2</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>ipython()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>150</x>
+     <y>364</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>-9</x>
+     <y>405</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>runCode()</slot>
@@ -649,5 +672,6 @@ for a in range(5):   #Run this loop 5 times.
   <slot>openFile()</slot>
   <slot>compileAndUpload()</slot>
   <slot>I2CScan()</slot>
+  <slot>ipython()</slot>
  </slots>
 </ui>

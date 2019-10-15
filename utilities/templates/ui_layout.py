@@ -111,6 +111,9 @@ class Ui_MainWindow(object):
         self.toolButton_2.setIcon(icon3)
         self.toolButton_2.setObjectName("toolButton_2")
         self.gridLayout_3.addWidget(self.toolButton_2, 0, 1, 1, 1)
+        self.pushButton_2 = QtWidgets.QPushButton(self.examples)
+        self.pushButton_2.setObjectName("pushButton_2")
+        self.gridLayout_3.addWidget(self.pushButton_2, 2, 0, 1, 3)
         self.tabs.addTab(self.examples, "")
         self.tab_2 = QtWidgets.QWidget()
         self.tab_2.setObjectName("tab_2")
@@ -267,6 +270,7 @@ class Ui_MainWindow(object):
         self.commandLinkButton_2.clicked.connect(MainWindow.openFile)
         self.commandLinkButton_3.clicked.connect(MainWindow.compileAndUpload)
         self.toolButton_4.clicked.connect(MainWindow.I2CScan)
+        self.pushButton_2.clicked.connect(MainWindow.ipython)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
@@ -286,6 +290,7 @@ class Ui_MainWindow(object):
 "    time.sleep(0.5)\n"
 "    setReg(PORTD, 0)\n"
 "    time.sleep(0.5)"))
+        self.pushButton_2.setText(_translate("MainWindow", "Launch iPython Console"))
         self.tabs.setTabText(self.tabs.indexOf(self.examples), _translate("MainWindow", "Scripting"))
         self.filenameLabel.setText(_translate("MainWindow", ":"))
         self.commandLinkButton_2.setText(_translate("MainWindow", "Open File"))

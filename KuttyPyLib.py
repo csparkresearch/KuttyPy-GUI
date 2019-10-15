@@ -83,6 +83,7 @@ def getFreePorts(openPort=None):
 
 class KUTTYPY:	
 	VERSIONNUM = Byte.pack(99)
+	VERSIONNUM_328P = Byte.pack(100)
 	GET_VERSION = Byte.pack(1)
 	READB =   Byte.pack(2)
 	WRITEB =   Byte.pack(3)
@@ -96,6 +97,7 @@ class KUTTYPY:
 	REGS = REGISTERS.VERSIONS[99]['REGISTERS'] # A map of alphanumeric port names to the 8-bit register locations
 	REGSTATES = {} #Store the last written state of the registers
 	SPECIALS = REGISTERS.VERSIONS[99]['SPECIALS']
+	nano = False #check if atmega328p is found instead of 32
 	def __init__(self,**kwargs):
 		self.sensors={
 			0x39:{
@@ -230,7 +232,7 @@ class KUTTYPY:
 				'max':[350]}
 		}
 		self.controllers={
-			0x62:{
+			self.MCP5725_ADDRESS:{
 				'name':'MCP4725',
 				'init':self.MCP4725_init,
 				'write':[['CH0',0,4095,0,self.MCP4725_set]],
@@ -257,8 +259,17 @@ class KUTTYPY:
 				self.fd,self.version,self.connected=self.connectToPort(self.portname)
 				if self.connected:
 					#self.fd.setRTS(0)
-					for a in ['A','B','C','D']: #Initialize all inputs
-						self.setReg('DDR'+a,0)
+					if self.nano:
+						self.REGS = REGISTERS.VERSIONS[self.version]['REGISTERS'] # A map of alphanumeric port names to the 8-bit register locations
+						self.REGSTATES = {} #Store the last written state of the registers
+						self.SPECIALS = REGISTERS.VERSIONS[self.version]['SPECIALS']
+						for a in ['B','C','D']: #Initialize all inputs
+							self.setReg('DDR'+a,0) #All inputs
+							self.setReg('PORT'+a,0) #No Pullup
+						self.setReg('PORTC',(1<<4)|(1<<5)) #I2C Pull-Up
+					else:
+						for a in ['A','B','C','D']: #Initialize all inputs
+							self.setReg('DDR'+a,0)
 					return
 			except Exception as ex:
 				print('Failed to connect to ',self.portname,ex.message)
@@ -272,10 +283,19 @@ class KUTTYPY:
 						self.fd,self.version,self.connected=self.connectToPort(self.portname)
 						if self.connected:
 							#self.fd.setRTS(0)
-							for a in ['A','B','C','D']: #Initialize all inputs
-								self.setReg('DDR'+a,0) #All inputs
-								self.setReg('PORT'+a,0) #No Pullup
-							self.setReg('PORTC',3) #I2C Pull-Up
+							if self.nano:
+								self.REGS = REGISTERS.VERSIONS[self.version]['REGISTERS'] # A map of alphanumeric port names to the 8-bit register locations
+								self.REGSTATES = {} #Store the last written state of the registers
+								self.SPECIALS = REGISTERS.VERSIONS[self.version]['SPECIALS']
+								for a in ['B','C','D']: #Initialize all inputs
+									self.setReg('DDR'+a,0) #All inputs
+									self.setReg('PORT'+a,0) #No Pullup
+								self.setReg('PORTC',(1<<4)|(1<<5)) #I2C Pull-Up
+							else:
+								for a in ['A','B','C','D']: #Initialize all inputs
+									self.setReg('DDR'+a,0) #All inputs
+									self.setReg('PORT'+a,0) #No Pullup
+								self.setReg('PORTC',3) #I2C Pull-Up
 							return
 					except Exception as e:
 						print (e)
@@ -332,10 +352,14 @@ class KUTTYPY:
 			return None,'',False
 
 		version = self.__get_version__(fd)
+		self.nano = False
 		if len(version)==1:
 			if ord(version)==ord(self.VERSIONNUM):
 				return fd,ord(version),True
-		print ('version check failed',len(version),version)
+			if ord(version)==ord(self.VERSIONNUM_328P):
+				self.nano = True
+				return fd,ord(version),True
+		print ('version check failed',len(version),ord(version))
 		return None,'',False
 		
 
@@ -370,6 +394,7 @@ class KUTTYPY:
 
 	def setReg(self,reg, data):
 		#print(reg,data)
+		if reg not in self.REGS and type(reg)==str: return False
 		self.REGSTATES[reg] = data
 		self.__sendByte__(self.WRITEB)
 		if reg in self.REGS:
@@ -380,6 +405,9 @@ class KUTTYPY:
 		self.__sendByte__(data)
 
 	def getReg(self,reg):
+		if (reg not in self.REGS) and type(reg)==str:
+			print('unknown register',reg)
+			return 0
 		self.__sendByte__(self.READB)
 		if reg in self.REGS:
 			self.__sendByte__(self.REGS[reg])
@@ -906,6 +934,7 @@ class KUTTYPY:
 		else:
 			return None
 
+	MCP5725_ADDRESS = 0x60
 	def MCP4725_init(self):
 		pass
 
@@ -913,7 +942,7 @@ class KUTTYPY:
 		'''
 		Set the DAC value. 0 - 4095
 		'''
-		self.I2CWriteBulk(0x62, [0x40,(val>>4)&0xFF,(val&0xF)<<4])
+		self.I2CWriteBulk(self.MCP5725_ADDRESS, [0x40,(val>>4)&0xFF,(val&0xF)<<4])
 
 	####################### HMC5883L MAGNETOMETER ###############
 
@@ -1108,11 +1137,15 @@ if __name__ == '__main__':
 	if not a.connected:
 		sys.exit(1)
 	time.sleep(0.01)
-	a.readADC(0)
+	a.setReg(0x2A,15)
+	for l in range(50):
+		a.setReg(0x2B,15)
+		time.sleep(0.05)
+		a.setReg(0x2B,0)
+		time.sleep(0.05)
+	'''
 	print(a.I2CScan())
 	a.MS5611_init()
-	
-	'''
 	a.PCA9685_init()
 	a.PCA9685_set(1,650)
 

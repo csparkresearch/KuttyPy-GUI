@@ -58,6 +58,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		self.uploadingHex = False
 		self.autoUpdateUserRegisters = False
 		self.CFile = None #'~/kuttyPy.c'
+		self.ipy = None
 
 		self.setTheme("material")
 		examples = [a for a in os.listdir(os.path.join(path["examples"],self.EXAMPLES_DIR)) if ('.py' in a) and a is not 'kuttyPy.py'] #.py files except the library
@@ -103,14 +104,6 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 
 
 		self.initializeCommunications()
-		self.updatedRegs=OrderedDict()
-		self.currentRegister = 0
-		self.getRegs=[
-		('PINA',self.updateInputs),
-		('PINB',self.updateInputs),
-		('PINC',self.updateInputs),
-		('PIND',self.updateInputs),
-		]
 		self.pending = {
 		'status':myTimer(constants.STATUS_UPDATE_INTERVAL),
 		'update':myTimer(constants.AUTOUPDATE_INTERVAL),
@@ -373,7 +366,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 				reg = self.getReg(pname)
 				reg &=~ (1<<bit)
 				if(a[2]):reg |= (1<<bit)
-				self.setReg(pname,reg);
+				self.setReg(pname,reg)
 			elif a[0] == 'DTYPE': #Digital pin I/O ['DTYPE','Pxx',state]
 				pname = 'DDR'+a[1][1].upper()
 				bit = int(a[1][2])
@@ -506,7 +499,15 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 				try:
 					import subprocess
 					fname = '.'.join(self.fname.split('.')[:-1])
-					cmd = 'avr-gcc -Wall -O2 -mmcu=%s -o "%s" "%s"' %('atmega32',fname,self.fname)
+					if self.p.version == REGISTERS.VERSION_ATMEGA32:
+						cmd = 'avr-gcc -Wall -O2 -mmcu=%s -o "%s" "%s"' %('atmega32',fname,self.fname)
+						self.logThis.emit('''<span style="color:green;">Compiling for Atmega32</span>''')
+					elif self.p.version == REGISTERS.VERSION_ATMEGA328P:
+						cmd = 'avr-gcc -Wall -O2 -mmcu=%s -o "%s" "%s"' %('atmega328p',fname,self.fname)
+						self.logThis.emit('''<span style="color:green;">Compiling for Atmega328p (Nano)</span>''')
+					else:
+						self.logThis.emit('''<span style="color:red;">COMPILER UNAVAILABLE</span>''')
+						return
 					print(cmd)
 					res = subprocess.getstatusoutput(cmd)
 					if res[0] != 0:
@@ -594,6 +595,27 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		if self.p.connected:
 			self.userApplication.setChecked(False)
 			self.setWindowTitle('KuttyPy Interactive Console [{0:s}]'.format(self.p.portname))
+			self.updatedRegs=OrderedDict()
+			self.currentRegister = 0
+			self.VERSION = self.p.version
+			self.SPECIALS = REGISTERS.VERSIONS[self.VERSION]['SPECIALS']
+			self.REGISTERS = REGISTERS.VERSIONS[self.VERSION]['REGISTERS']
+			self.EXAMPLES_DIR = REGISTERS.VERSIONS[self.VERSION]['examples directory']
+			if self.p.version == REGISTERS.VERSION_ATMEGA328P:
+				self.getRegs=[
+				('PINB',self.updateInputs),
+				('PINC',self.updateInputs),
+				('PIND',self.updateInputs),
+				]
+			elif self.p.version == REGISTERS.VERSION_ATMEGA32:
+				self.getRegs=[
+				('PINA',self.updateInputs),
+				('PINB',self.updateInputs),
+				('PINC',self.updateInputs),
+				('PIND',self.updateInputs),
+				]
+
+
 		else:
 			self.setWindowTitle('KuttyPy Interactive Console [ Hardware not detected ]')
 
@@ -729,8 +751,14 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 			self.render(p)
 			p.end()
 
-
-
+	def ipython(self): #Experimental feature. Import ipython and launch console
+		if not self.p.connected:
+			return
+		from utilities import ipy
+		if not self.ipy:
+			self.ipy = ipy.AppWindow(self,kp = self.p)
+		self.ipy.show()
+		self.ipy.updateDevice(self.p)
 
 def translators(langDir, lang=None):
 	"""
