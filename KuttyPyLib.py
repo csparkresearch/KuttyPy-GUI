@@ -426,6 +426,7 @@ class KUTTYPY:
 		return (hi << 8) | low
 
 	# I2C Calls. Will be replaced with firmware level implementation
+	'''
 	def initI2C(self): # Initialize I2C
 		self.setReg('TWSR',0x00)
 		self.setReg('TWBR',0x46)
@@ -472,7 +473,6 @@ class KUTTYPY:
 			return self.getReg('TWDR')
 		else:
 			return None
-	'''
 	def I2CWriteBulk(self,address,bytestream): 
 		# Individual register write based writing. takes a few hundred milliseconds
 		self.startI2C()
@@ -514,7 +514,7 @@ class KUTTYPY:
 		val = self.__getByte__()
 		if val is None:
 			return []
-		while val<127:
+		while val<254:
 			addrs.append(val)
 			val = self.__getByte__()
 		if(val==254):print('timed out')
@@ -1137,15 +1137,10 @@ if __name__ == '__main__':
 	if not a.connected:
 		sys.exit(1)
 	time.sleep(0.01)
-	a.setReg(0x2A,15)
-	for l in range(50):
-		a.setReg(0x2B,15)
-		time.sleep(0.05)
-		a.setReg(0x2B,0)
-		time.sleep(0.05)
-	'''
 	print(a.I2CScan())
-	a.MS5611_init()
+	a.MPU6050_init()
+	print(a.MPU6050_all())
+	'''
 	a.PCA9685_init()
 	a.PCA9685_set(1,650)
 

@@ -1,6 +1,6 @@
 from .Qt import QtGui,QtCore,QtWidgets
 from utilities.templates import ui_dio,ui_dio_pwm,ui_dio_adc,ui_dio_adcLog,ui_dio_sensor,ui_regvals,ui_dio_cntr,ui_regedit,ui_dio_control
-from utilities.templates import ui_dio_robot,ui_dio_stepper
+from utilities.templates import ui_dio_robot,ui_dio_stepper,ui_dummyio
 
 from . import REGISTERS
 from utilities.templates.gauge import Gauge
@@ -104,6 +104,8 @@ def widget(name,Q,**kwargs):
 		widget = DIOADC(name,Q,**kwargs)
 	elif kwargs.get('extra','') in ['T1']: #Counters
 		widget = DIOCNTR(name,Q,**kwargs)
+	elif kwargs.get('extra','') == 'FIXED': #Uneditable
+		widget = DIODUMMY(name,**kwargs)
 	else: #Regular D IO
 		widget = DIO(name,Q,**kwargs)
 	widget.setProperty("class", name)
@@ -170,6 +172,13 @@ class DIO(QtWidgets.QStackedWidget,ui_dio.Ui_stack):
 		self.pullup.setChecked(state)
 		self.Q.append(['DSTATE',self.name,state])
 
+class DIODUMMY(QtWidgets.QWidget,ui_dummyio.Ui_Form):
+	def __init__(self,name,**kwargs):
+		super(DIODUMMY, self).__init__()
+		self.setupUi(self)
+		self.name = name
+		self.nameIn.setText(name)
+		
 
 class DIOPWM(QtWidgets.QStackedWidget,ui_dio_pwm.Ui_stack):
 	def __init__(self,name,Q,**kwargs):

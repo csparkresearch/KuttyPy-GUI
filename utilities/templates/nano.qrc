@@ -1,0 +1,5 @@
+<RCC>
+  <qresource prefix="control">
+    <file>nanopinout.png</file>
+  </qresource>
+</RCC>

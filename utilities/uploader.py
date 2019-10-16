@@ -69,7 +69,7 @@ class Uploader(object):
 			if not reply or ([reply[0], reply[-1]] != self.INSYNC):
 				if n < self.retry:
 					n += 1
-					self.log('retrying...')
+					self.log('retrying...%s'%reply)
 					continue
 				else:
 					raise BaseException("Not in sync")
