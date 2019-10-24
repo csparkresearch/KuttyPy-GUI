@@ -1,6 +1,6 @@
 site_name: KuttyPy Graphical Interface Documentation
-theme: 'material'
-#theme: 'readthedocs'
+#theme: 'material'
+theme: 'readthedocs'
 markdown_extensions:
     - toc:
         permalink: True

@@ -29,11 +29,8 @@ main(){
  
   for(;;){
         delay_ms(2);
-        showchar(cs);
-        showchar(ca);
-        showchar(ck);
-        showchar(cs);
         showchar(ch);
+        showchar(ca);
         showchar(ci);
         delay_ms(8);
   }
