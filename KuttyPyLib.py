@@ -425,6 +425,44 @@ class KUTTYPY:
 		hi = self.getReg(self.REGS['ADCH'])
 		return (hi << 8) | low
 
+	'''
+	def writeEEPROM(self,data):
+		addr=0
+		for a in data:
+			timeout=20 #20mS
+			while ((self.getReg('EECR') & 2)):
+				timeout-=1
+				if timeout==0:
+					print ('wait timeout!')
+					break
+				time.sleep(0.001)
+
+			self.setReg('EEARL',addr)
+			self.setReg('EEARH',0)
+			self.setReg('EEDR',a)
+			self.setReg('EECR',4) ##EEMPE master write enable
+			self.setReg('EECR',6) # EEPE write
+			addr+=1
+
+	def readEEPROM(self,total):
+		addr=0; b = []
+		for a in range(total):
+			timeout=20 #20mS
+			while ((self.getReg('EECR') & 2)):
+				timeout-=1
+				if timeout==0:
+					print ('wait timeout!')
+					break
+				time.sleep(0.001)
+
+			self.setReg('EEARL',addr)
+			self.setReg('EEARH',0)
+			self.setReg('EECR',1) ##EERE. Read 
+			b.append(self.getReg('EEDR'))
+			addr+=1
+		return b
+	'''
+
 	# I2C Calls. Will be replaced with firmware level implementation
 	'''
 	def initI2C(self): # Initialize I2C
@@ -1140,6 +1178,8 @@ if __name__ == '__main__':
 	print(a.I2CScan())
 	a.MPU6050_init()
 	print(a.MPU6050_all())
+	a.writeEEPROM('abcdef')
+	print(a.readEEPROM(5))
 	'''
 	a.PCA9685_init()
 	a.PCA9685_set(1,650)

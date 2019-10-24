@@ -1,0 +1,54 @@
+site_name: KuttyPy Graphical Interface Documentation
+theme: 'material'
+#theme: 'readthedocs'
+markdown_extensions:
+    - toc:
+        permalink: True
+    - admonition
+    - smarty
+    - wikilinks
+    - codehilite:
+        linenums: True
+    # - urlize # requires: pip install git+https://github.com/r0wb0t/markdown-urlize.git
+    - pymdownx.arithmatex
+    - pymdownx.betterem:
+        smart_enable: all
+    - pymdownx.caret
+    - pymdownx.critic
+    - pymdownx.details
+    - pymdownx.emoji:
+        emoji_generator: !!python/name:pymdownx.emoji.to_svg
+    - pymdownx.inlinehilite
+    - pymdownx.magiclink
+    - pymdownx.mark
+    - pymdownx.smartsymbols
+    - pymdownx.superfences
+    - pymdownx.tasklist:
+        custom_checkbox: True
+    - pymdownx.tilde
+site_favicon: 'images/favicon.ico'
+extra:
+  palette:
+      primary: '#087da1'
+      accent: '#00a889'
+  font:
+      text: 'Source Sans Pro'
+  social:
+    - type: 'github'
+      link: 'https://github.com/csparkresearch/'
+    - type: 'twitter'
+      link: 'https://twitter.com/csparkresearch'
+repo_name: 'csparkresearch/kuttypy-gui'
+repo_url: 'https://github.com/csparkresearch/kuttypy-gui'
+copyright: 'Copyright © 2017 <a href="https://csparkresearch.in">CSpark Research</a>'
+#google_analytics:
+#  - 'UA-49052879-1'
+#  - 'auto'
+pages:
+  - Home: 'index.md'
+  - Installation:
+      - 'Getting started': 'installation/gettingstarted.md'
+  - I2C Sensors:
+      - 'Introduction': 'sensors.md'
+  - Programming:
+      - 'Basics': 'programming/intro.md'
