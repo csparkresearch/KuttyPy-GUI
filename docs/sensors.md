@@ -1,6 +1,6 @@
 # Monitor I2C Sensors
 
-![Screenshot](/images/mpu6050.gif?raw=true "6 DOF inertial measurement unit MPU6050")
+![Screenshot](images/mpu6050.gif?raw=true "6 DOF inertial measurement unit MPU6050")
 
 ## Procedure for using I2C sensors
 
