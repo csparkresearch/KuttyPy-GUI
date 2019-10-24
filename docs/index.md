@@ -33,30 +33,44 @@ It is being extended to support other microcontrollers as well, such as the 328p
 
 ## Python library and Graphical utility
 
+The graphical window featured in the cover animation allows exploring the functions of each pin of the hardware live, and also
+viewing the corresponding register manipulations executed for each change. This knowledge can then be applied while writing C programs.
+![Screenshot](images/blink.gif?raw=true "Write Python code to blink all of PORT D")
+
+The python library has setReg and getReg functions calls to manipulate and read registers, in addition to a host of high level functions
+to access sensors, ADC etc.
+```python
+from kuttyPy import * #Import the library. also automatically connects to any available kuttypy hardware.
+setReg('DDRD',160) #0b10100000 PD7(BLUE LED) and PD5(GREEN LED) made output type
+setReg('PORD',160) # PD5 and PD7 set to HIGH. Both LEDs start glowing
+```
+
 ## Monitor I2C Sensors
 
+You can plug and play a variety of support I2C sensors such as accelerometers, pressure sensors etc via the I2C pins (PC0:SCL, PC1:SDA).
+[Details here](sensors)
+
 ![Screenshot](images/mpu6050.gif?raw=true "6 DOF inertial measurement unit MPU6050")
+
+Data from a 6 DOF inertial measurement unit MPU6050 shown with beautiful analog guages. A data logger is also built-in, and
+this includes analytical functions to select plot regions and fit against sinusoidal or damped sinusoidal functions for 
+feature extraction and physics experiments.
 
 ## 7 channel voltmeter [ 0-5000mV without analog frontend ]
 ![Screenshot](images/voltmeter.gif?raw=true "Voltmeter")
 
+PA0 - PA7 are ADC enabled pins. The graphical utility allows for their monitoring. This makes it easy to record expected input
+values from analog sensors before hard-coding them into C programs.
+
 ## Plotting ADC values using matplotlib
 ![Screenshot](images/code.gif?raw=true "Recording of the ADC logging example")
 
-![Screencast](images/monitor.gif?raw=true "Monitor your code!")
 
 Hall Sensor|Servo Motor
 ---|---
-![Screencast](images/hall_sensor.webp?raw=true "Hall sensor!") | ![Screencast](/docs/servo_motor.webp?raw=true "Hall sensor!")
+![Screencast](images/hall_sensor.webp?raw=true "Hall sensor!") | ![Screencast](/images/servo_motor.webp?raw=true "Hall sensor!")
 
 Plug and play various accessories such as this Hall Sensor, & servo motor.
-
-## Simple blink.py example
-![Screenshot](images/blink.gif?raw=true "Write Python code to blink all of PORT D")
-
-![Screencast](images/monitor.gif?raw=true "Monitor your code!")
-
-Monitor your code's activity while it executes
 
 ![Screencast](images/custom_registers.gif?raw=true "Add Register widgets, twiddle bits, and see what happens!")
 
@@ -82,7 +96,6 @@ The user can switch back to the monitoring utility in a snap!
 ![Screencast](images/pov_display.webp?raw=true "POV display!")
 
 A persistence of vision display made with C code! Write text in thin air using 8 LEDs on PORTB.
-
 
 
 ###Contributions:

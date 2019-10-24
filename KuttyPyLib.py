@@ -923,7 +923,7 @@ class KUTTYPY:
 
 
 	####### TSL2561 LIGHT SENSOR ###########
-	TSL_GAIN = 0x00 # 0x00=1x , 0x10 = 16x
+	TSL_GAIN = 0x00 # 0x00=1x , 0x01 = 16x
 	TSL_TIMING = 0x00 # 0x00=3 mS , 0x01 = 101 mS, 0x02 = 402mS
 	def TSL2561_init(self):
 		self.I2CWriteBulk(0x39,[0x80 , 0x03 ]) #poweron
