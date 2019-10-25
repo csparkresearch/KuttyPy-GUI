@@ -1,8 +1,6 @@
 site_name: KuttyPy Software Documentation
 theme:
     name: 'material'
-    logo: 'images/kuttypy.png'
-    favicon: 'images/favicon.ico'
  
 #theme: 'readthedocs'
 markdown_extensions:
@@ -37,6 +35,7 @@ extra:
       primary: '#087da1'
       accent: '#00a889'
   logo: 'images/kuttypy.png'
+  favicon: 'images/favicon.ico'
   social:
     - type: 'github'
       link: 'https://github.com/csparkresearch/'
