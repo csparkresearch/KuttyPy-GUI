@@ -1,17 +1,33 @@
 # Welcome to KuttyPy's documentation
 
-The kuttyPy (/kʊtipʌɪ/) Microcontroller training utility allows live manipulation of the registers in microcontrollers via a connected computer containing its python library.
+The kuttyPy (/kʊtipʌɪ/) Microcontroller training software allows live manipulation of the registers
+in microcontrollers via a connected computer through a Python library or Graphical interface.
 
-setReg and getReg function calls act as debugging and monitoring tools, and combined with Python's visualization 
+The kuttyPy hardware is an ATMEGA32 microcontroller development board developed by the [ExpEYES](http://expeyes.in) project, and is 
+currently supported. The hardware contains the kuttyPy firmware, but can also be used to run other
+programs via its bootloader functionality.
+The software is being extended to support other microcontroller platforms as well, such as the 328p
+ found on Arduino Nano boards.
+
+
+setReg and getReg Python function calls act as debugging and monitoring tools, and combined with Python's visualization 
 and analytical utilities, this approach has immense pedagogical potential for beginners to the microcontroller world. 
+```python
+from kuttyPy import * #Import the library. also automatically connects to any available kuttypy hardware.
+setReg('DDRD',160) #0b10100000 PD7(BLUE LED) and PD5(GREEN LED) made output type
+setReg('PORD',160) # PD5 and PD7 set to HIGH. Both LEDs start glowing
+```
 
-The kuttyPy hardware is an ATMEGA32 microcontroller development board developed by the [ExpEYES](http://expeyes.in) project, and is currently supported by this software. It contains the kuttyPy firmware, but can also be used to run other programs via its bootloader.
-It is being extended to support other microcontrollers as well, such as the 328p found on Arduino Nano boards.
+!!! info "The KuttyPy ATMEGA32 hardware"
+	![Screenshot](images/kuttypy.jpg)
 
-![Screenshot](images/main.gif?raw=true "Recording of the User Interface")
 
----
+!!! info "And its companion Python software"
+	![Screenshot](images/main.gif?raw=true "Recording of the User Interface")
 
+!!! tip "Atmega32 Datasheet"
+	[Download](http://ww1.microchip.com/downloads/en/devicedoc/doc2503.pdf) the datasheet before diving
+	into learning how to use microcontrollers
 
 
 ---
@@ -47,7 +63,7 @@ setReg('PORD',160) # PD5 and PD7 set to HIGH. Both LEDs start glowing
 
 ## Monitor I2C Sensors
 
-You can plug and play a variety of support I2C sensors such as accelerometers, pressure sensors etc via the I2C pins (PC0:SCL, PC1:SDA).
+You can plug and play a variety of supported I2C sensors such as accelerometers, pressure sensors etc via the I2C pins (PC0:SCL, PC1:SDA).
 [Details here](sensors)
 
 ![Screenshot](images/mpu6050.gif?raw=true "6 DOF inertial measurement unit MPU6050")
@@ -56,14 +72,18 @@ Data from a 6 DOF inertial measurement unit MPU6050 shown with beautiful analog 
 this includes analytical functions to select plot regions and fit against sinusoidal or damped sinusoidal functions for 
 feature extraction and physics experiments.
 
+!!! info "Everyone loves robots!"
+	<video controls >
+		<source src="../images/robot.mp4"
+				type="video/mp4">
+		Sorry, your browser doesn't support embedded videos.
+	</video>
+
+
 ## 7 channel voltmeter [ 0-5000mV without analog frontend ]
-![Screenshot](images/voltmeter.gif?raw=true "Voltmeter")
 
 PA0 - PA7 are ADC enabled pins. The graphical utility allows for their monitoring. This makes it easy to record expected input
-values from analog sensors before hard-coding them into C programs.
-
-## Plotting ADC values using matplotlib
-![Screenshot](images/code.gif?raw=true "Recording of the ADC logging example")
+values from analog sensors before hard-coding them into C programs. You can also use plotting libraries such as matplotlib to monitor variations.
 
 
 Hall Sensor|Servo Motor
@@ -77,36 +97,43 @@ Plug and play various accessories such as this Hall Sensor, & servo motor.
 Add custom register blocks, twiddle bits, and observe!
 In this demo, the ADC is read by first setting the bits in the ADCSRA(control and status register), then reading back ADCL(8LSB)+ADCH(2MSB), and also checking the new status of ADCSRA after the operation.
 
-## C Code compilation and uploading
-
-### Seamless switching between the KuttyPy monitor, and user uploaded hex file.
+## [C Code compilation and uploading](programming/c)
 ---
-The KuttyPy monitor code is part of the bootloader. This allows users to upload their own Hex files without losing the training utility features.
 
-![App Switching](images/switch.gif?raw=true "App Switching")
+The kuttyPy also has standalone operation similar to an Arduino, or any other development board.
+You can [compile C code with avr-gcc](programming/c), and upload via avrdude by selecting the 'arduino' bootloader type, and a 38400 BAUD rate. All
+this can be easily carried out via pre-configured buttons in the KuttyPy GUI.
 
-This example shows how to skip back and forth to an LED scanning code (which also prints letters to the serial port) written in C and uploaded.
+!!! tip "Seamless switching between the KuttyPy monitor, and user uploaded hex file."
 
-In the animation, after fiddling a little with the PWM controls on the monitor, the 'user app' button is clicked. This triggers the following:
-+ Within a few ten milliseconds the user uploaded hex file starts executing
-+ The console turns into a serial monitor, and shows any text sent by the user uploaded hex.
+	The KuttyPy monitor code is part of the bootloader. This allows users to upload their own Hex files without losing the training utility features.
 
-The user can switch back to the monitoring utility in a snap!
+	![App Switching](images/switch.gif?raw=true "App Switching")
 
-![Screencast](images/pov_display.webp?raw=true "POV display!")
+	This example shows how to skip back and forth to an LED scanning code (which also prints letters to the serial port) written in C and uploaded.
 
-A persistence of vision display made with C code! Write text in thin air using 8 LEDs on PORTB.
+	In the animation, after fiddling a little with the PWM controls on the monitor, the 'user app' button is clicked. This triggers the following
+
+		* Within a few ten milliseconds the user uploaded hex file starts executing
+		* The console turns into a serial monitor, and shows any text sent by the user uploaded hex.
+
+	The user can switch back to the monitoring utility in a snap!
+
+!!! tip "Persistence of vision display"
+	![Screencast](images/pov_display.webp?raw=true "POV display!")
+
+	A persistence of vision display made with C code! Write text in thin air using 8 LEDs on PORTB.
 
 
-###Contributions:
+## Contributions:
 + Special thanks to Georges Khazanadar for Debianizing efforts.
 
 We welcome packaging efforts for other linux distributions.
 
 ## Supporting KuttyPy
 
-KuttyPy is an open source project. Its ongoing development is made possible thanks to the support by 
-people who purchase the hardware. We do not yet have a Patreon campaign or equivalent.
+kuttypy-gui is an open source project. Its ongoing development is made possible thanks to the support by 
+people purchasing the hardware. We do not yet have a Patreon campaign or equivalent.
 
 ---
-Developed by Jithin B.P @CSpark Research, 2018. 
+Developed by Jithin B.P @CSpark Research

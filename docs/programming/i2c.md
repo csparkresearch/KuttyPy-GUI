@@ -6,7 +6,7 @@ The I2C interface consists of 2 pins:
 + SDA, also known as the data pin. PC1 on Atmega32
 
 With these two connections, it is possible to get data from a variety of sensors measuring
-physical parameters. Visit the [sensors page](../sensors) for details on using them via the GUI.
+physical parameters. Visit the [sensors page](../../sensors) for details on using them via the GUI.
 
 
 ## I2C function calls

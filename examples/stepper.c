@@ -1,6 +1,6 @@
 #include "mh-utils.c"
 
-#define DELAY 5
+#define DELAY 10
 #define STEPS 90
 int main (void)
   {

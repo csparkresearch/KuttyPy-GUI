@@ -8,6 +8,10 @@ DDRB = 255 (binary 11111111) implies all pins will be output type. DDRB = 160 (1
 
 Similarly, PORTB register is used to turn an output HIGH(5V), or LOW(0V/Ground)
 
+
+![](../images/PORTB.png "PB5 and PB7 set to HIGH")
+PB5 and PB7 set to Output type (DDRB=160), and made HIGH(PORTB=160).
+
 ### Test this with a simple code to turn on an LED connected to PB3
 
 ```python tab="Python Code"

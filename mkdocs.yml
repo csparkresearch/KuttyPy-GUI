@@ -1,5 +1,8 @@
 site_name: KuttyPy Graphical Interface Documentation
-theme: 'material'
+theme:
+    name: 'material'
+    favicon: 'images/kuttypy.png'
+    logo: 'images/kuttypy.png'
 
 
 #theme: 'readthedocs'
@@ -11,7 +14,7 @@ markdown_extensions:
     - wikilinks
     - codehilite:
         linenums: False
-    - pymdownx.arithmatex
+    #- pymdownx.arithmatex
     - pymdownx.betterem:
         smart_enable: all
     - pymdownx.caret
@@ -29,11 +32,9 @@ markdown_extensions:
 
 extra_css: ["assets/main.css"]
 
-
-site_favicon: 'images/favicon.ico'
-
-
 extra:
+  favicon: '/images/kuttypy.png'
+  logo: 'images/kuttypy.png'
   palette:
       primary: '#087da1'
       accent: '#00a889'
@@ -44,19 +45,26 @@ extra:
     - type: 'twitter'
       link: 'https://twitter.com/csparkresearch'
 
+
 repo_name: 'csparkresearch/kuttypy-gui'
 repo_url: 'https://github.com/csparkresearch/kuttypy-gui'
-copyright: 'Copyright © 2017 <a href="https://csparkresearch.in">CSpark Research</a>'
+copyright: 'Copyright © 2019 <a href="https://csparkresearch.in">CSpark Research</a>'
 #google_analytics:
 #  - 'UA-49052879-1'
 #  - 'auto'
-pages:
+nav:
   - Home: 'index.md'
   - Installation:
       - 'Getting started': 'installation/gettingstarted.md'
   - I2C Sensors:
       - 'Introduction': 'sensors.md'
-  - Programming:
+  - Other features:
+      - '8 Channel Voltmeter': 'adc.md'
+      - 'Stepper Motors': 'stepper.md'
+  - Python Programming:
       - 'Introduction': 'programming/intro.md'
       - 'Basic I/O': 'programming/basics.md'
       - 'I2C and Sensors': 'programming/i2c.md'
+  - C Programming:
+      - 'Introduction': 'programming/c.md'
+
