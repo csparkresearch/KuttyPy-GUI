@@ -51,7 +51,7 @@ while(1):
 
 ```
 
-!!! info "Manually controlling the Robotic Arm based on SG90 servos!"
+!!! info "Manually controlling a Robotic Arm based on SG90 servos!"
 	<video controls >
 		<source src="../../images/robot.mp4"
 				type="video/mp4">

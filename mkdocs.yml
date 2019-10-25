@@ -1,4 +1,4 @@
-site_name: KuttyPy Graphical Interface Documentation
+site_name: KuttyPy Software Documentation
 theme:
     name: 'material'
     logo: 'images/kuttypy.png'

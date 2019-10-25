@@ -74,7 +74,7 @@ feature extraction and physics experiments.
 
 !!! info "Everyone loves robots!"
 	<video controls >
-		<source src="../images/robot.mp4"
+		<source src="images/robot.mp4"
 				type="video/mp4">
 		Sorry, your browser doesn't support embedded videos.
 	</video>
@@ -88,7 +88,7 @@ values from analog sensors before hard-coding them into C programs. You can also
 
 Hall Sensor|Servo Motor
 ---|---
-![Screencast](images/hall_sensor.webp?raw=true "Hall sensor!") | ![Screencast](/images/servo_motor.webp?raw=true "Hall sensor!")
+![Screencast](images/hall_sensor.webp?raw=true "Hall sensor!") | ![Screencast](images/servo_motor.webp?raw=true "Hall sensor!")
 
 Plug and play various accessories such as this Hall Sensor, & servo motor.
 
