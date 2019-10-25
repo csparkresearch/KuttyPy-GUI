@@ -52,17 +52,19 @@ copyright: 'Copyright © 2019 <a href="https://csparkresearch.in">CSpark Researc
 #  - 'auto'
 nav:
   - Home: 'index.md'
-  - Installation:
-      - 'Getting started': 'installation/gettingstarted.md'
-  - I2C Sensors:
-      - 'Introduction': 'sensors.md'
-  - Other features:
+  - Getting Started:
+      - 'Installation': 'installation.md'
+      - 'Software': 'software.md'
+      - 'Basic I/O': 'io.md'
       - '8 Channel Voltmeter': 'adc.md'
       - 'Stepper Motors': 'stepper.md'
-  - Python Programming:
+  - I2C Sensors: 'sensors.md'
+  - Programming - Python:
       - 'Introduction': 'programming/intro.md'
       - 'Basic I/O': 'programming/basics.md'
       - 'I2C and Sensors': 'programming/i2c.md'
-  - C Programming:
-      - 'Introduction': 'programming/c.md'
+  - Programming - C: 'programming/c.md'
+  - KuttyPy Hardware:
+      - 'Design': 'hw.md'
+      - 'Firmware': 'boot.md'
 
