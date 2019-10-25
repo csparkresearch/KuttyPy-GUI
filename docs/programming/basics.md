@@ -96,6 +96,17 @@ for a in range(50):
     plt.pause(0.01) #Wait 10 mS
 ```
 
+## Embedded iPython Console
+
+In the scripting tab, there is an option to launch the ipython console. This
+is a quick way to access the python functions from the GUI itself.
+The kuttyPy instance in this window is called `kp` , so you can
+use functions such as `kp.setReg` , `kp.MPU6050_init` etc.
+TAB based autocompletion and inline help is also available.
+
+!!! tip "Screenshot"
+	![](../images/qtconsole.png "QTConsole")
+
 
 ## Total list of defined registers for ATMEGA32
 

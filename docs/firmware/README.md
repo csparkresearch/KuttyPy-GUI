@@ -5,8 +5,6 @@ utility developed by jithin B.P @ [CSpark Research Pvt Ltd](https://csparkresear
 What is KuttyPy?
 ---
 
-![Screenshot](../blink.gif?raw=true "Write Python code to blink all of PORT D")
-
 An Open-Hardware microcontroller board with a python GUI companion
 that allows real-time manipulation and reading of registers
 in the processor. It allows a glimpse into the brain of

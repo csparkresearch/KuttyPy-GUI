@@ -12,6 +12,16 @@
 /* Heavily optimised bootloader that is faster and        */
 /* smaller than the Arduino standard bootloader           */
 /*                                                        */
+/*                                                        */
+/* Enhancements for supporting KuttyPy                    */
+/*   Author : Jithin B.P. <jithinbp@gmail.com>            */
+/*   Supports the kuttypy protocol for Atmega32 but       */
+/*   retains the original arduino bootloader              */
+/*   Also marks pins PC0 and PC1 as SCL pins              */
+/*   Watchdog timer of 1 Second set inside Kpy loop.      */
+/*                                                        */
+/*                                                        */
+/*                                                        */
 /* Enhancements:                                          */
 /*   Fits in 512 bytes, saving 1.5K of code space         */
 /*   Background page erasing speeds up programming        */
