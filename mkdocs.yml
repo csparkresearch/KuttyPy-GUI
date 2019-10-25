@@ -1,7 +1,6 @@
 site_name: KuttyPy Graphical Interface Documentation
 theme: 'material'
 
-
 #theme: 'readthedocs'
 markdown_extensions:
     - toc:
@@ -11,7 +10,6 @@ markdown_extensions:
     - wikilinks
     - codehilite:
         linenums: False
-    #- pymdownx.arithmatex
     - pymdownx.betterem:
         smart_enable: all
     - pymdownx.caret
@@ -35,7 +33,6 @@ extra:
   palette:
       primary: '#087da1'
       accent: '#00a889'
-  logo: 'images/kuttypy.png'
   social:
     - type: 'github'
       link: 'https://github.com/csparkresearch/'
