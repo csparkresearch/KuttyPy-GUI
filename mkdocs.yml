@@ -1,4 +1,4 @@
-site_name: KuttyPy Software Documentation
+site_name: KuttyPy Graphical Interface Documentation
 theme:
     name: 'material'
     logo: 'images/kuttypy.png'
@@ -65,3 +65,4 @@ nav:
       - 'I2C and Sensors': 'programming/i2c.md'
   - C Programming:
       - 'Introduction': 'programming/c.md'
+
