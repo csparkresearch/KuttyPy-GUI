@@ -53,7 +53,7 @@ while(1):
 
 !!! info "Manually controlling the Robotic Arm based on SG90 servos!"
 	<video controls >
-		<source src="../../../images/robot.mp4"
+		<source src="../../images/robot.mp4"
 				type="video/mp4">
 		Sorry, your browser doesn't support embedded videos.
 	</video>
