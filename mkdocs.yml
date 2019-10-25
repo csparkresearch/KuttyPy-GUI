@@ -1,6 +1,9 @@
 site_name: KuttyPy Graphical Interface Documentation
-theme: 'material'
-
+theme:
+    name: 'material'
+    logo: 'images/kuttypy.png'
+    favicon: 'images/favicon.ico'
+ 
 #theme: 'readthedocs'
 markdown_extensions:
     - toc:

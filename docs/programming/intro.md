@@ -1,10 +1,12 @@
 # Writing Programs for KuttyPy
 
-## You have two options
+## Two options are available
 
-+ Run the kuttypy as an accessory for controlling real world events from a Python code running on your laptop. For example, you could use opencv to track an object, and kuttypy to control a robotic arm that interacts with it.
++ Run the kuttypy as an accessory for controlling real world events from a Python code running on your laptop. 
+	
+	For example, you could use opencv to track an object, and kuttypy to control a robotic arm that interacts with it.
 
-+ Write C code, compile it with avr-gcc, upload it to KuttyPy, and use KuttyPy as an independent processor. Example, a burglar alarm where kuttypy monitors a switch hooked up to a door, and enables an alarm when it is triggered.
++ Write C code, compile it with avr-gcc, upload it to KuttyPy, and use KuttyPy as an independent processor. Example, a burglar alarm where kuttypy monitors a switch hooked up to a door, and enables an alarm when it is triggered. skip to [the C code section](../../programming/c) for details.
 
 
 ## Python Code Example
@@ -48,4 +50,13 @@ while(1):
 		kp.PCA9685_set(3, int(m3*x[1]+c3)) # Ay controls rotation
 
 ```
+
+!!! info "Manually controlling the Robotic Arm based on SG90 servos!"
+	<video controls >
+		<source src="../../../images/robot.mp4"
+				type="video/mp4">
+		Sorry, your browser doesn't support embedded videos.
+	</video>
+	The robot is being controlled from the KuttyPy GUI by manually adjusting the PWM outputs of the PCA9685 PWM generator IC.
+	This is super helpful to note which values correspond to which angles of the robot. 
 
