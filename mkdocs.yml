@@ -1,7 +1,6 @@
 site_name: KuttyPy Graphical Interface Documentation
 theme: 'material'
 
-#theme: 'readthedocs'
 markdown_extensions:
     - toc:
         permalink: True
@@ -9,7 +8,7 @@ markdown_extensions:
     - smarty
     - wikilinks
     - codehilite:
-        linenums: False
+        linenums: false
     - pymdownx.betterem:
         smart_enable: all
     - pymdownx.caret
