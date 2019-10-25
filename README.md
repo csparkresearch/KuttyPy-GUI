@@ -1,6 +1,8 @@
 ## KuttyPy Interactive Playground [ Microcontroller Training Utility ]
 
-![Screenshot](/docs/main.gif?raw=true "Recording of the User Interface")
+[READ THE DOCS](https://kuttypy.readthedocs.io/en/latest/)
+
+![Screenshot](/docs/images/main.gif?raw=true "Recording of the User Interface")
 
 ---
 The kuttyPy (/kʊtipʌɪ/) Microcontroller training utility allows live manipulation of the registers in microcontrollers via a connected computer containing its python library.  setReg and getReg function calls act as debugging and monitoring tools, and combined with Python's visualization and analytical utilities, this approach has immense pedagogical potential for beginners to the microcontroller world. 
@@ -26,7 +28,7 @@ The kuttyPy hardware is an ATMEGA32 microcontroller development board developed 
 ## Python library and Graphical utility
 
 ### 7 channel voltmeter [ 0-5000mV without analog frontend ]
-![Screenshot](/docs/voltmeter.gif?raw=true "Voltmeter")
+![Screenshot](/docs/images/voltmeter.gif?raw=true "Voltmeter")
 
 ### Monitor I2C Sensors
 Supports I2C sensors: Luminosity Example. | Video recording
@@ -43,27 +45,29 @@ Supports I2C sensors: Luminosity Example. | Video recording
   + PCA9685 PWM controller
   + MLX90614 Passive IR
 
-![Screenshot](/docs/mpu6050.gif?raw=true "6 DOF inertial measurement unit MPU6050")
+Programming library and examples : [READ THE DOCS](https://kuttypy.readthedocs.io/en/latest/)
+
+![Screenshot](/docs/images/mpu6050.gif?raw=true "6 DOF inertial measurement unit MPU6050")
 
 ### Plotting ADC values using matplotlib
-![Screenshot](/docs/code.gif?raw=true "Recording of the ADC logging example")
+![Screenshot](/docs/images/code.gif?raw=true "Recording of the ADC logging example")
 
-![Screencast](/docs/monitor.gif?raw=true "Monitor your code!")
+![Screencast](/docs/images/monitor.gif?raw=true "Monitor your code!")
 
 Hall Sensor|Servo Motor
 ---|---
-![Screencast](/docs/hall_sensor.webp?raw=true "Hall sensor!") | ![Screencast](/docs/servo_motor.webp?raw=true "Hall sensor!")
+![Screencast](/docs/images/hall_sensor.webp?raw=true "Hall sensor!") | ![Screencast](/docs/images/servo_motor.webp?raw=true "Hall sensor!")
 
 Plug and play various accessories such as this Hall Sensor, & servo motor.
 
 ### Simple blink.py example
-![Screenshot](/docs/blink.gif?raw=true "Write Python code to blink all of PORT D")
+![Screenshot](/docs/images/blink.gif?raw=true "Write Python code to blink all of PORT D")
 
-![Screencast](/docs/monitor.gif?raw=true "Monitor your code!")
+![Screencast](/docs/images/monitor.gif?raw=true "Monitor your code!")
 
 Monitor your code's activity while it executes
 
-![Screencast](/docs/custom_registers.gif?raw=true "Add Register widgets, twiddle bits, and see what happens!")
+![Screencast](/docs/images/custom_registers.gif?raw=true "Add Register widgets, twiddle bits, and see what happens!")
 
 Add custom register blocks, twiddle bits, and observe!
 In this demo, the ADC is read by first setting the bits in the ADCSRA(control and status register), then reading back ADCL(8LSB)+ADCH(2MSB), and also checking the new status of ADCSRA after the operation.
@@ -74,7 +78,7 @@ In this demo, the ADC is read by first setting the bits in the ADCSRA(control an
 ---
 The KuttyPy monitor code is part of the bootloader. This allows users to upload their own Hex files without losing the training utility features.
 
-![App Switching](/docs/switch.gif?raw=true "App Switching")
+![App Switching](/docs/images/switch.gif?raw=true "App Switching")
 
 This example shows how to skip back and forth to an LED scanning code (which also prints letters to the serial port) written in C and uploaded.
 
@@ -84,7 +88,7 @@ In the animation, after fiddling a little with the PWM controls on the monitor, 
 
 The user can switch back to the monitoring utility in a snap!
 
-![Screencast](/docs/pov_display.webp?raw=true "POV display!")
+![Screencast](/docs/images/pov_display.webp?raw=true "POV display!")
 
 A persistence of vision display made with C code! Write text in thin air using 8 LEDs on PORTB.
 
