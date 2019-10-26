@@ -4,15 +4,15 @@
 
 import time
 #from kuttyPy import *
-setReg(DDRC,1)
-setReg(ADMUX, (1<<6) | 5) #REF_AVCC | Channel 5
+setReg('DDRC',1)
+setReg('ADMUX', (1<<6) | 5) #REF_AVCC | Channel 5
 for a in range(50): 
-    setReg(ADCSRA, 196)
-    cl = getReg(ADCL)
-    ch = getReg(ADCH)
+    setReg('ADCSRA', 196)
+    cl = getReg('ADCL')
+    ch = getReg('ADCH')
     val = (ch<<8)|cl
-    if(val>512):setReg(PORTC,1)
-    else: setReg(PORTC,0)
+    if(val>512):setReg('PORTC',1)
+    else: setReg('PORTC',0)
     print(val)
     time.sleep(0.1)
     

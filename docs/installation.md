@@ -1,3 +1,24 @@
+
+## Using PIP . easiest!
+
+### Windows
+
+Python3 must be installed. kuttyPy package will install other dependencies such as PyQt5, qtconsole, numpy, scipy, pyqtgraph etc
+
+```
+py -3 -m pip install kuttyPy
+kuttypy
+```
+
+### Ubuntu
+
+```
+pip3 install kuttyPy
+kuttypy
+```
+
+---
+
 ## On Ubuntu:
 ### Installing from source
 
@@ -17,6 +38,8 @@
 	this version may not be up to date because this is very recent work, and several changes were made over the past few months
 
 ## Installing on windows.
+
++ The best option is to use pip as shown in the first section.
 + This code can be run from source, provided python3 and pyqt5 are installed.
 + [Download Bundled Installer](https://drive.google.com/uc?export=download&id=1giJuDNIql8X5oaIcOLFACXD05-hmkBAy)
 
