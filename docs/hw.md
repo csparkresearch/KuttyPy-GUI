@@ -13,7 +13,7 @@ The schematic is relatively simple. It contains
 ![Screenshot](images/schema.png "Schematic")
 
 ## Layout
-![Screenshot](images/layout.png)
+![Screenshot](images/layout.jpg)
 
 ## Pinout diagram
 

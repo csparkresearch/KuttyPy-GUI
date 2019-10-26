@@ -4,10 +4,12 @@
 
 import os,sys,time,re,traceback,platform
 from utilities.Qt import QtGui, QtCore, QtWidgets
+import KuttyPyLib
 
 from utilities.templates import ui_layout as layout
 from utilities import dio,REGISTERS,uploader
-import constants,inspect
+import constants
+import inspect
 
 
 from functools import partial
@@ -829,12 +831,10 @@ def common_paths():
 	return path
 
 
-
-
-if __name__ == "__main__":
+def run():
+	global path, app, myapp
 	path = common_paths()
 	app = QtWidgets.QApplication(sys.argv)
-	import KuttyPyLib
 
 	myapp = AppWindow(app=app, path=path)
 	myapp.show()
@@ -849,5 +849,7 @@ if __name__ == "__main__":
 	app.deleteLater()
 	sys.exit(r)
 
+if __name__ == "__main__":
+	run()
 
 

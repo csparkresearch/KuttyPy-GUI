@@ -1,9 +1,9 @@
 from .Qt import QtGui,QtCore,QtWidgets
-from utilities.templates import ui_dio,ui_dio_pwm,ui_dio_adc,ui_dio_adcLog,ui_dio_sensor,ui_regvals,ui_dio_cntr,ui_regedit,ui_dio_control
-from utilities.templates import ui_dio_robot,ui_dio_stepper,ui_dummyio
+from .templates import ui_dio,ui_dio_pwm,ui_dio_adc,ui_dio_adcLog,ui_dio_sensor,ui_regvals,ui_dio_cntr,ui_regedit,ui_dio_control
+from .templates import ui_dio_robot,ui_dio_stepper,ui_dummyio
 
 from . import REGISTERS
-from utilities.templates.gauge import Gauge
+from .templates.gauge import Gauge
 import numpy as np
 from functools import partial
 from collections import OrderedDict

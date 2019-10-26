@@ -1,3 +1,7 @@
+.md-typeset h1,
+.md-typeset h2 {
+  font-weight: bold;
+}
 
 .superfences-tabs .highlight {
   background: #ddd;
