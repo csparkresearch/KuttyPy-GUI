@@ -54,6 +54,7 @@ sed -i "s/import constants/from . import constants/g" kuttyPyGui/KuttyPyNano.py
 
 sed -i "s/^from utilities/from .utilities/g" kuttyPyGui/KuttyPyLib.py
 
+#sudo python3 setup.py install
 
 python3 setup.py sdist bdist_wheel
 python3 -m twine upload dist/*

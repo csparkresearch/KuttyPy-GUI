@@ -64,6 +64,8 @@ nav:
       - 'Basic I/O': 'programming/basics.md'
       - 'I2C and Sensors': 'programming/i2c.md'
   - Programming - C: 'programming/c.md'
+  - Projects:
+      - 'R2R DAC Wavegen': 'programming/r2r_wavegen.md'
   - KuttyPy Hardware:
       - 'Design': 'hw.md'
       - 'Firmware': 'boot.md'

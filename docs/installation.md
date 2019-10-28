@@ -1,5 +1,5 @@
 
-## Using PIP . easiest!
+## Using PIP 
 
 ### Windows
 
@@ -12,10 +12,30 @@ kuttypy
 
 ### Ubuntu
 
+run as superuser in order to install the `kuttypy` library, and application entry point in /usr/bin/
 ```
-pip3 install kuttyPy
+sudo pip3 install kuttyPy
 kuttypy
 ```
+
+!!!warning "setting permissions"
+	Accessing the hardware on linux requires certain permissions to be set.
+	Due to an apparent bug with pip3, the install script may fail to do this.
+
+	As a workaround, you can run the program as root to verify the permissions issue
+	```
+	sudo kuttypy
+	```
+	For a more permanent fix for regular users, please download and execute this
+	[post installation script](../assets/postinst.sh)
+	
+	```bash
+	chmod +x postinst.sh
+	sudo ./postinst.sh
+	kuttypy
+	```
+
+	*If this is too hard, please install the deb file linked in the following section*
 
 ---
 
