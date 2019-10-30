@@ -1,6 +1,6 @@
 
 ## Using PIP 
-
+[![PyPI version](https://badge.fury.io/py/kuttyPy.svg)](https://badge.fury.io/py/kuttyPy)
 ### Windows
 
 Python3 must be installed. kuttyPy package will install other dependencies such as PyQt5, qtconsole, numpy, scipy, pyqtgraph etc

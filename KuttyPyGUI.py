@@ -16,8 +16,6 @@ from functools import partial
 from collections import OrderedDict
 
 
-
-
 class myTimer():
 	def __init__(self,interval):
 		self.interval = interval
@@ -703,8 +701,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 						self.setWindowTitle('Error : Device Disconnected')
 						QtWidgets.QMessageBox.warning(self, 'Connection Error', 'Device Disconnected. Please check the connections')
 						try:
-							self.p.fd.close()
-							self.p.portname = None
+							self.p.close()
 						except:pass
 						self.p.connected = False
 						self.setWindowTitle('KuttyPy Interactive Console [ Hardware not detected ]')

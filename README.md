@@ -1,7 +1,7 @@
 ## KuttyPy Interactive Playground [ Microcontroller Training Utility ]
 
+[![PyPI version](https://badge.fury.io/py/kuttyPy.svg)](https://badge.fury.io/py/kuttyPy)
 [![Documentation Status](https://readthedocs.org/projects/kuttypy/badge/?version=latest)](https://kuttypy.readthedocs.io/en/latest/?badge=latest)
-[READ THE DOCS](https://kuttypy.readthedocs.io/en/latest/)
 
 ![Screenshot](/docs/images/main.gif?raw=true "Recording of the User Interface")
 

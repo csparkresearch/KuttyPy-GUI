@@ -98,6 +98,7 @@ class KUTTYPY:
 	REGSTATES = {} #Store the last written state of the registers
 	SPECIALS = REGISTERS.VERSIONS[99]['SPECIALS']
 	nano = False #check if atmega328p is found instead of 32
+	blockingSocket = None
 	def __init__(self,**kwargs):
 		self.sensors={
 			0x39:{
@@ -323,29 +324,37 @@ class KUTTYPY:
 		'''
 
 		try:
-			fd = serial.Serial(portname, self.BAUD, timeout = 0.5)
-			if fd.isOpen():
-				#try to lock down the serial port
-				if 'inux' in platform.system(): #Linux based system
-					import fcntl
-					try:
-						fcntl.flock(fd.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
-						#print ('locked access to ',portname,fd.fileno())
-					except IOError:
-						#print ('Port {0} is busy'.format(portname))
+			if 'inux' in platform.system(): #Linux based system
+				try:
+					#try to lock down the serial port
+					import socket
+					self.blockingSocket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+					self.blockingSocket.bind('\0eyesj2%s'%portname) 
+					self.blockingSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+					fd = serial.Serial(portname, self.BAUD, timeout = 0.5)
+					if not fd.isOpen():
 						return None,'',False
+				except socket.error as e:
+					#print ('Port {0} is busy'.format(portname))
+					return None,'',False
+					#raise RuntimeError("Another program is using %s (%d)" % (portname) )
 
-				else:
-					pass
-					#print ('not on linux',platform.system())
-
-				if(fd.in_waiting):
-					fd.flush()
-					fd.readall()
-
+				'''
+				import fcntl
+				try:
+					fcntl.flock(fd.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+					#print ('locked access to ',portname,fd.fileno())
+				except IOError:
+					#print ('Port {0} is busy'.format(portname))
+					return None,'',False
+				'''
 			else:
-				#print('unable to open',portname)
-				return None,'',False
+				fd = serial.Serial(portname, self.BAUD, timeout = 0.5)
+				#print ('not on linux',platform.system())
+
+			if(fd.in_waiting):
+				fd.flush()
+				fd.readall()
 
 		except serial.SerialException as ex:
 			print ('Port {0} is unavailable: {1}'.format(portname, ex) )
@@ -362,6 +371,14 @@ class KUTTYPY:
 		print ('version check failed',len(version),ord(version))
 		return None,'',False
 		
+	def close(self):
+		self.fd.close()
+		self.portname = None
+		self.connected = False
+		if self.blockingSocket:
+			self.blockingSocket.shutdown(1)
+			self.blockingSocket.close()
+			self.blockingSocket = None
 
 	def __sendByte__(self,val):
 		"""
