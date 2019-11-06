@@ -52,6 +52,8 @@ kuttypy
 + use gdebi to install it.
 
 ### Installing from the Ubuntu repository
+![Ubuntu package](https://img.shields.io/ubuntu/v/kuttypy?color=darkgreen&style=plastic)
+
 + sudo apt install kuttypy
 
 !!! warning "not up to date"

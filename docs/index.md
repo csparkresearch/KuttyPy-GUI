@@ -15,7 +15,7 @@ and analytical utilities, this approach has immense pedagogical potential for be
 ```python
 from kuttyPy import * #Import the library. also automatically connects to any available kuttypy hardware.
 setReg('DDRD',160) #0b10100000 PD7(BLUE LED) and PD5(GREEN LED) made output type
-setReg('PORD',160) # PD5 and PD7 set to HIGH. Both LEDs start glowing
+setReg('PORTD',160) # PD5 and PD7 set to HIGH. Both LEDs start glowing
 ```
 
 !!! info "The KuttyPy ATMEGA32 hardware"
@@ -58,7 +58,7 @@ to access sensors, ADC etc.
 ```python
 from kuttyPy import * #Import the library. also automatically connects to any available kuttypy hardware.
 setReg('DDRD',160) #0b10100000 PD7(BLUE LED) and PD5(GREEN LED) made output type
-setReg('PORD',160) # PD5 and PD7 set to HIGH. Both LEDs start glowing
+setReg('PORTD',160) # PD5 and PD7 set to HIGH. Both LEDs start glowing
 ```
 
 ## Monitor I2C Sensors

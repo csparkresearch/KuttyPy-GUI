@@ -1,3 +1,6 @@
 pyserial
 numpy
+scipy
+pyqt5
+pyqtgraph
 qtconsole

@@ -47,7 +47,7 @@ def make_rules():
 
 class InstallCommand(install):
 	def run(self):
-		print('NOOOOOOOOOOOOO')
+		print('works?')
 		install.run(self)
 		make_rules()
 
