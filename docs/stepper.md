@@ -30,13 +30,4 @@ LEDs are connected to PB0-PB3 to show the stepping signal outputs
 ## Applications
 
 - Move a light sensor (TSL2561) along a diffraction pattern, and record the intensity profile
-- Rotate the analyzer in a Malus's law experiment, and record the intensity variation which corresponds to IoCos^2(Theta)$ 
-
-
-!!! note
-	results from a Malus Law experiment carried out using a TSL2561 Luminosity sensor, a laser diode, two pieces of polarizers
-	ripped out of an LCD screen, and a hollow shaft stepper motor.
-	![Screenshot](images/malus.png)
-	The analyzer was rotated step by step, and light intensity was recorded using the light sensor. It confirms maximum transmission
-	when both polarizer and analyzer are parallel, and minimum when orthogonal. It does not go to exactly zero because ambient light 
-	was not fully blocked by leveraging a dark room. However, curve fitting showed that the shape was sinusoidal (cos^(theta))
+- Rotate the analyzer in a [Malus's law experiment](../malus), and record the intensity variation which corresponds to IoCos^2(Theta)$ 

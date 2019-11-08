@@ -10,6 +10,7 @@ markdown_extensions:
         permalink: True
     - admonition
     - smarty
+    - attr_list
     - wikilinks
     - codehilite:
         linenums: False
@@ -55,6 +56,7 @@ nav:
   - Getting Started:
       - 'Installation': 'installation.md'
       - 'Software': 'software.md'
+  - I/O and Peripherals:
       - 'Basic I/O': 'io.md'
       - '8 Channel Voltmeter': 'adc.md'
       - 'Stepper Motors': 'stepper.md'
@@ -66,6 +68,7 @@ nav:
   - Programming - C: 'programming/c.md'
   - Projects:
       - 'R2R DAC Wavegen': 'programming/r2r_wavegen.md'
+      - 'Optics: Malus Law': 'malus.md'
   - KuttyPy Hardware:
       - 'Design': 'hw.md'
       - 'Firmware': 'boot.md'

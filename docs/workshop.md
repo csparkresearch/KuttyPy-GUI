@@ -3,14 +3,14 @@
 `Tutorial for learning to use KuttyPy in a 2 hour workshop session`
 
 !!! info ""
-	![Screenshot](images/kuttypy.jpg)
+	![Screenshot](images/kuttypy.jpg){: style="align:center;max-width:400px"}
 
 ## Software Installation 
 
 Given the paucity of time, the fastest ways for installing the toolchain on different operating systems are listed. Click to expand.
 
 ??? abstract "Windows with Python3 installed"
-    * Python3 must be installed, and `pip` should be accessible.
+    * [Python3](https://www.python.org/ftp/python/3.8.0/python-3.8.0-amd64.exe) must be installed, and `pip` should be accessible.
     * Open a command prompt, and use pip3 to install the KuttyPy package
     ```
     py -3 -m pip install KuttyPy
@@ -19,6 +19,17 @@ Given the paucity of time, the fastest ways for installing the toolchain on diff
     * You will now be able to launch `kuttypy` from the prompt, and import the `kuttyPy` library from any Python script.
     * If you wish to compile C code and upload to the KuttyPy hardware, winavr must be installed, and `avr-gcc` must be accessible from a command prompt.
         * Download and install `winavr` from [winavr.sourceforge.net](https://sourceforge.net/projects/winavr/files/WinAVR/20100110/WinAVR-20100110-install.exe/download)
+
+??? warning "Windows bundled installer"
+    * The bundled installer includes Python3 and dependencies and KuttyPy software. Also includes winavr, usb driver.
+
+	[Download Bundled Installer](https://drive.google.com/uc?export=download&id=1giJuDNIql8X5oaIcOLFACXD05-hmkBAy)
+
+	!!! error "Made with Pyinstaller: Python will not be accessible globally"
+		Since the installer was made using PyInstaller, Python3 will not be accessible globally, and you will be limited to the ipython console within the KuttyPy software.
+		A better option would be to use pip to fetch PyQT5, qtconsole, pyserial, pyqtgraph, scipy , and KuttyPy . Winavr and the driver can be installed separately. Refer to the previous section.
+
+
 
 ??? abstract "Ubuntu"
     * Download the [deb file from here](../assets/KuttyPy-1.0.6.deb)
@@ -32,7 +43,7 @@ Given the paucity of time, the fastest ways for installing the toolchain on diff
     ```
     It is also present in the applications menu as `KuttyPy GUI` .
     
-    * You should see a graphical interface which looks like this
+    * You should see a graphical interface which looks like [this](#kuttypy-software)
     
 ??? abstract "Using PIP on other OSes"
     * Python3 must be installed
@@ -74,13 +85,13 @@ Given the paucity of time, the fastest ways for installing the toolchain on diff
 ## KuttyPy Software
 
 ???+ success "Screenshot of the Graphical interface after launching `kuttypy` "
-    ![zoomify](../images/software.png)
+    ![zoomify](../images/main.gif)
     The title will show `Hardware not Detected` if not connected, or if a permissions issue exists
 
 ### Explore the functions
 
 * You have already noticed that the User Interface(UI) resembles the kuttyPy board. 
-* It has four ports `PORTA, B , C, D` with 8 pins each, and pin has a row representing it: ![](../images/PD5.png)
+* It has four ports `PORTA, B , C, D` with 8 pins each, and each pin has a row representing it: ![](../images/PD5.png)
 ---
 * Each Pin is configured as an input by default, and the RED coloured box next to it indicates the input is `LOW` or near 0 Volts.
     * If the input is `HIGH`, which can be accomplished by connecting it to 5V, or enabling the `pull-up` checkbox, the RED box will turn to `GREEN`
@@ -101,8 +112,8 @@ Given the paucity of time, the fastest ways for installing the toolchain on diff
 * [I2C Sensors](../sensors) for a range of physical parameters such as pressure, acceleration etc can be connected using PC0(SCL), and PC1(SDA).
 
 !!! tip "Stuff seems to be working?"
-    Now that we have skimmed over the basics of the graphical utility's `playground`, it would appear that the board itself is capable
-    of controlling real-world events. For further details on the hardware schematic, [visit the page](../hw/) .
+    Now that we have skimmed over the basics of the graphical utility's `playground`, it would appear that the board is capable
+    of controlling real-world events from Python. For further details on the hardware schematic, [visit the page](../hw/) .
     
     The pinout diagram will be very useful although the board itself is well labelled. The ATMEGA32 datasheet will be handy as well.
 
@@ -112,6 +123,8 @@ Given the paucity of time, the fastest ways for installing the toolchain on diff
 
 Programs executing on Microcontrollers use [special function registers(SFRs)](../programming/basics) to manipulate the hardware(Inputs, outputs, ADCs etc). 
 These are basically predefined variables, where each bit is associated with a hardware change.
+
+![](../images/binary.png){: style="max-width:600px"}
 
 setReg and getReg Python function calls in the kuttyPy library can be used to read and write these registers.
 Here's an example. Run it in a python3 shell. 
@@ -124,5 +137,31 @@ setReg('PORTD',160) # PD5 and PD7 set to HIGH. Both LEDs start glowing. Colour l
 
 For detailed examples, visit the [python coding page](../programming/intro).
 
-We will continue from the [I/O examples](../programming/basics) page
+## Introduction to Registers
+
+Skip to the [I/O examples](../programming/basics) page which will cover the following topics:
+
+### Turning on an LED connected to any PIN
+
+### Reading a voltage from an ADC enabled PIN
+
+### Plotting with Matplotlib
+
+### Using the iPython console
+
+## Reading from I2C sensors
+
+[Skip to the relevant page](../sensors/)
+
+* Use the graphical interface to scan for sensors and view readings
+* Check out functionality, and explore potential applications.
+* Write Python code to read data from an accelerometer.
+
+## Basic C code
+
+All the register manipulation commands issued by Python running on your laptop are interpreted by a bootloader firmware
+executing on the microcontroller. In addition to this, you can also compile C code, and flash it to the remaining storage space
+on the microcontroller, thereby making it independent and capable of functioning from any 5V power supply.
+
+[Relevant section](../programming/c)
 
