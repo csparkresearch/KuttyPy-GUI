@@ -28,3 +28,4 @@ Luminosity sensor(TSL2561) Example. | Video recording
 ---|---
 ![sensor](https://user-images.githubusercontent.com/19327143/52988950-5c64f580-3427-11e9-8516-d6708ef2532b.gif) | ![ezgif com-optimize](https://user-images.githubusercontent.com/19327143/52989158-2bd18b80-3428-11e9-9b26-21f21f8fe99a.gif)
 
+[Project Example with TSL2561 light sensor: Malus Law](../malus)
