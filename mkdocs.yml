@@ -72,5 +72,6 @@ nav:
   - KuttyPy Hardware:
       - 'Design': 'hw.md'
       - 'Firmware': 'boot.md'
+      - 'Enclosures': 'enclosures.md'
   - 2-Hour Tutorial: 'workshop.md'
 

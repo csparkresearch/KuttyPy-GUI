@@ -38,3 +38,5 @@ avrdude -b 38400 -P /dev/ttyUSB0 -pm328p -c arduino -U flash:w:blink.hex  #Verif
 The kuttyPy hardware is closely related to the microhope project, and code examples from Microhope can also be
 compiled and uploaded for kuttyPy. However, since the bootloaders are different, the upload protocol 'arduino'
 must be used.
+
+[List of included C code](../c_examples)
