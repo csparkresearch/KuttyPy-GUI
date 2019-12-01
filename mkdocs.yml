@@ -76,4 +76,5 @@ nav:
       - 'Firmware': 'boot.md'
       - 'Enclosures': 'enclosures.md'
   - 2-Hour Tutorial: 'workshop.md'
+  - Arduino Boards : 'boards.md'
 

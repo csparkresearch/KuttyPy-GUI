@@ -1,0 +1,13 @@
+<RCC>
+  <qresource prefix="control">
+    <file>kuttypy.png</file>
+    <file>play.svg</file>
+    <file>plus.svg</file>
+    <file>minus.svg</file>
+    <file>settings.svg</file>
+    <file>reset.svg</file>
+    <file>saveall.png</file>
+    <file>stop.svg</file>
+    <file>unopinout.png</file>
+  </qresource>
+</RCC>

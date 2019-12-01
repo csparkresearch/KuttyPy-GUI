@@ -37,8 +37,7 @@ cp ../examples/*.c kuttyPyGui/examples/
 cp ../examples/atmega32/*.py kuttyPyGui/examples/atmega32/
 cp ../utilities/*.py kuttyPyGui/utilities/
 cp ../utilities/templates/ui_*.py kuttyPyGui/utilities/templates/
-cp ../utilities/templates/res_rc.py kuttyPyGui/utilities/templates/
-cp ../utilities/templates/nano_rc.py kuttyPyGui/utilities/templates/
+cp ../utilities/templates/*_rc.py kuttyPyGui/utilities/templates/
 cp ../utilities/templates/gauge.py kuttyPyGui/utilities/templates/
 cp -R ../utilities/themes kuttyPyGui/utilities/
 

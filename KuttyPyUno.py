@@ -4,11 +4,11 @@
 
 import os,sys,time,re,traceback,platform,inspect
 from utilities.Qt import QtGui, QtCore, QtWidgets
-import KuttyPyLibNano
+import KuttyPyLibUno
 
-from utilities.templates import ui_layoutnano as layout
+from utilities.templates import ui_layoutuno as layout
 from utilities import dio,uploader
-from utilities import REGISTERS_NANO as REGISTERS
+from utilities import REGISTERS_UNO as REGISTERS
 import constants
 
 
@@ -124,7 +124,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 
 		
 		#Auto-Detector
-		self.shortlist=KuttyPyLibNano.getFreePorts()
+		self.shortlist=KuttyPyLibUno.getFreePorts()
 
 	def newRegister(self):
 		reg = dio.REGEDIT(self.commandQ)
@@ -139,16 +139,33 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		self.registers.append(regItem)
 
 	def addPins(self):
-		for a in ['D','B']:
-			self.btns[a] = dio.REGVALS(a)
-			self.leftlayout.addWidget(self.btns[a])
+		'''
+		This function adds pins in the right order. this should be moved to a configuration file!
+		'''
 		self.btns['C'] = dio.REGVALS('C')
-		self.rightlayout.addWidget(self.btns['C'])
-		for name in ['PD1','PD0','PC6','GND','PD2','PD3','PD4','PD5','PD6','PD7','PB0','PB1','PB2','PB3','PB4']: #left dock
+		self.leftlayout.addWidget(self.btns['C'])
+		s = QtWidgets.QSpacerItem(20,250,QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+		self.leftlayout.addItem(s)
+
+		for name in ['PC0','PC1','PC2','PC3','PC4','PC5']: #left dock
 			checkbox = dio.widget(name,self.commandQ,extra = self.SPECIALS.get(name,''))
 			self.leftlayout.addWidget(checkbox)
 			self.btns[name] = checkbox
-		for name in ['VIN','GND','PC6','5V','ADC7','ADC6','SCL','SDA','PC3','PC2','PC1','PC0','AREF','3V3','PB5']: #left dock
+
+		self.btns['B'] = dio.REGVALS('B')
+		self.rightlayout.addWidget(self.btns['B'])
+
+		for name in ['PB5','PB4','PB3','PB2','PB1','PB0']: #right dock
+			checkbox = dio.widget(name,self.commandQ,extra = self.SPECIALS.get(name,''))
+			self.rightlayout.addWidget(checkbox)
+			self.btns[name] = checkbox
+
+		s = QtWidgets.QSpacerItem(20,20,QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+		self.rightlayout.addItem(s)
+
+		self.btns['D'] = dio.REGVALS('D')
+		self.rightlayout.addWidget(self.btns['D'])
+		for name in ['PD7','PD6','PD5','PD4','PD3','PD2','PD1','PD0']: #right dock
 			checkbox = dio.widget(name,self.commandQ,extra = self.SPECIALS.get(name,''))
 			self.rightlayout.addWidget(checkbox)
 			self.btns[name] = checkbox
@@ -505,7 +522,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 					import subprocess
 					fname = '.'.join(self.fname.split('.')[:-1])
 					cmd = 'avr-gcc -Wall -O2 -mmcu=%s -o "%s" "%s"' %('atmega328p',fname,self.fname)
-					self.logThis.emit('''<span style="color:green;">Compiling for Atmega328p (Nano)</span>''')
+					self.logThis.emit('''<span style="color:green;">Compiling for Atmega328p (Uno)</span>''')
 					print(cmd)
 					res = subprocess.getstatusoutput(cmd)
 					if res[0] != 0:
@@ -587,9 +604,9 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 			try:self.p.fd.close()
 			except:pass
 		if port:
-			self.p = KuttyPyLibNano.connect(port = port)
+			self.p = KuttyPyLibUno.connect(port = port)
 		else:
-			self.p = KuttyPyLibNano.connect(autoscan=True)
+			self.p = KuttyPyLibUno.connect(autoscan=True)
 		if self.p.connected:
 			self.userApplication.setChecked(False)
 			self.setWindowTitle('KuttyPy Interactive Console [{0:s}]'.format(self.p.portname))
@@ -676,7 +693,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		self.timer.setInterval([100,20,5][index])
 
 	def locateDevices(self):
-		try:L = KuttyPyLibNano.getFreePorts(self.p.portname)
+		try:L = KuttyPyLibUno.getFreePorts(self.p.portname)
 		except Exception as e:print(e)
 		total = len(L)
 		menuChanged = False
