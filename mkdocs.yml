@@ -48,9 +48,11 @@ extra:
 repo_name: 'csparkresearch/kuttypy-gui'
 repo_url: 'https://github.com/csparkresearch/kuttypy-gui'
 copyright: 'Copyright © 2019 <a href="https://csparkresearch.in">CSpark Research</a>'
-#google_analytics:
-#  - 'UA-49052879-1'
-#  - 'auto'
+
+google_analytics:
+  - 'UA-67472997-4'
+  - 'auto'
+
 nav:
   - Home: 'index.md'
   - Getting Started:

@@ -184,7 +184,7 @@ from kuttyPy import *
 BMP280_init() #Initialize the sensor
 x = BMP280_all() #Fetch readings
 if x is not None:
-	print('Pressure = %d, Temperature = %d'%(x[0],x[1]))
+	print('Pressure = %.2f, Temperature = %.2f'%(x[0],x[1]))
 ```
 
 
@@ -208,7 +208,7 @@ from kuttyPy import *
 MS5611_init() #Initialize the sensor
 x = MS5611_all() #Fetch readings
 if x is not None:
-	print('Pressure = %d, Temperature = %d'%(x[0],x[1]))
+	print('Pressure = %.2f, Temperature = %.2f'%(x[0],x[1]))
 ```
 
 ### TCS34725 RGB color sensor

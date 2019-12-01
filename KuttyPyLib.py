@@ -40,7 +40,7 @@ def listPorts():
 		return available
 	elif system_name == "Darwin":
 		# Mac
-		return glob.glob('/dev/tty*') + glob.glob('/dev/cu*')
+		return glob.glob('/dev/tty.usb*') + glob.glob('/dev/cu*')
 	else:
 		# Assume Linux or something else
 		return glob.glob('/dev/ttyACM*') + glob.glob('/dev/ttyUSB*')
@@ -1192,11 +1192,12 @@ if __name__ == '__main__':
 	if not a.connected:
 		sys.exit(1)
 	time.sleep(0.01)
+	a.setReg('DDRC',3)
+	a.setReg('PORTC',2)
+	time.sleep(1)
+	a.setReg('PORTC',3)
+	a.setReg('DDRC',0)
 	print(a.I2CScan())
-	a.MPU6050_init()
-	print(a.MPU6050_all())
-	a.writeEEPROM('abcdef')
-	print(a.readEEPROM(5))
 	'''
 	a.PCA9685_init()
 	a.PCA9685_set(1,650)
