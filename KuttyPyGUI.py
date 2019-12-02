@@ -39,7 +39,9 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 	ports = ['A','B','C','D']
 	logThis = QtCore.pyqtSignal(str)
 	logThisPlain = QtCore.pyqtSignal(bytes)
-	serialGaugeSignal = QtCore.pyqtSignal(int)
+	serialGaugeSignal = QtCore.pyqtSignal(bytes)
+	serialGaugeConvert = 'bytes'
+	serialStream = b''
 	def __init__(self, parent=None,**kwargs):
 		super(AppWindow, self).__init__(parent)
 		self.setupUi(self)
@@ -112,7 +114,13 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		serialgaugeoptions = {'name':'Serial Monitor', 'init':print, 'read':None,
 				'fields':['Value'],
 				'min':[0],
-				'max':[255]}
+				'max':[1000],
+				'config':[{
+					'name':'Data Type',
+					'options':['byte','ASCII'],
+					'function':self.configSerialGauge
+					}
+			]}
 		self.serialGauge = dio.DIOSENSOR(self,serialgaugeoptions)
 		
 		self.startTime = time.time()
@@ -307,8 +315,27 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		self.log.moveCursor(QtGui.QTextCursor.End)
 		self.log.insertPlainText(txt.decode('ascii'))
 
-	def setSerialgauge(self,val):
-		self.serialGauge.setValue([val])
+	def configSerialGauge(self,val):
+		if val == 0: #'byte' 
+			print('Byte Mode(0-255)')
+			for a in self.serialGauge.gauges:
+				a.set_MaxValue(255)
+			self.serialGaugeConvert = 'bytes'
+		if val == 1: #'ascii' 
+			print('ASCII(0-10000)')
+			for a in self.serialGauge.gauges:
+				a.set_MaxValue(10000)
+			self.serialGaugeConvert = 'ascii'
+
+	def setSerialgauge(self,vals):
+		if self.serialGaugeConvert == 'bytes':
+			self.serialGauge.setValue([vals[0]])
+		elif self.serialGaugeConvert == 'ascii':
+			self.serialStream += vals
+			while b'\n' in self.serialStream:
+				val,_,self.serialStream = self.serialStream.partition(b'\n')
+				print(int(val))
+				self.serialGauge.setValue([int(val)])
 
 	def genLog(self):
 		html='''<table border="1" align="center" cellpadding="1" cellspacing="0" style="font-family:arial,helvetica,sans-serif;font-size:9pt;">
@@ -343,7 +370,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		if self.userHexRunning:
 			t = self.p.fd.read(self.p.fd.in_waiting)
 			if len(t):
-				self.serialGaugeSignal.emit(t[0])
+				self.serialGaugeSignal.emit(t)
 				self.logThisPlain.emit(t)
 			return
 		
