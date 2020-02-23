@@ -1,7 +1,7 @@
 # 8 Channel 10 bit ADC
 ![Screenshot](images/voltmeter.gif?raw=true "Voltmeter")
 
-PA0 - PA7 are ADC enabled pins on the ATMEGA32, and the graphical utility is capable of monitoring these. 
+PA0 - PA7 are ADC enabled pins on the ATMEGA32, and the graphical utility is capable of monitoring these.
 This makes it easy to record expected input values from analog sensors before hard-coding them into C programs.
 
 <video controls width="600">
@@ -26,13 +26,13 @@ reads a voltage value from the specified channel, and returns it
 ```
 
 ```python tab="data logger example with matplotlib"  hl_lines="1"
-# Read values from Analog to Digital convertor(ADC) channel 5 (PA5), and plot them 
+# Read values from Analog to Digital converter(ADC) channel 5 (PA5), and plot them
 import time
 from kuttyPy import *
 from matplotlib import pyplot as plt
 
 setReg('ADMUX', (1<<6) | 5) #REF_AVCC | Channel 5
-for a in range(50): 
+for a in range(50):
     setReg('ADCSRA', 196)
     cl = getReg('ADCL')
     ch = getReg('ADCH')

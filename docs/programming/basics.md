@@ -2,7 +2,7 @@
 
 Features of microcontrollers ranging from I/O operations to ADC reading and I2C communications are all configured by toggling and reading bits in variables called Special Function Registers (SFR)
 
-For example, in the ATMEGA32 microcontroller, the DDRB register (Data direction Register for B pins PB0 - PB7) , is used to set which pins on Port B are output, and which are input. This can be done by writing an 8-bit number(0 - 255) to DDRB , where each bit controls one of the pins from PB0 to PB7. 
+For example, in the ATMEGA32 microcontroller, the DDRB register (Data direction Register for B pins PB0 - PB7) , is used to set which pins on Port B are output, and which are input. This can be done by writing an 8-bit number(0 - 255) to DDRB , where each bit controls one of the pins from PB0 to PB7.
 
 DDRB = 255 (binary 11111111) implies all pins will be output type. DDRB = 160 (101000000) implies PB7 and PB5 will be output type, and rest will be input.
 
@@ -25,7 +25,7 @@ setReg('PORTB', 8) #PB3 to 5 Volt supply. RED LED turns on
 #include <avr/io.h>
 int main (void) {
   DDRB = 8;		// Data Direction Register for port B
-  PORTB = 8;    // PB3 HIGH	
+  PORTB = 8;    // PB3 HIGH
   }
 return 0;
 }
@@ -57,7 +57,7 @@ reads a value frm a REGISTER defined in the datasheet of the processor
 ```
 
 ```python tab="example"  hl_lines="1"
-# Read value from Analog to Digital convertor(ADC) channel 0 (PA0) 
+# Read value from Analog to Digital converter(ADC) channel 0 (PA0)
 from kuttyPy import *
 setReg('ADMUX', (1<<6) | 0) #REF_AVCC | Channel 0
 setReg('ADCSRA', 196)  #Set ADC conversion speeds, and enable it. Refer to the ATMEGA32 datasheet for details.
@@ -67,7 +67,7 @@ print( (ch<<8)|cl )  # Combine the two to make a 10 bit number, and print to the
 ```
 
 
-You can also twiddle bits on various registers inside the "Registers" tab to watch 
+You can also twiddle bits on various registers inside the "Registers" tab to watch
 changes in real time. In the animation below, the ADC is being continuously read.
 ![Screencast](../images/custom_registers.gif?raw=true "Add Register widgets, twiddle bits, and see what happens!")
 
@@ -82,13 +82,13 @@ reads a voltage value from the specified channel, and returns it
 ```
 
 ```python tab="data logger example with matplotlib"  hl_lines="1"
-# Read values from Analog to Digital convertor(ADC) channel 5 (PA5), and plot them 
+# Read values from Analog to Digital converter(ADC) channel 5 (PA5), and plot them
 import time
 from kuttyPy import *
 from matplotlib import pyplot as plt
 
 setReg('ADMUX', (1<<6) | 5) #REF_AVCC | Channel 5
-for a in range(50): 
+for a in range(50):
     setReg('ADCSRA', 196)
     cl = getReg('ADCL')
     ch = getReg('ADCH')
@@ -149,7 +149,7 @@ ACSR	= 0X28,
 
 
 OCR2	= 0X43,		# Timer/Counter 2  Output Compare  Reg
-TCNT2	= 0X44	,	# Counter2 
+TCNT2	= 0X44	,	# Counter2
 TCCR2	= 0x45,		# Timer/Counter 2 control reg
 ICR1L	= 0X46,
 ICR1H	= 0X47,
