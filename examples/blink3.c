@@ -1,10 +1,13 @@
-#include "mh-uart.c"
+#include "mh-utils.c"
 
 int main (void)
   {
-	uart_init(57600);
+  DDRB=255;
 	while(1){
-	    	uart_send_byte('a');
+	PORTB=255;
+	delay_ms(100);
+	PORTB=0;
+	delay_ms(100);
 		}
-	return 0;
+
 }

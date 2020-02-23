@@ -84,7 +84,7 @@ PC3 = 'ADC3',
 for a in ['GND','VCC','RESET','5V','3V3','SCL','SDA','AREF','ADC6','ADC7','VIN']:
 	SPECIALS[a] = 'FIXED'
 ################################
-VERSIONNUM = 101
+VERSIONNUM = 100
 ADC = ['PC0','PC1','PC2','PC3','PC4','PC5']
 EXAMPLES = 'atmega328p'
 RESTRICTED = ['UBRRL']

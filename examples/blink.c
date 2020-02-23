@@ -51,7 +51,7 @@ TCCR1B=1;
 OCR1AH=1;
 
 
-uart_init(57600);
+uart_init(38400);
 delay_ms_spl(100);
 
 while(1){

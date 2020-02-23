@@ -49,7 +49,7 @@ class Uploader(object):
 	ENTER_PROG_MODE = [STK_ENTER_PROGMODE, CRC_EOP]
 	EXIT_PROG_MODE = [STK_LEAVE_PROGMODE, CRC_EOP]
 	INSYNC = [STK_INSYNC, STK_OK]
-	def __init__(self, sock, retry=9, hexfile="",logger=None):
+	def __init__(self, sock, retry=3, hexfile="",logger=None):
 		self.sock = sock
 		self.hexfile = hexfile
 		self.retry = retry
@@ -72,7 +72,8 @@ class Uploader(object):
 					self.log('retrying...%s'%reply)
 					continue
 				else:
-					raise BaseException("Not in sync")
+					raise Exception("SPI","Not in sync")
+					return
 			if len(reply) == 3:
 				return reply[1]
 			elif len(reply) > 3:

@@ -16,6 +16,22 @@ from functools import partial
 from collections import OrderedDict
 
 
+
+# translation stuff
+def translate(lang = None):
+	global app,t,t1
+	if lang is None:
+		lang=QtCore.QLocale.system().name()
+	print('setting language :',lang)
+	t=QtCore.QTranslator()
+	t.load("lang/"+lang, os.path.dirname(__file__))
+	app.installTranslator(t)
+	t1=QtCore.QTranslator()
+	t1.load("qt_"+lang,
+		QtCore.QLibraryInfo.location(QtCore.QLibraryInfo.TranslationsPath))
+	app.installTranslator(t1)
+
+
 class myTimer():
 	def __init__(self,interval):
 		self.interval = interval
@@ -334,8 +350,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 			self.serialStream += vals
 			while b'\n' in self.serialStream:
 				val,_,self.serialStream = self.serialStream.partition(b'\n')
-				print(int(val))
-				self.serialGauge.setValue([int(val)])
+				self.serialGauge.setValue([float(val)])
 
 	def genLog(self):
 		html='''<table border="1" align="center" cellpadding="1" cellspacing="0" style="font-family:arial,helvetica,sans-serif;font-size:9pt;">
@@ -526,7 +541,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 				try:
 					import subprocess
 					fname = '.'.join(self.fname.split('.')[:-1])
-					if self.p.version == REGISTERS.VERSION_ATMEGA32:
+					if self.p.version == REGISTERS.VERSION_ATMEGA32 or self.p.connected==False: #by default, compile for ATMEGA32.
 						cmd = 'avr-gcc -Wall -O2 -mmcu=%s -o "%s" "%s"' %('atmega32',fname,self.fname)
 						self.logThis.emit('''<span style="color:green;">Compiling for Atmega32</span>''')
 					elif self.p.version == REGISTERS.VERSION_ATMEGA328P:
@@ -538,7 +553,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 					print(cmd)
 					res = subprocess.getstatusoutput(cmd)
 					if res[0] != 0:
-						self.logThis.emit('''<span style="color:red;">Compile Error: %s</span>'''%res[1])
+						self.logThis.emit('''<span style="color:red;">Compile Error: %s</span>'''%res[1].replace('\n','<br>'))
 						self.finished.emit()
 						return
 
@@ -569,7 +584,11 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 						self.p.get_version()
 						self.logThis.emit('''<span style="color:green;">Finished upload</span>''')
 					except Exception as err:
+						print('upload error',err)
+						self.p.fd.setRTS(0);time.sleep(0.01);self.p.fd.setRTS(1);time.sleep(0.2)
+						self.p.get_version()
 						self.logThis.emit('''<span style="color:red;">Failed to upload</span>''')
+						#self.jumpToApplication(False) #Force a reset
 			self.finished.emit()
 	
 	def uploadHex(self):
@@ -649,6 +668,9 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 	def jumpToApplication(self,state):
 		if self.p:
 			if state:
+				translate('fr_FR')
+				self.retranslateUi(self)
+
 				self.userHexRunning=True
 				self.p.fd.write(b'j') #Skip to application (Bootloader resets) 
 
@@ -660,6 +682,8 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 				self.serialGauge.show()
 
 			else:
+				translate('en_IN')
+				self.retranslateUi(self)
 				self.p.fd.setRTS(0)  #Trigger a reset
 				time.sleep(0.01)
 				self.p.fd.setRTS(1)

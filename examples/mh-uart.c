@@ -12,7 +12,7 @@
 
 #include <avr/io.h>
 
-#define CPU_CLOCK	12000000		// 12 MHz clock is assumed
+#define CPU_CLOCK	8000000		// 8 MHz clock is assumed
 #define COMPUTE_BAUD(b) ((uint32_t)(CPU_CLOCK)/((uint32_t)(b)*16) - 1)
 
 
@@ -36,5 +36,11 @@ void uart_send_byte(uint8_t c)
 {
     while( !(UCSRA & (1 <<UDRE) ) );
     UDR = c;
+}
+
+void uart_send_string(char *s){
+	while(*s!='\0'){
+		uart_send_string(*(s++));
+	}
 }
 

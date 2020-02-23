@@ -10,6 +10,17 @@
 
 #include <avr/io.h>
 
+void delay_us (uint16_t k)  	 // k* 10 usecs delay, valid only for 8MHz clock
+{
+  while (k--) {asm("nop");}
+}
+
+
+void delay_10us (uint16_t k)  	 // k* 10 usecs delay, valid only for 8MHz clock
+{
+  volatile uint16_t x;
+  while (k--) {x=5; while (x--);}
+}
 
 void delay_100us (uint16_t k)  	 // k* 100 usecs delay, valid only for 8MHz clock
 {
