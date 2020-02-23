@@ -22,7 +22,6 @@ def translate(lang = None):
 	global app,t,t1
 	if lang is None:
 		lang=QtCore.QLocale.system().name()
-	print('setting language :',lang)
 	t=QtCore.QTranslator()
 	t.load("lang/"+lang, os.path.dirname(__file__))
 	app.installTranslator(t)
@@ -84,6 +83,14 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		blinkindex = self.exampleList.findText('blink.py')
 		if blinkindex!=-1: #default example. blink.py present in examples directory
 			self.exampleList.setCurrentIndex(blinkindex)
+
+		#Define some keyboard shortcuts for ease of use
+		self.shortcutActions={}
+		self.shortcuts={"f":partial(self.setLanguage,'fr_FR'),"e":partial(self.setLanguage,'en_IN'),"m":partial(self.setLanguage,'ml_IN')}
+		for a in self.shortcuts:
+			shortcut = QtWidgets.QShortcut(QtGui.QKeySequence(a), self)
+			shortcut.activated.connect(self.shortcuts[a])
+			self.shortcutActions[a] = shortcut
 
 		######## PYTHON CODE
 		self.codeThread = QtCore.QThread()
@@ -665,11 +672,14 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		else:
 			self.setWindowTitle('KuttyPy Interactive Console [ Hardware not detected ]')
 
+	def setLanguage(self,lang = 'fr_FR'):
+		translate(lang)
+		self.retranslateUi(self)
+
+
 	def jumpToApplication(self,state):
 		if self.p:
 			if state:
-				translate('fr_FR')
-				self.retranslateUi(self)
 
 				self.userHexRunning=True
 				self.p.fd.write(b'j') #Skip to application (Bootloader resets) 
@@ -682,8 +692,6 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 				self.serialGauge.show()
 
 			else:
-				translate('en_IN')
-				self.retranslateUi(self)
 				self.p.fd.setRTS(0)  #Trigger a reset
 				time.sleep(0.01)
 				self.p.fd.setRTS(1)

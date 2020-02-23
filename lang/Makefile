@@ -1,7 +1,8 @@
 DESTDIR =
 TS_FILES = $(shell ls *.ts)
 QM_FILES = $(patsubst %.ts, %.qm, $(TS_FILES))
-SOURCES = $(shell ls ../*py ../utilities/*.py ../utilities/templates/*.py)
+SOURCES = $(shell ls ../*py ../utilities/*.py)
+FORMS = $(shell ls ../utilities/templates/*.ui)
 PYLUPDATE ?= pylupdate5
 
 all: $(QM_FILES)
@@ -15,6 +16,7 @@ $(TS_FILES): kpy.pro
 kpy.pro: $(SOURCES)
 	echo "# GENERATED FILE, DO NOT EDIT" > $@
 	echo "SOURCES = $(SOURCES)" >> $@
+	echo "FORMS = $(FORMS)" >> $@
 	echo "TRANSLATIONS = $(TS_FILES)"  >> $@
 
 clean:

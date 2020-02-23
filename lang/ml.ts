@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE TS><TS version="2.0" language="fr_FR" sourcelanguage="en_IN">
+<!DOCTYPE TS>
+<TS version="2.1" language="ml_IN" sourcelanguage="en_GB">
 <context>
     <name>Dialog</name>
     <message>
         <location filename="../utilities/templates/dio_adcConfig.ui" line="14"/>
         <source>ADC Configuration</source>
-        <translation type="unfinished">ADC configuration</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../utilities/templates/dio_adcLog.ui" line="139"/>
@@ -20,17 +21,17 @@
     <message>
         <location filename="../utilities/templates/dio_adcLog.ui" line="60"/>
         <source>Log Read/Write calls</source>
-        <translation type="unfinished">consigner les commandes de lecture et d&apos;écriture</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../utilities/templates/dio_sensor.ui" line="19"/>
         <source>Sensor Reading</source>
-        <translation type="unfinished">mesures du capteur</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../utilities/templates/dio_sensor.ui" line="56"/>
         <source>Data Logger</source>
-        <translation type="unfinished">enregistreur de données</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../utilities/templates/dio_control.ui" line="14"/>
@@ -121,7 +122,7 @@
     <message>
         <location filename="../utilities/templates/dio_cntr.ui" line="85"/>
         <source>name</source>
-        <translation type="unfinished">nom</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../utilities/templates/dio_cntr.ui" line="52"/>
@@ -140,7 +141,7 @@
     </message>
     <message>
         <location filename="../utilities/templates/dio_cntr.ui" line="169"/>
-        <source>PD5&#xe2;&#x87;&#x86;</source>
+        <source>PD5⇆</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -200,7 +201,7 @@
     </message>
     <message>
         <location filename="../utilities/templates/regedit.ui" line="229"/>
-        <source>&#xe2;&#x86;&#x91;READ</source>
+        <source>↑READ</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -285,14 +286,19 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../utilities/templates/layoutuno.ui" line="56"/>
+        <source>Playground</source>
+        <translation type="unfinished">പ്ലേയ്‌ഗ്രൗണ്ട് </translation>
+    </message>
+    <message>
         <location filename="../utilities/templates/layoutnano.ui" line="71"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;img src=&quot;:/control/nanopinout.png&quot;/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../utilities/templates/layoutuno.ui" line="56"/>
-        <source>Playground</source>
-        <translation type="unfinished">terrain de jeux</translation>
+        <location filename="../utilities/templates/layoutuno.ui" line="108"/>
+        <source>Registers</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../utilities/templates/layoutuno.ui" line="143"/>
@@ -305,8 +311,21 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../utilities/templates/layoutuno.ui" line="108"/>
-        <source>Registers</source>
+        <location filename="../utilities/templates/layoutuno.ui" line="162"/>
+        <source>Scripting</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../utilities/templates/layoutuno.ui" line="202"/>
+        <source>import time
+from kuttyPy import *
+setReg(DDRD,255)
+
+for a in range(5):   #Run this loop 5 times. 
+	setReg(PORTD, 255)
+	time.sleep(0.5)
+	setReg(PORTD, 0)
+	time.sleep(0.5)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -315,8 +334,8 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../utilities/templates/layoutuno.ui" line="162"/>
-        <source>Scripting</source>
+        <location filename="../utilities/templates/layoutuno.ui" line="248"/>
+        <source>C Code</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -327,16 +346,11 @@
     <message>
         <location filename="../utilities/templates/layoutuno.ui" line="280"/>
         <source>Open File</source>
-        <translation type="unfinished">fichier ouvert</translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../utilities/templates/layoutuno.ui" line="287"/>
         <source>Compile+Upload</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../utilities/templates/layoutuno.ui" line="248"/>
-        <source>C Code</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -387,19 +401,6 @@
     <message>
         <location filename="../utilities/templates/layoutuno.ui" line="71"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;img src=&quot;:/control/unopinout.png&quot;/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../utilities/templates/layoutuno.ui" line="202"/>
-        <source>import time
-from kuttyPy import *
-setReg(DDRD,255)
-
-for a in range(5):   #Run this loop 5 times. 
-<byte value="x9"/>setReg(PORTD, 255)
-<byte value="x9"/>time.sleep(0.5)
-<byte value="x9"/>setReg(PORTD, 0)
-<byte value="x9"/>time.sleep(0.5)</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
