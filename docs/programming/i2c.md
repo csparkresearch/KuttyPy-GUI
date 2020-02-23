@@ -34,7 +34,7 @@ def I2CReadBulk(address,register,total_bytes)
 write a set of bytes to an I2C address
 
   address: Address of I2C slave device. 0-127
-  register: The starting address in the I2C slave device from where bytes are to be read 
+  register: The starting address in the I2C slave device from where bytes are to be read
   total_bytes: Total number of bytes to read
   return: bytes, timeout
   "ignore contents if timeout==True"
@@ -96,7 +96,7 @@ range: 0,1,2 or 3 corresponding to +-2,+-4,+-8,+-16
 
 ```python hl_lines="1"
 def MPU6050_kalman_set(value)
-Enable a moving average to reduce noise level of the sensor. 
+Enable a moving average to reduce noise level of the sensor.
 Useful to reject high frequency oscillations.
 fetches 50 values, and activates a Kalman filter. To ignore an activated Kalman Filter, an optional False value can be supplied to `MPU6050_all`
 
@@ -112,7 +112,7 @@ return: list of 7 16-bit integers
 
 Example with MPU6050
 
-```python 
+```python
 from kuttyPy import *
 MPU6050_init() #Initialize the sensor
 x = MPU6050_all() #Fetch readings
@@ -125,7 +125,7 @@ if x is not None:
 ### TSL2561 Luminosity sensor
 The TSL2561  is a light sensor which has a
 linear response across most of the visible spectrum. It has two photodiodes
-with corrresponding ADCs, and a very wide range of operation. Ideal for optics experiments 
+with corrresponding ADCs, and a very wide range of operation. Ideal for optics experiments
 
 
 ```python hl_lines="1"
@@ -153,7 +153,7 @@ return: list of 3 integers.  Total light, IR luminous intensity
 
 Example with TSL2561
 
-```python 
+```python
 from kuttyPy import *
 TSL2561_init() #Initialize the sensor
 x = TSL2561_all() #Fetch readings
@@ -165,10 +165,10 @@ if x is not None:
 
 ### BMP280 Pressure and temperature sensor
 BMP280 is an absolute barometric pressure sensor developed by Bosch Sensortec.
-The sensor module is housed in an extremely compact package, and is very handy to 
+The sensor module is housed in an extremely compact package, and is very handy to
 demonstrate physics concepts to high school students.
 
-```python tab="BMP280_init" hl_lines="1" 
+```python tab="BMP280_init" hl_lines="1"
 def BMP280_init()
 initialize the BMP280 sensor(address=118).
 ```
@@ -192,7 +192,7 @@ if x is not None:
 MS5611 is a high resolution altimeter developed by MEAS.
 It has better resolution than the BMP280, and about 15cm height difference can be resolved.
 
-```python tab="MS5611_init" hl_lines="1" 
+```python tab="MS5611_init" hl_lines="1"
 def MS5611_init()
 initialize the MS5611 sensor(address=119).
 ```
@@ -213,7 +213,7 @@ if x is not None:
 
 ### TCS34725 RGB color sensor
 
-```python tab="TCS34725_init" hl_lines="1" 
+```python tab="TCS34725_init" hl_lines="1"
 def TCS34725_init()
 initialize the TCS34725 sensor(address=41).
 ```
@@ -241,10 +241,10 @@ if x is not None:
 
 ### MLX90614 passive IR
 The MLX90614 is an infrared thermometer for non-contact temperature measurements made by Melexis
-Both the IR sensitive thermopile detector chip and the signal conditioning ASIC are 
+Both the IR sensitive thermopile detector chip and the signal conditioning ASIC are
 integrated in the same TO-39 can.
 
-```python tab="MLX90614_init" hl_lines="1" 
+```python tab="MLX90614_init" hl_lines="1"
 def MLX90614_init()
 initialize the sensor(address=0x5A).
 ```
@@ -268,9 +268,9 @@ if x is not None:
 ## Output devices with I2C
 
 ### MCP4725 DAC
-MCP4725 is a single-channel 12-bit Digital to Analog convertor from Microchip Technology.
+MCP4725 is a single-channel 12-bit Digital to Analog converter from Microchip Technology.
 
-```python tab="MCP4725_init" hl_lines="1" 
+```python tab="MCP4725_init" hl_lines="1"
 def MCP4725_init()
 initialize the MCP4725 DAC(address=0x60).
 ```
@@ -291,7 +291,7 @@ MCP4725_set(1024) #Write
 PCA9685 is a 16-channel PWM generator. It can be used to adjust brightness of LEDs via high frequency output,
 or for controlling servo motors in a low-frequency mode. The emphasis is currently on driving SG-90 servos
 
-```python tab="PCA9685_init" hl_lines="1" 
+```python tab="PCA9685_init" hl_lines="1"
 def PCA9685_init()
 initialize the PCA9685 (address = 64).
 ```

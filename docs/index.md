@@ -68,7 +68,7 @@ You can plug and play a variety of supported I2C sensors such as accelerometers,
 
 ![Screenshot](images/mpu6050.gif?raw=true "6 DOF inertial measurement unit MPU6050")
 
-Data from a 6 DOF inertial measurement unit MPU6050 shown with beautiful analog guages. A data logger is also built-in, and
+Data from a 6 DOF inertial measurement unit MPU6050 shown with beautiful analog gauges. A data logger is also built-in, and
 this includes analytical functions to select plot regions and fit against sinusoidal or damped sinusoidal functions for 
 feature extraction and physics experiments.
 
