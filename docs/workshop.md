@@ -159,7 +159,7 @@ You may skip to the [I/O examples](../programming/basics) page which will cover 
     * Analog to Digital Convertor enabled inputs: 
         * All pins on `PORTA (PA0 - PA7)` for this microcontroller have a 10-bit ADC functionality. 
         * Make it an `OUTPUT`, and click again to see a variable slider and an LCD number show a value between 0-1023  ![](../images/extra_adc.gif)
-        * You can use this as an [8 channel, 0-5V voltmeter](../adc) for testing analog joysticks, sensors etc.  Click on the LCD number to reveal a guage and data logger!
+        * You can use this as an [8 channel, 0-5V voltmeter](../adc) for testing analog joysticks, sensors etc.  Click on the LCD number to reveal a gauge and data logger!
     * PWM outputs. PB3, PD5, PD7 . Adjust the RGB LED intensity using the sliders. 
     ![](../images/extra_pwm.gif)
 
