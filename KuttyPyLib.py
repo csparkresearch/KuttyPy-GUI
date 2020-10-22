@@ -198,7 +198,7 @@ class KUTTYPY:
 				'read':self.BMP280_all,
 				'fields':['Pressure','Temp','Alt'],
 				'min':[0,0,0],
-				'max':[1600,100,10],
+				'max':[1600,100,100],
 				},
 			12:{ #0xc
 				'name':'AK8963 Mag',
@@ -693,22 +693,35 @@ class KUTTYPY:
 		else: return None
 
 
+
+
+
+
 	####### BMP280 ###################
-	## Ported from https://github.com/farmerkeith/BMP280-library/blob/master/farmerkeith_BMP280.cpp
+	# https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bme280-ds002.pdf
+	## Partly from https://github.com/farmerkeith/BMP280-library/blob/master/farmerkeith_BMP280.cpp
 	BMP280_ADDRESS = 118
 	BMP280_REG_CONTROL = 0xF4
 	BMP280_REG_RESULT = 0xF6
+	BMP280_HUMIDITY_ENABLED = False
+	_BMP280_humidity_calib = [0]*6
 	BMP280_oversampling = 0
 	_BMP280_PRESSURE_MIN_HPA = 0
 	_BMP280_PRESSURE_MAX_HPA = 1600
 	_BMP280_sea_level_pressure = 1013.25 #for calibration.. from circuitpython library
+
 	def BMP280_init(self):
+		b = self.I2CWriteBulk(self.BMP280_ADDRESS,[0xE0,0xB6]) #reset
+		time.sleep(0.1)
+		self.BMP280_HUMIDITY_ENABLED = False
 		b,tmt = self.I2CReadBulk(self.BMP280_ADDRESS, 0xD0 ,1)
-		if tmt:return
+		print(b)
+		if b is None:return None
 		b = b[0]
 		if b in [0x58,0x56,0x57]:
 			print('BMP280. ID:',b)
 		elif b==0x60:
+			self.BMP280_HUMIDITY_ENABLED = True
 			print('BME280 . includes humidity')
 		else:
 			print('ID unknown',b)
@@ -720,12 +733,25 @@ class KUTTYPY:
 		self._BMP280_pressure_calib = coeff[3:]
 		self._BMP280_t_fine = 0.
 
-		#details of register 0xF4
-		#mode[1:0] F4bits[1:0] 00=sleep, 01,10=forced, 11=normal
-		#osrs_p[2:0] F4bits[4:2] 000=skipped, 001=16bit, 010=17bit, 011=18bit, 100=19bit, 101,110,111=20 bit
-		#osrs_t[2:0] F4bits[7:5] 000=skipped, 001=16bit, 010=17bit, 011=18bit, 100=19bit, 101,110,111=20 bit
-		#VALUE = (osrs_t & 0x7) << 5 | (osrs_p & 0x7) << 2 | (mode & 0x3); #
-		self.I2CWriteBulk(self.BMP280_ADDRESS, [0xF4,0xFF]) #
+
+		if self.BMP280_HUMIDITY_ENABLED:
+			self.I2CWriteBulk(self.BMP280_ADDRESS, [0xF2,0b101]) #ctrl_hum. oversampling x 16
+			#humidity calibration read 
+			self._BMP280_humidity_calib = [0]*6
+			val,tmt = self.I2CReadBulk(self.BMP280_ADDRESS,0xA1,1)
+			self._BMP280_humidity_calib[0] = val[0]#H1
+			coeff,tmt = self.I2CReadBulk(self.BMP280_ADDRESS,0xE1, 7) 
+			coeff = list(struct.unpack('<hBbBbb', bytes(coeff)))
+			self._BMP280_humidity_calib[1] = float(coeff[0])
+			self._BMP280_humidity_calib[2] = float(coeff[1])
+			self._BMP280_humidity_calib[3] = float((coeff[2] << 4) |  (coeff[3] & 0xF))
+			self._BMP280_humidity_calib[4] = float((coeff[4] << 4) | (coeff[3] >> 4))
+			self._BMP280_humidity_calib[5] = float(coeff[5])
+
+
+
+		self.I2CWriteBulk(self.BMP280_ADDRESS, [0xF4,0xFF]) # ctrl_meas (oversampling of pressure, temperature)
+
 
 
 	def _BMP280_calcTemperature(self,adc_t):
@@ -759,18 +785,46 @@ class KUTTYPY:
 			return self._BMP280_PRESSURE_MAX_HPA
 		return pressure
 
+
+	def _BMP280_calcHumidity(self,adc_h,adc_t):
+		self._BMP280_calcTemperature(adc_t) #t fine set.
+		var1 = float(self._BMP280_t_fine) - 76800.0
+		var2 = (self._BMP280_humidity_calib[3] * 64.0 + (self._BMP280_humidity_calib[4] / 16384.0) * var1)
+		var3 = adc_h - var2
+		var4 = self._BMP280_humidity_calib[1] / 65536.0
+		var5 = (1.0 + (self._BMP280_humidity_calib[2] / 67108864.0) * var1)
+		var6 = 1.0 + (self._BMP280_humidity_calib[5] / 67108864.0) * var1 * var5
+		var6 = var3 * var4 * (var5 * var6)
+		humidity = var6 * (1.0 - self._BMP280_humidity_calib[0] * var6 / 524288.0)
+		if humidity > 100:
+			return 100
+		if humidity < 0:
+			return 0
+
+		return humidity
+
 	def BMP280_all(self):
+		if self.BMP280_HUMIDITY_ENABLED:
+			data,tmt = self.I2CReadBulk(self.BMP280_ADDRESS, 0xF7,8)
+		else:
+			data,tmt = self.I2CReadBulk(self.BMP280_ADDRESS, 0xF7,6)
 		#os = [0x34,0x74,0xb4,0xf4]
 		#delays=[0.005,0.008,0.014,0.026]
 		#self.I2CWriteBulk(self.BMP280_ADDRESS,[self.BMP280_REG_CONTROL,os[self.BMP280_oversampling] ])
 		#time.sleep(delays[self.BMP280_oversampling])
-		data,tmt = self.I2CReadBulk(self.BMP280_ADDRESS, 0xF7,6)
 		if tmt:return None
+		if data is None:return None
 		if None not in data:
 			# Convert pressure and temperature data to 19-bits
 			adc_p = (((data[0] & 0xFF) * 65536.) + ((data[1] & 0xFF) * 256.) + (data[2] & 0xF0)) / 16.
 			adc_t = (((data[3] & 0xFF) * 65536.) + ((data[4] & 0xFF) * 256.) + (data[5] & 0xF0)) / 16.
-		return [self._BMP280_calcPressure(adc_p,adc_t), self._BMP280_calcTemperature(adc_t), 0]
+			if self.BMP280_HUMIDITY_ENABLED:
+				adc_h = (data[6] * 256.) + data[7]
+				return [self._BMP280_calcPressure(adc_p,adc_t), self._BMP280_calcTemperature(adc_t), self._BMP280_calcHumidity(adc_h,adc_t)]
+			else:
+				return [self._BMP280_calcPressure(adc_p,adc_t), self._BMP280_calcTemperature(adc_t), 0]
+
+		return None
 
 
 	########## TCS34725 RGB sensor ###########

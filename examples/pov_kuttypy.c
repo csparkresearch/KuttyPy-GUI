@@ -7,7 +7,7 @@ void showcharReversed(uint8_t *c);
 
 main(){
 
-	unsigned char myString[] = "KUTTYPY";
+	unsigned char myString[] = "HUNNY MOTA";
 	int x=0;
 
 	DDRB=255;
