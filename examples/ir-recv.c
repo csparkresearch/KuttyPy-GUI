@@ -4,7 +4,7 @@ Tested on microHOPE running at 8MHz, using  ordinary TV remotes.
 Author : Jithin B P, IISER, MOhali, jithinbp@gmail.com
 License : GPL v3
 
-TSOP1738 connections:
+TSOP4838 connections:
 ----- PD2
 ----- blank space
 ----- 5V

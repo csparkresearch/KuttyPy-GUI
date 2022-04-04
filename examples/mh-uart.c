@@ -40,7 +40,7 @@ void uart_send_byte(uint8_t c)
 
 void uart_send_string(char *s){
 	while(*s!='\0'){
-		uart_send_string(*(s++));
+		uart_send_byte(*(s++));
 	}
 }
 

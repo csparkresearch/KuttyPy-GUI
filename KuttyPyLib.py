@@ -84,6 +84,7 @@ def getFreePorts(openPort=None):
 class KUTTYPY:	
 	VERSIONNUM = Byte.pack(99)
 	VERSIONNUM_328P = Byte.pack(100)
+	VERSIONNUM_UNO = Byte.pack(101)
 	GET_VERSION = Byte.pack(1)
 	READB =   Byte.pack(2)
 	WRITEB =   Byte.pack(3)
@@ -137,13 +138,13 @@ class KUTTYPY:
 							'function':self.TSL2561_timing
 							}
 					] },
-			0x49:{
+			0x48:{
 				'name':'ADS1115',
 				'init':self.ADS1115_init,
 				'read':self.ADS1115_read,
 				'fields':['Voltage'],
-				'min':[0],
-				'max':[2**16],
+				'min':[-5],
+				'max':[5],
 				'config':[{
 							'name':'channel',
 							'options':['UNI_0','UNI_1','UNI_2','UNI_3','DIFF_01','DIFF_23'],
@@ -151,8 +152,13 @@ class KUTTYPY:
 							},
 							{
 							'name':'Data Rate',
-							'options':['8 SPS','16 SPS','32 SPS','64 SPS','128 SPS','250 SPS','475 SPS','860 SPS'],
-							'function':self.TSL2561_rate
+							'options':['8','16','32','64','128','250','475','860'],
+							'function':self.ADS1115_rate
+							},
+							{
+							'name':'Gain',
+							'options':['GAIN_TWOTHIRDS','GAIN_ONE','GAIN_TWO','GAIN_FOUR','GAIN_EIGHT','GAIN_SIXTEEN'],
+							'function':self.ADS1115_gain
 							}
 					] },
 			0x68:{
@@ -365,9 +371,9 @@ class KUTTYPY:
 		if len(version)==1:
 			if ord(version)==ord(self.VERSIONNUM):
 				return fd,ord(version),True
-			if ord(version)==ord(self.VERSIONNUM_328P):
+			elif ord(version)in [ ord(self.VERSIONNUM_328P), ord(self.VERSIONNUM_UNO)]: #assume it is mega32. will work with glitches
 				self.nano = True
-				return fd,ord(version),True
+				return fd,ord(self.VERSIONNUM),True
 		print ('version check failed',len(version),ord(version))
 		return None,'',False
 		
@@ -747,6 +753,7 @@ class KUTTYPY:
 			self._BMP280_humidity_calib[3] = float((coeff[2] << 4) |  (coeff[3] & 0xF))
 			self._BMP280_humidity_calib[4] = float((coeff[4] << 4) | (coeff[3] >> 4))
 			self._BMP280_humidity_calib[5] = float(coeff[5])
+			print('calibration data: ',self._BMP280_temp_calib,self._BMP280_humidity_calib)
 
 
 
@@ -1192,34 +1199,67 @@ class KUTTYPY:
 	REG_CONFIG_CQUE_2CONV   =0x0001
 	REG_CONFIG_CQUE_4CONV   =0x0002
 	REG_CONFIG_CQUE_NONE    =0x0003
-	gains = OrderedDict([('GAIN_TWOTHIRDS',REG_CONFIG_PGA_6_144V),('GAIN_ONE',REG_CONFIG_PGA_4_096V),('GAIN_TWO',REG_CONFIG_PGA_2_048V),('GAIN_FOUR',REG_CONFIG_PGA_1_024V),('GAIN_EIGHT',REG_CONFIG_PGA_0_512V),('GAIN_SIXTEEN',REG_CONFIG_PGA_0_256V)])
-	gain_scaling =  OrderedDict([('GAIN_TWOTHIRDS',0.1875),('GAIN_ONE',0.125),('GAIN_TWO',0.0625),('GAIN_FOUR',0.03125),('GAIN_EIGHT',0.015625),('GAIN_SIXTEEN',0.0078125)])
-	type_selection = OrderedDict([('UNI_0',0),('UNI_1',1),('UNI_2',2),('UNI_3',3),('DIFF_01','01'),('DIFF_23','23')])
-	sdr_selection = OrderedDict([(8,REG_CONFIG_DR_8SPS),(16,REG_CONFIG_DR_16SPS),(32,REG_CONFIG_DR_32SPS),(64,REG_CONFIG_DR_64SPS),(128,REG_CONFIG_DR_128SPS),(250,REG_CONFIG_DR_250SPS),(475,REG_CONFIG_DR_475SPS),(860,REG_CONFIG_DR_860SPS)]) #sampling data rate
-	conversion_time = [8,16,32,64,128,250,460,860]
-	ADS1115_DATARATE = 5 #250SPS [ 8, 16, 32, 64, 128, 250, 475, 860 ]
+
+	ADS1115_gains = OrderedDict([('GAIN_TWOTHIRDS',REG_CONFIG_PGA_6_144V),('GAIN_ONE',REG_CONFIG_PGA_4_096V),('GAIN_TWO',REG_CONFIG_PGA_2_048V),('GAIN_FOUR',REG_CONFIG_PGA_1_024V),('GAIN_EIGHT',REG_CONFIG_PGA_0_512V),('GAIN_SIXTEEN',REG_CONFIG_PGA_0_256V)])
+	ADS1115_gain_scaling =  OrderedDict([('GAIN_TWOTHIRDS',0.1875),('GAIN_ONE',0.125),('GAIN_TWO',0.0625),('GAIN_FOUR',0.03125),('GAIN_EIGHT',0.015625),('GAIN_SIXTEEN',0.0078125)])
+	ADS1115_scaling = 0.125
+	ADS1115_channels = OrderedDict([('UNI_0',0),('UNI_1',1),('UNI_2',2),('UNI_3',3),('DIFF_01','01'),('DIFF_23','23')])
+	ADS1115_rates = OrderedDict([(8,REG_CONFIG_DR_8SPS),(16,REG_CONFIG_DR_16SPS),(32,REG_CONFIG_DR_32SPS),(64,REG_CONFIG_DR_64SPS),(128,REG_CONFIG_DR_128SPS),(250,REG_CONFIG_DR_250SPS),(475,REG_CONFIG_DR_475SPS),(860,REG_CONFIG_DR_860SPS)]) #sampling data rate
+	ADS1115_DATARATE = 250 #250SPS [ 8, 16, 32, 64, 128, 250, 475, 860 ]
 	ADS1115_GAIN = REG_CONFIG_PGA_4_096V  # +/-4.096V range = Gain 1 . [+-6, +-4, +-2, +-1, +-0.5, +- 0.25]
-	ADS1115_CHANNEL = REG_CONFIG_MUX_SINGLE_0 # ref: type_selection
-	TSL_TIMING = 0x00 # 0x00=3 mS , 0x01 = 101 mS, 0x02 = 402mS
+	ADS1115_CHANNEL = 0 # ref: type_selection
 	ADS1115_ADDRESS = 0x48
 	
 	def ADS1115_init(self):
-		self.I2CWriteBulk(0x39,[0x80 , 0x03 ]) #poweron
-	def ADS1115_channel(self):
-		pass
+		self.I2CWriteBulk(self.ADS1115_ADDRESS,[0x80 , 0x03 ]) #poweron
+
+	def ADS1115_gain(self,gain):
+		'''
+		options : 'GAIN_TWOTHIRDS','GAIN_ONE','GAIN_TWO','GAIN_FOUR','GAIN_EIGHT','GAIN_SIXTEEN'
+		'''
+		print('setting gain:',str(gain))
+		if(type(gain) == int): #From the UI selectors which return index
+			self.ADS1115_GAIN = list(self.ADS1115_gains.items())[gain][1]
+			print('set gain with index selection:',self.ADS1115_GAIN)
+			self.ADS1115_scaling = list(self.ADS1115_gain_scaling.items())[gain][1]
+			print('Scaling factor:',self.ADS1115_scaling)
+		else:
+			self.ADS1115_GAIN = self.ADS1115_gains.get(gain,self.REG_CONFIG_PGA_4_096V)
+			self.ADS1115_scaling = self.ADS1115_gain_scaling.get(gain)
+			print('set gain type B:',str(gain),self.ADS1115_GAIN, self.ADS1115_scaling)
+
+
+	def ADS1115_channel(self,channel):
+		'''
+		options 'UNI_0','UNI_1','UNI_2','UNI_3','DIFF_01','DIFF_23'
+		'''
+		self.ADS1115_CHANNEL = int(channel)
+		print('channel',channel,self.ADS1115_CHANNEL)
+
+	def ADS1115_rate(self,rate):
+		'''
+		data rate options 8,16,32,64,128,250,475,860 SPS . string.
+		'''
+		opts = [8,16,32,64,128,250,475,860]
+		rate = int(rate)
+		if rate < len(opts):
+			self.ADS1115_DATARATE = opts[rate]
+
+		print('rate:',rate,self.ADS1115_DATARATE)
+
+
 	def ADS1115_read(self):
 		'''
 		returns a voltage from ADS1115 channel selected using ADS1115_channel. default UNI_0 (Unipolar from channel 0)
 		'''
-		if chan<=3:
+		if self.ADS1115_CHANNEL in [0,1,2,3]:
 			config = (self.REG_CONFIG_CQUE_NONE # Disable the comparator (default val)
 			|self.REG_CONFIG_CLAT_NONLAT        # Non-latching (default val)
 			|self.REG_CONFIG_CPOL_ACTVLOW 	    #Alert/Rdy active low   (default val)
 			|self.REG_CONFIG_CMODE_TRAD         # Traditional comparator (default val)
-			|(self.ADS1115_DATARATE<<5)               # 1600 samples per second (default)
+			|(self.ADS1115_rates.get(self.ADS1115_DATARATE,self.REG_CONFIG_DR_250SPS))      # 250 samples per second (default)
 			|(self.REG_CONFIG_MODE_SINGLE)        # Single-shot mode (default)
 			|self.ADS1115_GAIN)
-
 			if self.ADS1115_CHANNEL == 0   : config |= self.REG_CONFIG_MUX_SINGLE_0
 			elif self.ADS1115_CHANNEL == 1 : config |= self.REG_CONFIG_MUX_SINGLE_1
 			elif self.ADS1115_CHANNEL == 2 : config |= self.REG_CONFIG_MUX_SINGLE_2
@@ -1227,15 +1267,17 @@ class KUTTYPY:
 			#Set 'start single-conversion' bit
 			config |= self.REG_CONFIG_OS_SINGLE
 			self.I2CWriteBulk(self.ADS1115_ADDRESS,[self.REG_POINTER_CONFIG,(config>>8)&0xFF,config&0xFF])
-			time.sleep(1./self.rate+.002) #convert to mS to S
-			return self.readRegister(self.REG_POINTER_CONVERT)*self.gain_scaling[self.gain]
+			time.sleep(1./self.ADS1115_DATARATE+.002) #convert to mS to S
 
+			b,tmt = self.I2CReadBulk(self.ADS1115_ADDRESS, self.REG_POINTER_CONVERT ,2)
+			if tmt: return None
+			if b is not None:
+				x = ( (b[0]<<8)|b[1] )*self.ADS1115_scaling*1e-3
+				return [( (b[0]<<8)|b[1] )*self.ADS1115_scaling*1e-3] # scale and convert to volts
 
+		elif self.ADS1115_CHANNEL in ['01','23']:
+			return [0]
 
-		b,tmt = self.I2CReadBulk(0x68, 0x3B ,14)
-		if tmt:return None
-		if None not in b:
-			return [ np.int16((b[x*2]<<8)|b[x*2+1]) for x in range(7) ] #Ax,Ay,Az, Temp, Gx, Gy,Gz
 
 	
 	

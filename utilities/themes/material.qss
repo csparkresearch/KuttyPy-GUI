@@ -41,15 +41,14 @@ QTextEdit {
 	color: #a9b7c6;
 }
 QPlainTextEdit {
-	selection-background-color:#007b50;
-	background-color:#1e1d23;
+	selection-background-color:#00ab50;
+	background-color:#fff;
 	border-style: solid;
 	border-top-color: transparent;
 	border-right-color: transparent;
 	border-left-color: transparent;
 	border-bottom-color: transparent;
 	border-width: 1px;
-	color: #a9b7c6;
 }
 QPushButton{
 	border-style: solid;

@@ -3,11 +3,11 @@
 #!/usr/bin/python3
 
 import os,sys,time,re,traceback,platform
-from utilities.Qt import QtGui, QtCore, QtWidgets
+from PyQt5 import QtGui, QtCore, QtWidgets
 import KuttyPyLib
 
 from utilities.templates import ui_layout as layout
-from utilities import dio,REGISTERS,uploader
+from utilities import dio,REGISTERS,uploader,syntax
 import constants
 import inspect
 
@@ -59,6 +59,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 	serialStream = b''
 	def __init__(self, parent=None,**kwargs):
 		super(AppWindow, self).__init__(parent)
+
 		self.setupUi(self)
 
 		self.VERSION = REGISTERS.VERSION_ATMEGA32 #This needs to be dynamically changed when hardware is connected
@@ -76,6 +77,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		self.autoUpdateUserRegisters = False
 		self.CFile = None #'~/kuttyPy.c'
 		self.ipy = None
+		self.defaultDirectory = path["examples"]
 
 		self.setTheme("material")
 		examples = [a for a in os.listdir(os.path.join(path["examples"],self.EXAMPLES_DIR)) if ('.py' in a) and a is not 'kuttyPy.py'] #.py files except the library
@@ -84,6 +86,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		if blinkindex!=-1: #default example. blink.py present in examples directory
 			self.exampleList.setCurrentIndex(blinkindex)
 
+		self.serialGuageButton.hide() #Hide the serial guage button
 		#Define some keyboard shortcuts for ease of use
 		self.shortcutActions={}
 		self.shortcuts={"f":partial(self.setLanguage,'fr_FR'),"e":partial(self.setLanguage,'en_IN'),"m":partial(self.setLanguage,'ml_IN')}
@@ -91,7 +94,6 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 			shortcut = QtWidgets.QShortcut(QtGui.QKeySequence(a), self)
 			shortcut.activated.connect(self.shortcuts[a])
 			self.shortcutActions[a] = shortcut
-
 		######## PYTHON CODE
 		self.codeThread = QtCore.QThread()
 		self.codeEval = self.codeObject(self.REGISTERS)
@@ -116,6 +118,9 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 
 		self.uploadThread.started.connect(self.UploadObject.execute)
 		self.uploadThread.finished.connect(self.codeFinished)
+		
+		########## C CODE EDITOR SYNTAX HIGHLIGHTER
+		self.highlight = syntax.PythonHighlighter(self.editor.document())
 
 		self.commandQ = []
 		self.btns={}
@@ -182,16 +187,32 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 				self.btns[name] = checkbox
 
 	def tabChanged(self,index):
+		if self.userHexRunning: #Firmware was running. Stop it.
+			self.launchFirmwareButton.setChecked(False)			
+			self.jumpToApplication(False)	
+
 		if index != 0 : #examples/editor tab. disable monitoring
 			self.monitoring = False
 			for a in self.docks:
 				a.hide()		
-		else: #Playground . enable monitoring and control.
+		else: #Playground . enable monitoring and control.				
 			self.monitoring = True
 			self.autoRefreshUserRegisters.setChecked(False)
 			self.userRegistersAutoRefresh(False)
+			self.setLogType('playground')
 			for a in self.docks:
 				a.show()		
+
+	def setLogType(self,tp):
+		self.log.clear()
+		if tp == 'playground':
+			self.logLabel.setText("Monitor registers being read and set during each operation")
+		elif tp == 'avr':
+			self.logLabel.setText("Avr-Gcc compile/upload messages")
+		elif tp == 'monitor':
+			self.logLabel.setText("Monitor data input from the serial port")
+		elif tp == 'python':
+			self.logLabel.setText("Python Code operations monitor")
 
 	################USER CODE SECTION####################
 	class codeObject(QtCore.QObject):
@@ -273,15 +294,11 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 			self.finished.emit()
 	
 	def runCode(self):
-		#if self.p:
-		#	try:
-		#		self.p.fd.read() #Clear junk
-		#		self.p.fd.close()
-		#	except:pass
 		if self.codeThread.isRunning():
 			print('one code is already running')
 			return
 
+		self.setLogType('python')
 		self.log.clear() #clear the log window
 		self.log.setText('''<span style="color:green;">----------User Code Started-----------</span>''')
 		kwargs = {}
@@ -544,57 +561,60 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 			self.mode = mode
 
 		def execute(self):
-			if self.mode == 'compileupload':
+			if 'compile' in self.mode:
 				try:
 					import subprocess
+					if self.fname[-2:] in ['.s','.S']:
+						action = 'Assembl'
+					else:#elif self.fname[-2:] in ['.c','.C']:
+						action = 'Compil'
 					fname = '.'.join(self.fname.split('.')[:-1])
 					if self.p.version == REGISTERS.VERSION_ATMEGA32 or self.p.connected==False: #by default, compile for ATMEGA32.
 						cmd = 'avr-gcc -Wall -O2 -mmcu=%s -o "%s" "%s"' %('atmega32',fname,self.fname)
-						self.logThis.emit('''<span style="color:green;">Compiling for Atmega32</span>''')
+						self.logThis.emit('''<span style="color:green;">%sing for Atmega32</span>'''%(action))
 					elif self.p.version == REGISTERS.VERSION_ATMEGA328P:
 						cmd = 'avr-gcc -Wall -O2 -mmcu=%s -o "%s" "%s"' %('atmega328p',fname,self.fname)
-						self.logThis.emit('''<span style="color:green;">Compiling for Atmega328p (Nano)</span>''')
+						self.logThis.emit('''<span style="color:green;">%sing for Atmega328p (Nano)</span>'''%(action))
 					else:
-						self.logThis.emit('''<span style="color:red;">COMPILER UNAVAILABLE</span>''')
+						self.logThis.emit('''<span style="color:red;">%ser UNAVAILABLE</span>'''%(action))
 						return
 					print(cmd)
 					res = subprocess.getstatusoutput(cmd)
 					if res[0] != 0:
-						self.logThis.emit('''<span style="color:red;">Compile Error: %s</span>'''%res[1].replace('\n','<br>'))
+						self.logThis.emit('''<span style="color:darkred;">%se Error: %s</span>'''%(action,res[1].replace('\n','<br>')) )
 						self.finished.emit()
 						return
 
 					else:
-						self.logThis.emit('''<span style="color:white;">%s</span><br>'''%res[1])
+						self.logThis.emit('''<span style="color:gray;">%s</span><br>'''%res[1])
 					cmd = 'avr-objcopy -j .text -j .data -O ihex "%s" "%s.hex"' %(fname,fname)
 					res = subprocess.getstatusoutput(cmd)
-					self.logThis.emit('''<span style="color:white;">%s</span><br>'''%res[1])
+					self.logThis.emit(res[1])#'''<span style="color:gray;">%s</span><br>'''%res[1])
 					cmd = 'avr-objdump -S "%s" > "%s.lst"'%(fname,fname)
 					res = subprocess.getstatusoutput(cmd)
-					self.logThis.emit('''<span style="color:white;">%s</span><br>'''%res[1])
-					if self.fname[-2:] in ['.c','.C']:
-						self.fname = self.fname[:-2]+'.hex' #Replace .c with .hex
-						self.mode = 'upload'
-						self.logThis.emit('''<span style="color:green;">Generated Hex File</span>''')
-					self.logThis.emit('''<span style="color:green;">Finished Compiling: Generated Hex File</span>''')
+					self.logThis.emit(res[1])#'''<span style="color:gray;">%s</span><br>'''%res[1])
+					self.logThis.emit('Finished %sing: Generated Hex File'%action) #'''<span style="color:darkgreen;">Finished %sing: Generated Hex File</span>'''%(action))
 				except Exception as err:
-					self.logThis.emit('''<span style="color:red;">Failed to Compile:%s</span>'''%str(err))
+					self.logThis.emit('''<span style="color:darkred;">Failed to %se:%s</span>'''%str(action,err))
 
 			if self.p.connected:
-				if self.mode == 'upload':
+				if 'upload' in self.mode:
 					try:
+						if self.fname[-2:] in ['.c','.C','.s','.S']:
+							self.fname = self.fname[:-2]+'.hex' #Replace .c with .hex
+						self.logThis.emit('''<span style="font-size:12pt">Upload Code... Trigger Reset...</span>''')
 						self.p.fd.setRTS(0);time.sleep(0.01);self.p.fd.setRTS(1);time.sleep(0.4)
 						dude = uploader.Uploader(self.p.fd, hexfile=self.fname,logger = self.logThis)
 						dude.program()
 						dude.verify()
 						self.p.fd.setRTS(0);time.sleep(0.01);self.p.fd.setRTS(1);time.sleep(0.2)
 						self.p.get_version()
-						self.logThis.emit('''<span style="color:green;">Finished upload</span>''')
+						self.logThis.emit('''<span style="color:darkgreen;">Finished upload</span>''')
 					except Exception as err:
 						print('upload error',err)
 						self.p.fd.setRTS(0);time.sleep(0.01);self.p.fd.setRTS(1);time.sleep(0.2)
 						self.p.get_version()
-						self.logThis.emit('''<span style="color:red;">Failed to upload</span>''')
+						self.logThis.emit('''<span style="color:darkred;">Failed to upload</span>''')
 						#self.jumpToApplication(False) #Force a reset
 			self.finished.emit()
 	
@@ -611,25 +631,53 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 
 
 	def openFile(self):
-		filename = QtWidgets.QFileDialog.getOpenFileName(self," Open a C file to edit", path["examples"], "C Files (*.c *.C)")
+		filename = QtWidgets.QFileDialog.getOpenFileName(self," Open a C/Asm file to edit", self.defaultDirectory, "C/ASM Files (*.c *.C *.s *.S);; Asm Files (*.s *.S);; C Files (*.c *.C)")
 		if len(filename[0]):
+			self.defaultDirectory = ''
 			self.filenameLabel.setText(filename[0])
 			self.CFile = filename[0]
 			self.log.clear()
+			infile = open(filename[0], 'r')
+			self.editor.setPlainText(infile.read())
 			self.log.setText('''<span style="color:cyan;">-- Opened File: %s --</span><br>'''%filename[0])
-			if 'inux' in platform.system(): #Linux based system
-				os.system('%s "%s"' % ('xdg-open', filename[0]))
-			else:
-				os.system('%s "%s"' % ('open', filename[0]))
+
 
 	def compileAndUpload(self):
+		self.setLogType('avr')
+		self.saveFile()
 		if self.CFile:
 			self.uploadingHex = True
-			self.log.clear()
 			self.log.setText('''<span style="color:cyan;">-- Compiling and Uploading Code --</span><br>''')
 			self.UploadObject.config('compileupload',self.p,self.CFile)
 			self.uploadThread.start()
+
+	def compile(self):
+		self.setLogType('avr')
+		self.saveFile()
+		if self.CFile:
+			self.log.setText('''<span style="color:cyan;">-- Compiling Code --</span><br>''')
+			self.UploadObject.config('compile',self.p,self.CFile)
+			self.uploadThread.start()
+
+	def upload(self):
+		self.setLogType('avr')
+		if self.CFile:
+			self.uploadingHex = True
+			self.log.setText('''<span style="color:cyan;">-- Uploading Code --</span><br>''')
+			self.UploadObject.config('upload',self.p,self.CFile)
+			self.uploadThread.start()
+
 			
+	def saveFile(self):
+		if not self.CFile:
+			name = QtGui.QFileDialog.getSaveFileName(self, 'Save File')
+			print('created new file:',name)
+			self.CFile = name[0]
+			self.log.setText('''<span style="color:green;">-- Created new file: %s --</span><br>'''%self.CFile)
+		fn = open(self.CFile,'w')
+		fn.write(self.editor.toPlainText())
+		fn.close()
+		self.log.setText('''<span style="color:green;">-- Saved to: %s --</span><br>'''%self.CFile)
 
 	##############################
 	def setTheme(self,theme):
@@ -646,7 +694,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		else:
 			self.p = KuttyPyLib.connect(autoscan=True)
 		if self.p.connected:
-			self.userApplication.setChecked(False)
+			self.launchFirmwareButton.setChecked(False)
 			self.setWindowTitle('KuttyPy Interactive Console [{0:s}]'.format(self.p.portname))
 			self.updatedRegs=OrderedDict()
 			self.currentRegister = 0
@@ -676,22 +724,25 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		translate(lang)
 		self.retranslateUi(self)
 
+	def showSerialGauge(self):
+		self.serialGauge.show()
 
 	def jumpToApplication(self,state):
 		if self.p:
 			if state:
-
+				self.serialGuageButton.show()
 				self.userHexRunning=True
 				self.p.fd.write(b'j') #Skip to application (Bootloader resets) 
 
 				for a in self.docks:
 					a.setEnabled(False)
-				self.tabs.setEnabled(False)
-				self.log.clear()
+				#self.tabs.setEnabled(False)
+				self.setLogType('monitor')
 				self.log.setText('''<span style="color:cyan;">-- Serial Port Monitor --</span><br>''')
-				self.serialGauge.show()
+				#self.serialGauge.show()
 
 			else:
+				self.serialGuageButton.hide()
 				self.p.fd.setRTS(0)  #Trigger a reset
 				time.sleep(0.01)
 				self.p.fd.setRTS(1)
@@ -702,7 +753,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 				for a in self.docks:
 					a.setEnabled(True)
 				self.userHexRunning=False
-				self.tabs.setEnabled(True)
+				#self.tabs.setEnabled(True)
 				self.serialGauge.hide()
 		else:
 			if self.isChecked():
@@ -713,29 +764,35 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		try:self.pushbutton.setParent(None)
 		except:pass
 		self.pushbutton = QtWidgets.QPushButton('Menu')
-		self.pushbutton.setStyleSheet("height: 13px;padding:3px;color: #FFFFFF;")
+		self.pushbutton.setStyleSheet("height: 13px;padding:3px;color: #7c7;")
 		menu = QtWidgets.QMenu()
 
 		menu.addAction('Save Window as Svg', self.exportSvg)
 		menu.addAction('Open Stepper Controller', self.newStepperController)
 
 		#Theme
+		'''
 		self.themeAction = QtWidgets.QWidgetAction(menu)
 		themes = [a.split('.qss')[0] for a in os.listdir(path["themes"]) if '.qss' in a]
 		self.themeBox = QtWidgets.QComboBox(); self.themeBox.addItems(themes)
 		self.themeBox.currentIndexChanged['QString'].connect(self.setTheme)
 		self.themeAction.setDefaultWidget(self.themeBox)
 		menu.addAction(self.themeAction)
+		'''
+		themes = [a.split('.qss')[0] for a in os.listdir(path["themes"]) if '.qss' in a]
+		self.themeBox = QtWidgets.QComboBox(); self.themeBox.addItems(themes)
+		self.themeBox.currentIndexChanged['QString'].connect(self.setTheme)
+		self.statusBar.addPermanentWidget(self.themeBox)
 
 		self.pushbutton.setMenu(menu)
 
-		self.userApplication = QtWidgets.QCheckBox("User App");
-		self.userApplication.toggled['bool'].connect(self.jumpToApplication)
-		self.statusBar.addPermanentWidget(self.userApplication)
+		#self.userApplication = QtWidgets.QCheckBox("User App");
+		#self.userApplication.toggled['bool'].connect(self.jumpToApplication)
+		#self.statusBar.addPermanentWidget(self.userApplication)
 
-		self.hexUploadButton = QtWidgets.QPushButton("Upload Hex");
-		self.hexUploadButton.clicked.connect(self.uploadHex)
-		self.statusBar.addPermanentWidget(self.hexUploadButton)
+		#self.hexUploadButton = QtWidgets.QPushButton("Upload Hex");
+		#self.hexUploadButton.clicked.connect(self.uploadHex)
+		#self.statusBar.addPermanentWidget(self.hexUploadButton)
 
 
 		self.speedbutton = QtWidgets.QComboBox(); self.speedbutton.addItems(['Slow','Fast','Ultra']);
@@ -794,7 +851,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 
 	######## WINDOW EXPORT SVG
 	def exportSvg(self):
-		from utilities.Qt import QtSvg
+		from PyQt5 import QtSvg
 		path, _filter  = QtWidgets.QFileDialog.getSaveFileName(self, 'Save File', '~/')
 		if path:
 			generator = QtSvg.QSvgGenerator()
@@ -890,8 +947,8 @@ def common_paths():
 def run():
 	global path, app, myapp
 	path = common_paths()
+	print('QT Version',QtWidgets.__file__)
 	app = QtWidgets.QApplication(sys.argv)
-
 	myapp = AppWindow(app=app, path=path)
 	myapp.show()
 	r = app.exec_()

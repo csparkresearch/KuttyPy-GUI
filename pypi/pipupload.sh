@@ -45,6 +45,14 @@ sed -i "s/from utilities/from .utilities/g" kuttyPyGui/KuttyPyGUI.py
 sed -i "s/import KuttyPyLib/from . import KuttyPyLib/g" kuttyPyGui/KuttyPyGUI.py
 sed -i "s/import constants/from . import constants/g" kuttyPyGui/KuttyPyGUI.py
 
+sed -i "s/from utilities/from .utilities/g" kuttyPyGui/KuttyPyPlus.py
+sed -i "s/import KuttyPyLib/from . import KuttyPyLib/g" kuttyPyGui/KuttyPyPlus.py
+sed -i "s/import constants/from . import constants/g" kuttyPyGui/KuttyPyPlus.py
+
+sed -i "s/from utilities/from .utilities/g" kuttyPyGui/KuttyPyUno.py
+sed -i "s/import KuttyPyLib/from . import KuttyPyLib/g" kuttyPyGui/KuttyPyUno.py
+sed -i "s/import constants/from . import constants/g" kuttyPyGui/KuttyPyUno.py
+
 
 sed -i "s/from utilities/from .utilities/g" kuttyPyGui/KuttyPyNano.py
 sed -i "s/import KuttyPyLib/from . import KuttyPyLib/g" kuttyPyGui/KuttyPyNano.py

@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="control">
+    <file>download.svg</file>
     <file>refresh.svg</file>
     <file>plus.svg</file>
     <file>stop.svg</file>

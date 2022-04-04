@@ -5,6 +5,7 @@ import os
 ENVIRON = os.environ['CSMCA_QT_LIB']
 
 if ENVIRON=='PyQt5':
+	print('PyQt5 imported')
 	from PyQt5 import QtGui,QtCore,QtWidgets
 	try: from PyQt5 import QtSvg
 	except: pass
@@ -14,6 +15,7 @@ if ENVIRON=='PyQt5':
 	except:
 		QWebView = None
 elif ENVIRON == 'PyQt4':
+	print('PyQt4 imported')
 	from PyQt4 import QtGui,QtCore
 	from PyQt4 import QtGui as QtWidgets
 	#try:

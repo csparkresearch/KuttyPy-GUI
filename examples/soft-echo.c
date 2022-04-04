@@ -12,12 +12,13 @@ int main()
 
   lcd_init();
   enable_uart(9600); // 2400,4800, 9600 & 19200 allowed
+for(x=0;x<25;x++)uart_write(x+64);
 
   for(;;)
 	{
 	 while( !ubcount) ;  // wait for Rx data
 	x = uart_read();
-	lcd_put_char(x);
+	PORTB = x;
 	uart_write(x);
 	} 
 }

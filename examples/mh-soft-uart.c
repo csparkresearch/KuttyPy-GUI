@@ -11,8 +11,8 @@ Date :  5-Feb-2014
 #include <avr/io.h>
 #include <avr/interrupt.h>
 
-#define RXBIT  PD2
-#define TXBIT  PD3
+#define RXBIT  PD3
+#define TXBIT  PD4
 
 	//delay between bits for a given baudrate, valid only for 8MHz clock
 void bit_delay (uint16_t  baudrate)   
@@ -28,7 +28,7 @@ switch(baudrate) {
                  while (x--);
                  break;
       case 9600:                    // 104 usecs per bit
-                 x=50; 
+                 x=54; 
                  while (x--);
                  break;
       case 4800:
@@ -49,14 +49,14 @@ uint16_t   baudrate  = 9600;
 uint8_t     uart_buf[UBSIZE];                               // Rx buffer
 volatile    uint8_t   ubrd, ubwrt, ubcount;   // read/write indices and count
 
-SIGNAL (SIG_INTERRUPT0)		// interrupt triggered on a falling edge on PD2
+ISR (INT1_vect)		// interrupt triggered on a falling edge on PD3
 {
 uint8_t bit, val = 0;
 
 if(ubcount == UBSIZE) return;	// Rx buffer is full
 
 bit_delay(baudrate*2);       // wait till the middle of the start bit
-if ( PIND & 4) return;      // False  trigger
+if ( (PIND >> RXBIT) & 1) return;      // False  trigger
 
 for(bit =0;  bit <= 7;  ++bit)
 	{
@@ -75,7 +75,7 @@ if (PIND & (1 << RXBIT))     // stop bit high ?
 void disable_uart(uint16_t baud)   // Only  2400, 4800, 9600 and 19200 are allowed
 {
 DDRD    &=  ~(1 << TXBIT);       // Transmit pin as input
-GICR &= ~(1<<INT0);		 // Disable INT0
+GICR &= ~(1<<INT1);		 // Disable INT1
 cli();   				                  //disable interrupt globally
 }
 
@@ -86,9 +86,9 @@ ubrd = ubwrt = ubcount =0;
 DDRD    |=  (1 << TXBIT);         // Transmit pin as output
 PORTD  |=  (1 << TXBIT);        // and set it HIGH
 
-PORTD = (1 <<  RXBIT);         // Enable  pullup on PD2 (INT0 pin) receive pin
-MCUCR = (1<<ISC01);		  // Falling edge on INT0
-GICR = (1<<INT0);		          // Enable INT0
+PORTD |= (1 <<  RXBIT);         // Enable  pullup on PD3 (INT1 pin) receive pin
+MCUCR |= (1<<ISC11);		  // Falling edge on INT1
+GICR |= (1<<INT1);		          // Enable INT1
 sei();   				                  //enable interrupt globally
 }
 

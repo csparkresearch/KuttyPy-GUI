@@ -56,7 +56,7 @@ atexit.register(make_rules)
 
 setuptools.setup(
     name="kuttyPy",
-    version="1.0.17",
+    version="1.0.20",
     install_requires=requirements,
     author="Jithin B.P",
     author_email="jithinbp@gmail.com",
@@ -78,6 +78,7 @@ setuptools.setup(
     entry_points={
     'console_scripts': [
         'kuttypy=kuttyPyGui.KuttyPyGUI:run',
+        'kuttypyplus=kuttyPyGui.KuttyPyPlus:run',
         'kuttypyNano=kuttyPyGui:KuttyPyNano.run',
     		],
 	},
