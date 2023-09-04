@@ -1,0 +1,5 @@
+examples/*.map
+examples/*.hex
+examples/*.lst
+pypi
+__pycache__

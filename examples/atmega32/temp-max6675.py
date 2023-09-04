@@ -6,13 +6,9 @@ import numpy as np
 
 #Outputs, pin definitions
 PIN_SCK = 7; PIN_MOSI = 5 ; PIN_SS = 4
-
 #$0D ($2D) SPCR : SPIE SPE DORD MSTR CPOL CPHA SPR1 SPR0 
 SPE = 6 ; MSTR = 4 ; SPR0 = 0
-
 PORTBvalue = 0
-
-
 #Initialize things
 setReg('DDRB', (1 << PIN_SCK) | (1 << PIN_MOSI) | (1 << PIN_SS)) #SCK MOSI CS/LOAD/SS
 setReg('SPCR', (1 << SPE) | (1 << MSTR)| (1<<SPR0) ) #SPI Master Mode.

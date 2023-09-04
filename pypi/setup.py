@@ -56,11 +56,11 @@ atexit.register(make_rules)
 
 setuptools.setup(
     name="kuttyPy",
-    version="1.0.20",
+    version="1.0.22",
     install_requires=requirements,
     author="Jithin B.P",
     author_email="jithinbp@gmail.com",
-    description="Python package for KuttyPy AVR trainer",
+    description="Python package for KuttyPy and KuttyPyPlus AVR trainer",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/csparkresearch/kuttypy-gui",

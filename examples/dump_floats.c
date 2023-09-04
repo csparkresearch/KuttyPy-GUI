@@ -42,7 +42,7 @@ int main()
 uint16_t x=0;
 uint8_t cnt=0,dec=0;
 char buffer[10];
-uart_init(9600);
+uart_init(38400);
 
 while(1){
 	for(x=0;x<=1000;x++){

@@ -2,13 +2,14 @@
 
 int main (void)
   {
-  DDRB = 255;		// Data Direction Register for port B
+  DDRD = 255;		// Data Direction Register for port B
   for(;;)
     {
-    PORTB = 255;	
-    delay_ms(500);
-    PORTB = 0;
-    delay_ms(500);
+for(int i=0;i<8;i++){
+    PORTD = 1<<i;	
+    delay_ms(200);
+
+}
   }
 return 0;
 }

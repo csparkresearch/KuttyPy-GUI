@@ -311,9 +311,9 @@ class KUTTYPY:
 
 
 	def __get_version__(self,fd):
-		fd.setRTS(0)
-		time.sleep(0.01)
-		fd.setRTS(1)
+		fd.setRTS(0);fd.setDTR(0);
+		time.sleep(0.01);
+		fd.setRTS(1);fd.setDTR(1);
 		time.sleep(0.25)
 		while fd.in_waiting:
 			fd.read(fd.in_waiting)

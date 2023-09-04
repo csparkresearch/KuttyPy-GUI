@@ -11,7 +11,6 @@ from utilities import dio,REGISTERS,uploader,syntax
 import constants
 import inspect
 
-
 from functools import partial
 from collections import OrderedDict
 
@@ -80,7 +79,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		self.ipy = None
 		self.defaultDirectory = path["examples"]
 
-		examples = [a for a in os.listdir(os.path.join(path["examples"],self.EXAMPLES_DIR)) if ('.py' in a) and a is not 'kuttyPy.py'] #.py files except the library
+		examples = [a for a in os.listdir(os.path.join(path["examples"],self.EXAMPLES_DIR)) if ('.py' in a) and a != 'kuttyPy.py'] #.py files except the library
 		self.exampleList.addItems(examples)
 		blinkindex = self.exampleList.findText('blink.py')
 		if blinkindex!=-1: #default example. blink.py present in examples directory
@@ -536,7 +535,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 			self.controllerList = []
 			for a in x:
 				s = self.p.sensors.get(a,None)
-				if s is not None:
+				if s != None:
 					btn = QtWidgets.QPushButton(s['name']+':'+hex(a))
 					dialog = dio.DIOSENSOR(self,s)
 					btn.clicked.connect(dialog.launch)
@@ -545,7 +544,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 					continue
 
 				s = self.p.controllers.get(a,None)
-				if s is not None:
+				if s != None:
 					btn = QtWidgets.QPushButton(s['name']+':'+hex(a))
 					dialog = dio.DIOCONTROL(self,s)
 					btn.clicked.connect(dialog.launch)
@@ -554,7 +553,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 					continue
 
 				s = self.p.special.get(a,None)
-				if s is not None:
+				if s != None:
 					btn = QtWidgets.QPushButton(s['name']+':'+hex(a))
 					dialog = dio.DIOROBOT(self,s)
 					btn.clicked.connect(dialog.launch)
@@ -632,16 +631,25 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 						if self.fname[-2:] in ['.c','.C','.s','.S']:
 							self.fname = self.fname[:-2]+'.hex' #Replace .c with .hex
 						self.logThis.emit('''<span style="font-size:12pt">Upload Code... Trigger Reset...</span>''')
-						self.p.fd.setRTS(0);time.sleep(0.01);self.p.fd.setRTS(1);time.sleep(0.4)
+						self.p.fd.setRTS(0);self.p.fd.setDTR(0);
+						time.sleep(0.01);
+						self.p.fd.setRTS(1);self.p.fd.setDTR(1);
+						time.sleep(0.05)
 						dude = uploader.Uploader(self.p.fd, hexfile=self.fname,logger = self.logThis)
 						dude.program()
 						dude.verify()
-						self.p.fd.setRTS(0);time.sleep(0.01);self.p.fd.setRTS(1);time.sleep(0.2)
+						self.p.fd.setRTS(0);self.p.fd.setDTR(0);
+						time.sleep(0.01);
+						self.p.fd.setRTS(1);self.p.fd.setDTR(1);
+						time.sleep(0.25)
 						self.p.get_version()
 						self.logThis.emit('''<span style="color:darkgreen;">Finished upload</span>''')
 					except Exception as err:
 						print('upload error',err)
-						self.p.fd.setRTS(0);time.sleep(0.01);self.p.fd.setRTS(1);time.sleep(0.2)
+						self.p.fd.setRTS(0);self.p.fd.setDTR(0);
+						time.sleep(0.01);
+						self.p.fd.setRTS(1);self.p.fd.setDTR(1);
+						time.sleep(0.25)
 						self.p.get_version()
 						self.logThis.emit('''<span style="color:darkred;">Failed to upload</span>''')
 						#self.jumpToApplication(False) #Force a reset
@@ -797,10 +805,10 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 
 			else:
 				self.serialGuageButton.hide()
-				self.p.fd.setRTS(0)  #Trigger a reset
-				time.sleep(0.01)
-				self.p.fd.setRTS(1)
-				time.sleep(0.1)
+				self.p.fd.setRTS(0);self.p.fd.setDTR(0);
+				time.sleep(0.01);
+				self.p.fd.setRTS(1);self.p.fd.setDTR(1);
+				time.sleep(0.2)
 				while self.p.fd.in_waiting:
 					self.p.fd.read()
 				self.p.get_version()
@@ -1011,13 +1019,6 @@ def run():
 	myapp = AppWindow(app=app, path=path)
 	myapp.show()
 	r = app.exec_()
-	'''
-	if myapp.p.connected:
-		myapp.p.fd.write(b'j')
-		#myapp.p.fd.setRTS(0)
-		#time.sleep(0.01)
-		#myapp.p.fd.setRTS(1)
-	'''
 	app.deleteLater()
 	sys.exit(r)
 

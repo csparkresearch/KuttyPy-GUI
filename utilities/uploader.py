@@ -82,7 +82,9 @@ class Uploader(object):
 	
 	def sync(self):
 		self.sock.write(b'0 ')#\x30\x20')
-		self.sock.read(2)
+		x = self.sock.read(2)
+		print('sync',x)
+
 	
 	def program(self):
 		self.sync()
@@ -116,7 +118,9 @@ class Uploader(object):
 					self.spi_transaction([self.STK_LOAD_ADDRESS, address % 256, int(address / 256), self.CRC_EOP])
 					self.log("Writing @ %s:%s, block size:%s"%( int(address / 256), address % 256, size ))
 					address += 64
-					self.spi_transaction([self.STK_PROG_PAGE, 0, size, self.FLASH_MEMORY] + data[:128] + [self.CRC_EOP])
+					packet = [self.STK_PROG_PAGE, 0, size, self.FLASH_MEMORY] + data[:128] + [self.CRC_EOP]
+					self.spi_transaction(packet)
+					print ('writing', len(packet), packet)
 					data = data[128:]
 
 		self.spi_transaction(self.EXIT_PROG_MODE)
