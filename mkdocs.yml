@@ -1,9 +1,29 @@
 site_name: KuttyPy Graphical Interface Documentation
 theme:
-    name: 'material'
-    logo: 'images/kuttypy.png'
-    favicon: 'images/favicon.ico'
+  name: 'material'
+  palette:
+    # Palette toggle for light mode
+    - scheme: default
+      primary: teal
+      accent: amber
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+
+    # Palette toggle for dark mode
+    - scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  logo: images/kuttypy.png
+  favicon: 'images/favicon.png'
+  features:
+    - navigation.footer
+    - content.code.copy
+  icon:
+    annotation: material/arrow-right-circle 
  
+
 #theme: 'readthedocs'
 markdown_extensions:
     - toc:
@@ -37,12 +57,23 @@ extra:
   palette:
       primary: '#087da1'
       accent: '#00a889'
-  logo: 'images/kuttypy.png'
+  generator: false
   social:
-    - type: 'github'
-      link: 'https://github.com/csparkresearch/'
-    - type: 'twitter'
-      link: 'https://twitter.com/csparkresearch'
+    - icon: fontawesome/brands/twitter 
+      link: https://x.com/csparkresearch
+    - icon: fontawesome/brands/instagram
+      link: https://instagram.com/csparkresearch
+    - icon: fontawesome/brands/github
+      link: https://github.com/csparkresearch
+
+
+plugins:
+   - search
+   - table-reader
+   - material/social:
+      cards: true
+      cards_font: Roboto
+   #- page-to-pdf
 
 
 repo_name: 'csparkresearch/kuttypy-gui'
@@ -75,6 +106,7 @@ nav:
       - 'Design': 'hw.md'
       - 'Firmware': 'boot.md'
       - 'Enclosures': 'enclosures.md'
-  - 2-Hour Tutorial: 'workshop.md'
+  - Nano Tutorial: 'workshopnano.md'
+  - 2 Hour Tutorial: 'workshop.md'
   - Arduino Boards : 'boards.md'
 

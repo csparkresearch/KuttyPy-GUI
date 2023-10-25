@@ -120,7 +120,7 @@ class Uploader(object):
 					address += 64
 					packet = [self.STK_PROG_PAGE, 0, size, self.FLASH_MEMORY] + data[:128] + [self.CRC_EOP]
 					self.spi_transaction(packet)
-					print ('writing', len(packet), packet)
+					#print ('writing', len(packet), packet)
 					data = data[128:]
 
 		self.spi_transaction(self.EXIT_PROG_MODE)

@@ -7,7 +7,7 @@ void showcharReversed(uint8_t *c);
 
 main(){
 
-	unsigned char myString[] = "HELLO";
+	unsigned char myString[] = "ABCDE";
 	int x=0;
 
 	DDRB=255;
@@ -32,10 +32,10 @@ void showchar(uint8_t *c){
   for(x=0;x<6;x++)
    {
    PORTB=c[x];
-   delay_100us(3);
+   delay_ms(1);
    }
   PORTB=0;
-  delay_ms(1);
+  delay_ms(3);
 }
 
 void showcharReversed(uint8_t *c){

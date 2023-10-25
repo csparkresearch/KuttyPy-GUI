@@ -1,2 +1,8 @@
-pymdown-extensions
-mkdocs-material
+mkdocs
+mkdocs-material[recommended, imaging]
+mkdocs-gen-files
+mkdocs-material-extensions
+mkdocs-table-reader-plugin
+mkdocs-exclude-search
+pillow
+cairosvg

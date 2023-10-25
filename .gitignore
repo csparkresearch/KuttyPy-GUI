@@ -3,3 +3,5 @@ examples/*.hex
 examples/*.lst
 pypi
 __pycache__
+.cache
+.idea

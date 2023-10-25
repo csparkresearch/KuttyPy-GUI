@@ -82,6 +82,7 @@ def getFreePorts(openPort=None):
 
 
 class KUTTYPY:	
+	VERSIONNUM_168P = Byte.pack(98)
 	VERSIONNUM = Byte.pack(99)
 	VERSIONNUM_328P = Byte.pack(100)
 	VERSIONNUM_UNO = Byte.pack(101)
@@ -371,7 +372,7 @@ class KUTTYPY:
 		if len(version)==1:
 			if ord(version)==ord(self.VERSIONNUM):
 				return fd,ord(version),True
-			elif ord(version)in [ ord(self.VERSIONNUM_328P), ord(self.VERSIONNUM_UNO)]: #assume it is mega32. will work with glitches
+			elif ord(version)in [ ord(self.VERSIONNUM_168P),ord(self.VERSIONNUM_328P), ord(self.VERSIONNUM_UNO)]: #assume it is mega32. will work with glitches
 				self.nano = True
 				return fd,ord(self.VERSIONNUM),True
 		print ('version check failed',len(version),ord(version))

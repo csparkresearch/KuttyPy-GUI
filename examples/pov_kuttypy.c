@@ -10,17 +10,19 @@ main(){
 	unsigned char myString[] = "SCIENCE";
 	int x=0;
 
-	DDRD=255;
+	DDRB=255;
 
 	for(;;){
 		for(x=0;x<sizeof(myString)-1;x++){
 			showchar(letters[myString[x]]);
 		}
-		delay_ms(100);
+		delay_ms(50);
+/*
 		for(x=sizeof(myString)-1;x>0;x--){
 			showcharReversed(letters[myString[x-1]]);
 		}
 		delay_ms(100);
+*/
 
 	}
 
@@ -31,21 +33,21 @@ void showchar(uint8_t *c){
   uint8_t x;
   for(x=0;x<6;x++)
    {
-   PORTD=c[x];
-   delay_100us(3);
+   PORTB=c[x];
+   delay_100us(6);
    }
-  PORTD=0;
-  delay_ms(1);
+  PORTB=0;
+  delay_ms(2);
 }
 
 void showcharReversed(uint8_t *c){
   uint8_t x;
   for(x=6;x>0;x--)
    {
-   PORTD=c[x-1];
+   PORTB=c[x-1];
    delay_ms(1);
    }
-  PORTD=0;
+  PORTB=0;
   delay_ms(3);
 }
 

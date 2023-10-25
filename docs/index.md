@@ -19,8 +19,10 @@ setReg('PORTD',160) # PD5 and PD7 set to HIGH. Both LEDs start glowing
 ```
 
 !!! info "The KuttyPy ATMEGA32 hardware"
-	![Screenshot](images/kuttypy.jpg)
+	![Screenshot](images/banner_pcb.png)
 
+!!! info "The KuttyPy Nano hardware"
+	![Screenshot](imagesnano/banner_nano.jpg)
 
 !!! info "And its companion Python software"
 	![Screenshot](images/main.gif?raw=true "Recording of the User Interface")
@@ -33,7 +35,7 @@ setReg('PORTD',160) # PD5 and PD7 set to HIGH. Both LEDs start glowing
 ---
 ## What can I use it for?
 
-+ It's an atmega32 development board with a bootloader supporting the 'arduino' protocol
++ It's an atmega development board with a bootloader supporting the 'arduino' protocol
 + The bootloader also allows real-time manipulation of registers through commmands sent via the serial port.
 + This is done by the associated Python library and companion GUI
     + You can monitor every input

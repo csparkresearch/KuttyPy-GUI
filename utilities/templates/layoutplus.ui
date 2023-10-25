@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>863</width>
-    <height>475</height>
+    <width>1005</width>
+    <height>538</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -265,10 +265,23 @@
         <property name="spacing">
          <number>0</number>
         </property>
+        <item row="0" column="2">
+         <spacer name="horizontalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>64</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
         <item row="0" column="1">
          <widget class="QLabel" name="label">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+           <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
@@ -292,19 +305,6 @@
           <property name="sizeHint" stdset="0">
            <size>
             <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item row="0" column="2">
-         <spacer name="horizontalSpacer_2">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>64</width>
             <height>20</height>
            </size>
           </property>
@@ -493,115 +493,14 @@ for a in range(5):   #Run this loop 5 times.
         <item row="3" column="0" colspan="5">
          <widget class="QTabWidget" name="codingTabs">
           <property name="currentIndex">
-           <number>0</number>
+           <number>-1</number>
           </property>
-          <widget class="QWidget" name="sourceTab">
-           <attribute name="title">
-            <string>Source</string>
-           </attribute>
-           <layout class="QHBoxLayout" name="horizontalLayout_3">
-            <property name="spacing">
-             <number>0</number>
-            </property>
-            <property name="leftMargin">
-             <number>0</number>
-            </property>
-            <property name="topMargin">
-             <number>0</number>
-            </property>
-            <property name="rightMargin">
-             <number>0</number>
-            </property>
-            <property name="bottomMargin">
-             <number>0</number>
-            </property>
-            <item>
-             <widget class="QPlainTextEdit" name="editor">
-              <property name="font">
-               <font>
-                <family>Ubuntu Mono</family>
-                <pointsize>12</pointsize>
-               </font>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </widget>
-          <widget class="QWidget" name="listTab">
-           <attribute name="title">
-            <string>List</string>
-           </attribute>
-           <layout class="QVBoxLayout" name="verticalLayout">
-            <property name="spacing">
-             <number>0</number>
-            </property>
-            <property name="leftMargin">
-             <number>0</number>
-            </property>
-            <property name="topMargin">
-             <number>0</number>
-            </property>
-            <property name="rightMargin">
-             <number>0</number>
-            </property>
-            <property name="bottomMargin">
-             <number>0</number>
-            </property>
-            <item>
-             <widget class="QTextBrowser" name="listEditor"/>
-            </item>
-           </layout>
-          </widget>
-          <widget class="QWidget" name="hexTab">
-           <attribute name="title">
-            <string>Hex</string>
-           </attribute>
-           <layout class="QVBoxLayout" name="verticalLayout_2">
-            <property name="spacing">
-             <number>0</number>
-            </property>
-            <property name="leftMargin">
-             <number>0</number>
-            </property>
-            <property name="topMargin">
-             <number>0</number>
-            </property>
-            <property name="rightMargin">
-             <number>0</number>
-            </property>
-            <property name="bottomMargin">
-             <number>0</number>
-            </property>
-            <item>
-             <widget class="QTextBrowser" name="hexEditor"/>
-            </item>
-           </layout>
-          </widget>
-          <widget class="QWidget" name="mapTab">
-           <attribute name="title">
-            <string>Map</string>
-           </attribute>
-           <layout class="QVBoxLayout" name="verticalLayout_3">
-            <property name="spacing">
-             <number>0</number>
-            </property>
-            <property name="leftMargin">
-             <number>0</number>
-            </property>
-            <property name="topMargin">
-             <number>0</number>
-            </property>
-            <property name="rightMargin">
-             <number>0</number>
-            </property>
-            <property name="bottomMargin">
-             <number>0</number>
-            </property>
-            <item>
-             <widget class="QTextBrowser" name="mapEditor"/>
-            </item>
-           </layout>
-          </widget>
+          <property name="tabsClosable">
+           <bool>true</bool>
+          </property>
+          <property name="movable">
+           <bool>true</bool>
+          </property>
          </widget>
         </item>
         <item row="4" column="0" colspan="5">
@@ -718,36 +617,9 @@ for a in range(5):   #Run this loop 5 times.
             <number>2</number>
            </property>
            <item>
-            <widget class="QPushButton" name="openCodeButton">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
+            <widget class="QPushButton" name="fileMenuButton">
              <property name="text">
-              <string>Open</string>
-             </property>
-             <property name="icon">
-              <iconset resource="resplus.qrc">
-               <normaloff>:/control/document-open.png</normaloff>:/control/document-open.png</iconset>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="saveButton">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="text">
-              <string/>
-             </property>
-             <property name="icon">
-              <iconset resource="resplus.qrc">
-               <normaloff>:/control/saveall.png</normaloff>:/control/saveall.png</iconset>
+              <string>File:</string>
              </property>
             </widget>
            </item>
@@ -1035,22 +907,6 @@ for a in range(5):   #Run this loop 5 times.
    </hints>
   </connection>
   <connection>
-   <sender>openCodeButton</sender>
-   <signal>clicked()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>openFile()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>85</x>
-     <y>57</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>0</x>
-     <y>54</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>compileButton</sender>
    <signal>clicked()</signal>
    <receiver>MainWindow</receiver>
@@ -1063,22 +919,6 @@ for a in range(5):   #Run this loop 5 times.
     <hint type="destinationlabel">
      <x>621</x>
      <y>49</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>saveButton</sender>
-   <signal>clicked()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>saveFile()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>115</x>
-     <y>56</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>622</x>
-     <y>88</y>
     </hint>
    </hints>
   </connection>
@@ -1111,22 +951,6 @@ for a in range(5):   #Run this loop 5 times.
     <hint type="destinationlabel">
      <x>617</x>
      <y>147</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>codingTabs</sender>
-   <signal>currentChanged(int)</signal>
-   <receiver>MainWindow</receiver>
-   <slot>codingTabChanged(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>96</x>
-     <y>91</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>0</x>
-     <y>148</y>
     </hint>
    </hints>
   </connection>
