@@ -804,13 +804,13 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
                         if self.fname[-2:] in ['.c', '.C', '.s', '.S']:
                             self.fname = self.fname[:-2] + '.hex'  # Replace .c with .hex
                         self.logThis.emit('''<span style="font-size:12pt">Upload Code... Trigger Reset...</span>''')
+                        dude = uploader.Uploader(self.p.fd, hexfile=self.fname, logger=self.logThis)
                         self.p.fd.setRTS(0);
                         self.p.fd.setDTR(0);
                         time.sleep(0.01);
                         self.p.fd.setRTS(1);
                         self.p.fd.setDTR(1);
                         time.sleep(0.05)
-                        dude = uploader.Uploader(self.p.fd, hexfile=self.fname, logger=self.logThis)
                         dude.program()
                         dude.verify()
                         self.p.fd.setRTS(0);

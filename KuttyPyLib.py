@@ -338,7 +338,7 @@ class KUTTYPY:
 					self.blockingSocket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
 					self.blockingSocket.bind('\0eyesj2%s'%portname) 
 					self.blockingSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-					fd = serial.Serial(portname, self.BAUD, timeout = 0.5)
+					fd = serial.Serial(portname, self.BAUD, timeout = 0.2)
 					if not fd.isOpen():
 						return None,'',False
 				except socket.error as e:

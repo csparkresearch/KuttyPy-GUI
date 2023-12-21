@@ -87,7 +87,10 @@ class Uploader(object):
 
 	
 	def program(self):
-		self.sync()
+		st = time.time()
+		print('start programming. flush:',self.sock.read(1))
+		#self.sync()
+		print('synced',(time.time()-st)*1000)
 		# print("erasing...")
 		# self.spi_transaction(CHIP_ERASE)
 
@@ -98,6 +101,7 @@ class Uploader(object):
 		address = 0
 		prg_length = 0
 		data = list()
+		print('entered program mode',(time.time()-st)*1000)
 
 		# open the hex file
 		with open(self.hexfile, "rb") as hexfile:
@@ -114,6 +118,7 @@ class Uploader(object):
 				if len(data) >= 128 or row[7:9] == b'01':
 					size = len(data[:128])
 					prg_length += size
+					#print('writing', len(data), (time.time() - st) * 1000)
 
 					self.spi_transaction([self.STK_LOAD_ADDRESS, address % 256, int(address / 256), self.CRC_EOP])
 					self.log("Writing @ %s:%s, block size:%s"%( int(address / 256), address % 256, size ))
@@ -124,7 +129,9 @@ class Uploader(object):
 					data = data[128:]
 
 		self.spi_transaction(self.EXIT_PROG_MODE)
-		self.log("Finished. Program size %s bytes"%prg_length)
+		self.sync()
+		#print("Finished. Program size %s bytes in %.1f mS"%(prg_length,(time.time()-st)*1000))
+		self.log("Finished. Program size %s bytes in %.1f mS"%(prg_length,(time.time()-st)*1000))
 
 	def verify(self):
 		self.sync()
