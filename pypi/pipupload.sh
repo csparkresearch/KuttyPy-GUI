@@ -23,16 +23,19 @@ rm -rf kuttyPyGui
 mkdir kuttyPyGui
 touch kuttyPyGui/__init__.py
 cp ../*.py kuttyPyGui/
+mkdir kuttyPyGui/kpy
 mkdir kuttyPyGui/utilities
 mkdir kuttyPyGui/utilities/templates
 mkdir kuttyPyGui/examples
 mkdir kuttyPyGui/examples/atmega32
 mkdir kuttyPyGui/examples/atmega328p
+touch kuttyPyGui/kpy/__init__.py
 touch kuttyPyGui/examples/__init__.py
 touch kuttyPyGui/examples/atmega32/__init__.py
 touch kuttyPyGui/examples/atmega328p/__init__.py
 touch kuttyPyGui/utilities/templates/__init__.py
 
+cp ../kpy/*.c kuttyPyGui/kpy/
 cp ../examples/*.c kuttyPyGui/examples/
 cp ../examples/atmega32/*.py kuttyPyGui/examples/atmega32/
 cp ../utilities/*.py kuttyPyGui/utilities/

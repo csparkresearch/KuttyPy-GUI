@@ -1,0 +1,33 @@
+<!-- templates/index.html -->
+
+{% extends "base.html" %}
+
+{% block content %}
+
+<h4 class="ui horizontal divider large header">
+  <i class="bar chart icon"></i>
+  Statistics
+</h4>
+
+<div class="ui row">
+	<div class="ui statistics">
+	  <div class="red statistic">
+		<div class="value">
+		  {{ total_active_users }}
+		</div>
+		<div class="label">
+		  ACTIVE USERS
+		</div>
+	  </div>
+
+	  <div class="red statistic">
+		<div class="value">
+		  {{ total_active_rooms }}
+		</div>
+		<div class="label">
+		  ACTIVE ROOMS
+		</div>
+	  </div>
+	</div>
+</div>
+{% endblock %}

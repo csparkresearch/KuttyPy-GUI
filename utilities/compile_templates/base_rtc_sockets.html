@@ -1,0 +1,404 @@
+<!-- templates/base.html -->
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ExpEYES Online Classrooms</title>
+	<script src="/static/jquery.min.js"></script>
+	<script src="/static/semantic/semantic.min.js"></script>
+	<script src="/static/socket.io.min.js"></script>
+
+    <link rel="stylesheet" href="/static/semantic/semantic.min.css" />
+    <link rel="stylesheet" href="/static/classroom.css" />
+
+	{% if jqplot %}
+	<script type="text/javascript" src="/static/jqplot/jquery.jqplot.js"></script>
+	<script type="text/javascript" src="/static/jqplot/jqplot.canvasTextRenderer.min.js"></script>
+	<script type="text/javascript" src="/static/jqplot/jqplot.canvasAxisLabelRenderer.min.js"></script>
+	<link rel="stylesheet" type="text/css" href="/static/jqplot/jquery.jqplot.min.css" />
+	{% endif %}
+	
+	<style>
+		html, body { 
+			background-color: #333; 
+		}
+		video {
+			width:  320px;
+			height:  240px;
+			border:  1px solid black;
+		}
+	</style>
+
+    <script>
+      // socket.io specific code
+      //var MD5 = function(d){var r = M(V(Y(X(d),8*d.length)));return r.toLowerCase()};function M(d){for(var _,m="0123456789ABCDEF",f="",r=0;r<d.length;r++)_=d.charCodeAt(r),f+=m.charAt(_>>>4&15)+m.charAt(15&_);return f}function X(d){for(var _=Array(d.length>>2),m=0;m<_.length;m++)_[m]=0;for(m=0;m<8*d.length;m+=8)_[m>>5]|=(255&d.charCodeAt(m/8))<<m%32;return _}function V(d){for(var _="",m=0;m<32*d.length;m+=8)_+=String.fromCharCode(d[m>>5]>>>m%32&255);return _}function Y(d,_){d[_>>5]|=128<<_%32,d[14+(_+64>>>9<<4)]=_;for(var m=1732584193,f=-271733879,r=-1732584194,i=271733878,n=0;n<d.length;n+=16){var h=m,t=f,g=r,e=i;f=md5_ii(f=md5_ii(f=md5_ii(f=md5_ii(f=md5_hh(f=md5_hh(f=md5_hh(f=md5_hh(f=md5_gg(f=md5_gg(f=md5_gg(f=md5_gg(f=md5_ff(f=md5_ff(f=md5_ff(f=md5_ff(f,r=md5_ff(r,i=md5_ff(i,m=md5_ff(m,f,r,i,d[n+0],7,-680876936),f,r,d[n+1],12,-389564586),m,f,d[n+2],17,606105819),i,m,d[n+3],22,-1044525330),r=md5_ff(r,i=md5_ff(i,m=md5_ff(m,f,r,i,d[n+4],7,-176418897),f,r,d[n+5],12,1200080426),m,f,d[n+6],17,-1473231341),i,m,d[n+7],22,-45705983),r=md5_ff(r,i=md5_ff(i,m=md5_ff(m,f,r,i,d[n+8],7,1770035416),f,r,d[n+9],12,-1958414417),m,f,d[n+10],17,-42063),i,m,d[n+11],22,-1990404162),r=md5_ff(r,i=md5_ff(i,m=md5_ff(m,f,r,i,d[n+12],7,1804603682),f,r,d[n+13],12,-40341101),m,f,d[n+14],17,-1502002290),i,m,d[n+15],22,1236535329),r=md5_gg(r,i=md5_gg(i,m=md5_gg(m,f,r,i,d[n+1],5,-165796510),f,r,d[n+6],9,-1069501632),m,f,d[n+11],14,643717713),i,m,d[n+0],20,-373897302),r=md5_gg(r,i=md5_gg(i,m=md5_gg(m,f,r,i,d[n+5],5,-701558691),f,r,d[n+10],9,38016083),m,f,d[n+15],14,-660478335),i,m,d[n+4],20,-405537848),r=md5_gg(r,i=md5_gg(i,m=md5_gg(m,f,r,i,d[n+9],5,568446438),f,r,d[n+14],9,-1019803690),m,f,d[n+3],14,-187363961),i,m,d[n+8],20,1163531501),r=md5_gg(r,i=md5_gg(i,m=md5_gg(m,f,r,i,d[n+13],5,-1444681467),f,r,d[n+2],9,-51403784),m,f,d[n+7],14,1735328473),i,m,d[n+12],20,-1926607734),r=md5_hh(r,i=md5_hh(i,m=md5_hh(m,f,r,i,d[n+5],4,-378558),f,r,d[n+8],11,-2022574463),m,f,d[n+11],16,1839030562),i,m,d[n+14],23,-35309556),r=md5_hh(r,i=md5_hh(i,m=md5_hh(m,f,r,i,d[n+1],4,-1530992060),f,r,d[n+4],11,1272893353),m,f,d[n+7],16,-155497632),i,m,d[n+10],23,-1094730640),r=md5_hh(r,i=md5_hh(i,m=md5_hh(m,f,r,i,d[n+13],4,681279174),f,r,d[n+0],11,-358537222),m,f,d[n+3],16,-722521979),i,m,d[n+6],23,76029189),r=md5_hh(r,i=md5_hh(i,m=md5_hh(m,f,r,i,d[n+9],4,-640364487),f,r,d[n+12],11,-421815835),m,f,d[n+15],16,530742520),i,m,d[n+2],23,-995338651),r=md5_ii(r,i=md5_ii(i,m=md5_ii(m,f,r,i,d[n+0],6,-198630844),f,r,d[n+7],10,1126891415),m,f,d[n+14],15,-1416354905),i,m,d[n+5],21,-57434055),r=md5_ii(r,i=md5_ii(i,m=md5_ii(m,f,r,i,d[n+12],6,1700485571),f,r,d[n+3],10,-1894986606),m,f,d[n+10],15,-1051523),i,m,d[n+1],21,-2054922799),r=md5_ii(r,i=md5_ii(i,m=md5_ii(m,f,r,i,d[n+8],6,1873313359),f,r,d[n+15],10,-30611744),m,f,d[n+6],15,-1560198380),i,m,d[n+13],21,1309151649),r=md5_ii(r,i=md5_ii(i,m=md5_ii(m,f,r,i,d[n+4],6,-145523070),f,r,d[n+11],10,-1120210379),m,f,d[n+2],15,718787259),i,m,d[n+9],21,-343485551),m=safe_add(m,h),f=safe_add(f,t),r=safe_add(r,g),i=safe_add(i,e)}return Array(m,f,r,i)}function md5_cmn(d,_,m,f,r,i){return safe_add(bit_rol(safe_add(safe_add(_,d),safe_add(f,i)),r),m)}function md5_ff(d,_,m,f,r,i,n){return md5_cmn(_&m|~_&f,d,_,r,i,n)}function md5_gg(d,_,m,f,r,i,n){return md5_cmn(_&f|m&~f,d,_,r,i,n)}function md5_hh(d,_,m,f,r,i,n){return md5_cmn(_^m^f,d,_,r,i,n)}function md5_ii(d,_,m,f,r,i,n){return md5_cmn(m^(_|~f),d,_,r,i,n)}function safe_add(d,_){var m=(65535&d)+(65535&_);return(d>>16)+(_>>16)+(m>>16)<<16|65535&m}function bit_rol(d,_){return d<<_|d>>>32-_};
+      //var origin   = window.location.origin;
+      //var token = "{{ token }}";
+      //console.log(token);
+      var socket = io.connect(origin+'/classroom'); //,{'heartbeat interval': 5,  'heartbeat timeout' : 10}
+      socket.on('connect', function () {
+        $('#connectionstatus').addClass('green').removeClass('loading').removeClass('red');
+            socket.emit('message', {'data':'New web client connected. Name:{{ name }}'});
+
+			setup_local_media(function() {
+				/* once the user has given us access to their
+				 * microphone/camcorder, join the channel and start peering up */
+					socket.emit('join',{'room':'{{tempRoom}}'},function (msg) {
+						console.log(msg);
+					});  
+
+
+			});
+			
+
+      });
+
+
+      socket.on('disconnect', function () {
+        $('#connectionstatus').addClass('loading').removeClass('green').addClass('red');
+        message('System', 'Disconnected..');
+      });
+
+
+      socket.on('reconnect', function () {
+        $('#lines').remove();
+        message('System', 'Reconnected to the server');
+      });
+      
+      socket.on('message', function (msg) {
+        message(msg['username'], msg['data']);
+      });
+
+      
+      socket.on('reconnecting', function () {
+        message('System', 'Attempting to re-connect to the server');
+      });
+      
+      socket.on('error', function (e) {
+        message('System', e ? e : 'A unknown error occurred');
+      });
+      
+      function message (from, msg) {
+        $('#message').html("<p><b>"+from+": </b>"+msg+"</p>")
+      }
+      
+      // dom manipulation
+      $(function () {
+        
+        function clear () {
+          $('#message').val('').focus();
+        };
+      });
+
+
+
+            /** CONFIG **/
+            var USE_AUDIO = true;
+            var USE_VIDEO = true;
+            var DEFAULT_CHANNEL = 'classroom';
+            var MUTE_AUDIO_BY_DEFAULT = false;
+
+            /** You should probably use a different stun server doing commercial stuff **/
+            /** Also see: https://gist.github.com/zziuni/3741933 **/
+            var ICE_SERVERS = [
+                {url:"stun:stun.l.google.com:19302"}
+            ];
+        </script>
+
+
+        <script>
+            var local_media_stream = null; /* our own microphone / webcam */
+            var peer_media_elements = {};  /* keep track of our <video>/<audio> tags, indexed by peer_id */
+            var peers = {};  /* keep track of our <video>/<audio> tags, indexed by peer_id */
+
+            function init() {
+                /** 
+                * When we join a group, our signaling server will send out 'addPeer' events to each pair
+                * of users in the group (creating a fully-connected graph of users, ie if there are 6 people
+                * in the channel you will connect directly to the other 5, so there will be a total of 15 
+                * connections in the network). 
+                */
+				socket.on('init video exchange', function (data) {
+                    console.log('Signaling server said to add peer:', data);
+
+                    var peer_id = data['peer_id'];
+                    if (peer_id in peers) {
+                        /* This could happen if the user joins multiple channels where the other peer is also in. */
+                        console.log("Already connected to peer ", peer_id);
+                        return;
+                    }
+                    var peer_connection = new RTCPeerConnection(
+                        {"iceServers": ICE_SERVERS},
+                        {"optional": [{"DtlsSrtpKeyAgreement": true}]} /* this will no longer be needed by chrome
+                                                                        * eventually (supposedly), but is necessary 
+                                                                        * for now to get firefox to talk to chrome */
+                    );
+                    peers[peer_id] = peer_connection;
+
+                    peer_connection.onicecandidate = function(event) {
+                        if (event.candidate) {
+                            socket.emit('relayICECandidate', {
+                                'peer_id': peer_id, 
+                                'ice_candidate': {
+                                    'sdpMLineIndex': event.candidate.sdpMLineIndex,
+                                    'candidate': event.candidate.candidate
+                                }
+                            });
+                        }
+                    }
+                    
+                    
+                    peer_connection.onaddstream = function(event) {
+                        console.log("onAddStream", event);
+                        var remote_media = USE_VIDEO ? $("<video>") : $("<audio>");
+                        remote_media.attr("autoplay", "autoplay");
+                        if (MUTE_AUDIO_BY_DEFAULT) {
+                            remote_media.attr("muted", "true");
+                        }
+                        remote_media.attr("controls", "");
+                        peer_media_elements[peer_id] = remote_media;
+                        $('body').append(remote_media);
+                        attachMediaStream(remote_media[0], event.stream);
+                    }
+
+                    /* Add our local stream */
+                    peer_connection.addStream(local_media_stream);
+
+                    /* Only one side of the peer connection should create the
+                     * offer, the signaling server picks one to be the offerer. 
+                     * The other user will get a 'sessionDescription' event and will
+                     * create an offer, then send back an answer 'sessionDescription' to us
+                     */
+                    if (data['should_create_offer']) {
+                        console.log("Creating RTC offer to ", peer_id);
+                        peer_connection.createOffer(
+                            function (local_description) { 
+                                console.log("Local offer description is: ", local_description);
+                                peer_connection.setLocalDescription(local_description,
+                                    function() { 
+                                        socket.emit('relaySessionDescription', 
+                                            {'peer_id': peer_id, 'session_description': local_description});
+                                        console.log("Offer setLocalDescription succeeded"); 
+                                    },
+                                    function() { Alert("Offer setLocalDescription failed!"); }
+                                );
+                            },
+                            function (error) {
+                                console.log("Error sending offer: ", error);
+                            });
+                    }
+
+
+
+
+
+				});
+
+
+
+                /** 
+                 * Peers exchange session descriptions which contains information
+                 * about their audio / video settings and that sort of stuff. First
+                 * the 'offerer' sends a description to the 'answerer' (with type
+                 * "offer"), then the answerer sends one back (with type "answer").  
+                 */
+                socket.on('sessionDescription', function(config) {
+                    console.log('Remote description received: ', config);
+                    var peer_id = config.peer_id;
+                    var peer = peers[peer_id];
+                    var remote_description = config.session_description;
+                    console.log(config.session_description);
+
+                    var desc = new RTCSessionDescription(remote_description);
+                    var stuff = peer.setRemoteDescription(desc, 
+                        function() {
+                            console.log("setRemoteDescription succeeded");
+                            if (remote_description.type == "offer") {
+                                console.log("Creating answer");
+                                peer.createAnswer(
+                                    function(local_description) {
+                                        console.log("Answer description is: ", local_description);
+                                        peer.setLocalDescription(local_description,
+                                            function() { 
+                                                socket.emit('relaySessionDescription', 
+                                                    {'peer_id': peer_id, 'session_description': local_description});
+                                                console.log("Answer setLocalDescription succeeded");
+                                            },
+                                            function() { Alert("Answer setLocalDescription failed!"); }
+                                        );
+                                    },
+                                    function(error) {
+                                        console.log("Error creating answer: ", error);
+                                        console.log(peer);
+                                    });
+                            }
+                        },
+                        function(error) {
+                            console.log("setRemoteDescription error: ", error);
+                        }
+                    );
+                    console.log("Description Object: ", desc);
+
+                });
+
+                /**
+                 * The offerer will send a number of ICE Candidate blobs to the answerer so they 
+                 * can begin trying to find the best path to one another on the net.
+                 */
+                socket.on('iceCandidate', function(config) {
+                    var peer = peers[config.peer_id];
+                    var ice_candidate = config.ice_candidate;
+                    peer.addIceCandidate(new RTCIceCandidate(ice_candidate));
+                });
+
+
+                /**
+                 * When a user leaves a channel (or is disconnected from the
+                 * signaling server) everyone will recieve a 'removePeer' message
+                 * telling them to trash the media channels they have open for those
+                 * that peer. If it was this client that left a channel, they'll also
+                 * receive the removePeers. If this client was disconnected, they
+                 * wont receive removePeers, but rather the
+                 * socket.on('disconnect') code will kick in and tear down
+                 * all the peer sessions.
+                 */
+                socket.on('removePeer', function(config) {
+                    console.log('Signaling server said to remove peer:', config);
+                    var peer_id = config.peer_id;
+                    if (peer_id in peer_media_elements) {
+                        peer_media_elements[peer_id].remove();
+                    }
+                    if (peer_id in peers) {
+                        peers[peer_id].close();
+                    }
+
+                    delete peers[peer_id];
+                    delete peer_media_elements[config.peer_id];
+                });
+            }
+
+
+
+
+            /***********************/
+            /** Local media stuff **/
+            /***********************/
+            function setup_local_media(callback, errorback) {
+                if (local_media_stream != null) {  /* ie, if we've already been initialized */
+                    if (callback) callback();
+                    return; 
+                }
+                /* Ask user for permission to use the computers microphone and/or camera, 
+                 * attach it to an <audio> or <video> tag if they give us access. */
+                console.log("Requesting access to local audio / video inputs");
+
+
+                navigator.getUserMedia = ( navigator.getUserMedia ||
+                       navigator.webkitGetUserMedia ||
+                       navigator.mozGetUserMedia ||
+                       navigator.msGetUserMedia);
+
+                attachMediaStream = function(element, stream) {
+                    console.log('DEPRECATED, attachMediaStream will soon be removed.');
+                    element.srcObject = stream;
+                 };
+
+                navigator.getUserMedia({"audio":USE_AUDIO, "video":USE_VIDEO},
+                    function(stream) { /* user accepted access to a/v */
+                        console.log("Access granted to audio/video");
+                        local_media_stream = stream;
+                        var local_media = USE_VIDEO ? $("<video>") : $("<audio>");
+                        local_media.attr("autoplay", "autoplay");
+                        local_media.attr("muted", "true"); /* always mute ourselves by default */
+                        local_media.attr("controls", "");
+                        $('body').append(local_media);
+                        attachMediaStream(local_media[0], stream);
+
+                        if (callback) callback();
+                    },
+                    function() { /* user denied access to a/v */
+                        console.log("Access denied for audio/video");
+                        alert("You chose not to provide access to the camera/microphone, demo will not work.");
+                        if (errorback) errorback();
+                    });
+            }
+
+
+      $(document).ready(function() {
+		  init();
+      });
+
+        </script>
+
+
+</head>
+
+<body id = "root">
+
+    <div class="ui tablet computer only padded grid">
+      <div class="ui inverted borderless top fixed fluid menu">
+		<div class="item">
+			<img class="ui mini circular image" src="/static/images/logo.png">
+			<div class="content">
+			  <a class="ui inverted header">ExPEYES Classroom: {{ name }}</a>
+			  <p id="message"></p>
+			</div>
+		</div>
+
+		<div>
+		</div>
+        <div class="right menu">
+          <!--
+          <div class="item">
+            <div class="ui small input"><input placeholder="Search..." /></div>
+          </div>
+          -->
+          <div class="item">
+		  <button id="connectionstatus" class="ui red active loading button item">Connected</button>
+          </div>
+          <a class="item" href="{{ url_for('teacherhome.classroom') }}">Classroom</a>
+          {% if current_user.is_authenticated %}<a class="item" href="{{ url_for('auth.logout') }}">Logout</a>{% endif %}
+          {% if current_user.is_authenticated %}<a class="item" href="{{ url_for('videocall.videocall_template') }}">video</a>{% endif %}
+        </div>
+      </div>
+    </div>
+    
+    <div class="ui mobile only padded grid">
+      <div class="ui top fixed borderless fluid inverted menu">
+        <a id="header-text" class="header item">
+			ExPEYES Classroom: {{ name }}
+        </a>
+        <div class="right menu">
+          <div class="item">
+            <button class="ui icon toggle basic inverted button">
+              <i class="content icon"></i>
+            </button>
+          </div>
+        </div>
+        <div class="ui vertical borderless inverted fluid menu">
+          <a class="item">Settings</a><a class="item">Help</a>
+          {% if current_user.is_authenticated %}<a class="item" href="{{ url_for('auth.logout') }}">Logout</a>{% endif %}
+          <div class="ui fitted divider"></div>
+          <div class="item">
+            <div class="ui small input"><input placeholder="Search..." /></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="ui padded grid">
+          <div class="row">
+          </div>
+
+          {% block content %}
+          {% endblock %}
+
+    </div>
+
+</body>
+
+</html>

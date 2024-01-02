@@ -1,0 +1,485 @@
+<!-- templates/base.html -->
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ExpEYES Desktop Support</title>
+	<script src="/static/jquery.min.js"></script>
+	<script src="/static/semantic/semantic.min.js"></script>
+    <link rel="stylesheet" href="/static/semantic/semantic.min.css" />
+	<script src="qrc:///qtwebchannel/qwebchannel.js" type="text/javascript"></script>
+
+<style>
+audio{
+    width: 200px;
+    height: 20px;
+}
+
+audio::-webkit-media-controls-enclosure {
+    background-color:  #95B9C7;
+}
+
+
+audio::-webkit-media-controls-play-button {
+display: none !important;
+}
+
+audio::-webkit-media-controls-volume-slider {
+width:180px;
+}
+
+audio::-webkit-media-controls-current-time-display {
+display: none !important;
+}
+audio::-webkit-media-controls-timeline {
+display: none !important;
+}
+audio::-webkit-media-controls-timeline-container {
+display: none !important;
+}
+
+</style>
+
+<script>
+var scripts = JSON.parse({{ data|tojson }});
+console.log(scripts);
+
+var local_media_stream = null; /* our own microphone / webcam */
+
+/** CONFIG **/
+var USE_AUDIO = {audio:{channelCount: 1,sampleRate: 48000,echoCancellation: true,noiseSuppression: true,autoGainControl: true}};;
+
+var VIDEO_CONSTRAINTS = { video: {
+					  mandatory: { 
+						width: { max: 320 },
+						height: { max: 180 }
+					  },
+					  optional: [  
+						{ width: { max: 1280 }},
+						{ frameRate: 30 },
+						{ facingMode: "user" }
+					  ]
+					}
+				}
+
+var USE_VIDEO = VIDEO_CONSTRAINTS;
+
+
+var local_media = null;
+
+var MUTE_AUDIO_BY_DEFAULT = false;
+
+var dataChannelOptions = {
+  ordered: false, // do not guarantee order
+  maxRetransmitTime: 3000, // in milliseconds
+};
+
+
+var ICE_SERVERS = [
+                {
+                urls:"stun:expeyes.scischool.in:3478",
+                username: "cspark",
+                credential: "temporarysat"
+                },
+                {
+                urls:"turn:expeyes.scischool.in:3478",
+                username: "cspark",
+                credential: "temporarysat"
+                }
+]
+
+
+var remote_media_element = null;  
+var peer = null;  
+
+attachMediaStream = function(element, stream) {
+	console.log('DEPRECATED, attachMediaStream will soon be removed.');
+	element.srcObject = stream;
+ };
+      
+
+
+	$(document).ready(function() {
+		var handler = null;
+		var files = {}
+		var acc = $('#scriptaccordion');
+		/*
+		for (var i in scripts){ 
+			script = scripts[i];
+			acc.append($('<div>').addClass('ui title').append($('<i>').addClass().text(i + ' : ' + script.path) ));
+			var tablebody = $('<tbody>');
+			for (var j in script.data){ 
+				data = script.data[j];
+				play = $('<div>').addClass('ui basic green mini button icon playbutton').attr('path',script.path).attr('hash',script.hash).attr('filename',data.Filename).attr('filetype',script.filetype).append($('<i>').addClass('play icon'));
+				fname = $('<a>').addClass('fluid ui basic left pointing blue mini label').text(data.Filename);
+				col1 = $('<td>').addClass('collapsing').append( $('<div>').addClass('fluid ui labeled mini button').append(play,fname)  );
+				col2 = $('<td>').text(data.Intro);
+
+				//view = $('<div>').addClass('ui button purple labeled icon').text('view').append($('<i>').addClass('eye icon'));
+				//download = $('<a>').addClass('ui button teal right labeled icon').attr('target','_blank').text('Download').append($('<i>').addClass('save icon'));
+				//col3 = $('<td>').addClass('right aligned collapsing').append( $('<div>').addClass('ui buttons mini').append(view,$('<div>').addClass('or'),download)  );
+
+				tablebody.append($('<tr>').append(col1,col2));
+			}
+			acc.append( $('<div>').addClass('content minitable').attr('style','max-height:600px;overflow:auto;').append($('<table>').addClass('ui very basic selectable table').append(tablebody)) );
+
+
+		}
+		$('#scriptaccordion').accordion('refresh');
+		*/
+		
+
+		setup_local_media ( function(){console.log('yo');} );
+
+		new QWebChannel(qt.webChannelTransport, function(channel) {
+					handler = channel.objects.handler;
+					$('.playbutton').click(function(){
+						handler.fetchFile(this.getAttribute('path'),this.getAttribute('filename'),this.getAttribute('hash'),this.getAttribute('filetype'));
+						});					
+					var peer;
+					$('#callTeacher').click(function(){
+						handler.callTeacher();
+					});
+
+					function makePeer(p2pDataEnabled){
+						if (peer){
+							handler.configureDataChannel(false);
+							try{peer.dataChannel.close();} catch{}
+							peer.close();
+							delete peer;
+						}
+						peer = new RTCPeerConnection(
+							{"iceServers": ICE_SERVERS},
+							{"optional": [{"DtlsSrtpKeyAgreement": true}]} /* this will no longer be needed by chrome
+																			* eventually (supposedly), but is necessary 
+																			* for now to get firefox to talk to chrome */
+						);
+						if(p2pDataEnabled){
+							dataChannel =
+							  peer.createDataChannel("myData", dataChannelOptions);
+							  peer.dataChannel = dataChannel; //store a copy
+
+							dataChannel.onerror = function (error) {
+							  console.log("Data Channel Error:", error);
+							};
+
+							dataChannel.onmessage = function (event) {
+							  console.log("Got Data Channel Message:", event.data);
+							};
+							
+							dataChannel.addEventListener('open', function(){handler.configureDataChannel( (peer.dataChannel.readyState=="open")?true:false ); console.log('data channel open');});
+							dataChannel.addEventListener('close', function(){handler.configureDataChannel(false);console.log('data channel CLOSED');});
+							dataChannel.addEventListener('bufferedamountlow', (e) => { handler.dataChannelBufferFull(false);  });
+							handler.sendDataSignal.connect(function(data) {
+								$('#buffer').val(dataChannel.bufferedAmount);
+								try{
+									dataChannel.send(data);
+								}catch (e){
+									console.log(e);
+									handler.configureDataChannel(false); //stop the channel.
+								}
+								if(dataChannel.bufferedAmount > 10000){handler.dataChannelBufferFull(true); return false;}
+								return true;
+							});
+
+							peer.ondatachannel = function(event) {
+							  receiveChannel = event.channel;
+							  receiveChannel.onmessage = function(event) {
+								  handler.gotRemoteData(event.data);
+								  console.log('received data',event.data);
+							  };
+							};
+						}
+						
+						
+						peer.onaddstream = function(event) {
+							attachMediaStream(audioElement[0], event.stream);
+							if(enable=="disabled"){audioElement[0].srcObject.getTracks()[0].enabled = false;}
+							peer_media_audio[peer_id] = [peer.getReceivers()[0] ,indicatorElement] ;
+
+						}
+
+					}
+
+					makePeer(false);
+
+
+					handler.makeVideoCall.connect(function(create_offer,p2pDataEnabled) {
+						makePeer(p2pDataEnabled);
+						peer.onicecandidate = function(event) {
+							if (event.candidate) {
+								handler.relayICECandidate(parseInt(event.candidate.sdpMLineIndex),String(event.candidate.candidate));
+								console.log('relayed ice candidate');
+								console.log(event.candidate);
+							}
+						}						
+						
+						peer.onaddstream = function(event) {
+							console.log("onAddStream", event);
+							if(event.stream.getTracks().length == 2){ //video accompanied
+								var remote_media = 	$('<video>').attr('id','remotevideo').attr('style',"width:60%").attr('autoplay',"autoplay");
+								 $("#remotevideorow").append(remote_media);
+								attachMediaStream(remote_media[0], event.stream);
+								$('#message').text('Video Call Connected! ');
+							}else{
+								var remote_media = $("#remoteaudio");
+								attachMediaStream(remote_media[0], event.stream);
+								$('#message').text('Audio Call Connected! ');
+							}
+						}
+						/* Add our local stream */
+						console.log('add local stream to PC')
+						peer.addStream(local_media_stream);
+
+						peer.oniceconnectionstatechange = function() {
+							if(peer.iceConnectionState == 'disconnected') {
+								$('#message').text('Voice Call Inactive.');
+								$("#remotevideorow").empty();
+							}else if(peer.iceConnectionState == 'connected'){
+								$('#message').text('Call Connected..');
+							}
+						}		
+
+						if (create_offer) {
+							console.log("Creating RTC offer ..");
+							peer.createOffer(
+								function (local_description) { 
+									console.log("Local offer description is: ", local_description);
+									$('#message').text('sending session description..');
+									peer.setLocalDescription(local_description,
+										function() { 
+											handler.relaySessionDescription(local_description['type'],local_description['sdp'])
+											console.log("Offer setLocalDescription succeeded. relayed session description"); 
+										},
+										function() { console.log("local error","Offer setLocalDescription failed!");alert("Offer setLocalDescription failed!"); }
+									);
+								},
+								function (error) {
+									console.log("Error sending offer: ", error);
+								});
+						}
+
+
+
+
+					});
+
+
+					/** 
+					 * Peers exchange session descriptions which contains information
+					 * about their audio / video settings and that sort of stuff. First
+					 * the 'offerer' sends a description to the 'answerer' (with type
+					 * "offer"), then the answerer sends one back (with type "answer").  
+					 */
+					handler.sessionDescription.connect(function(tp,sdp) {
+						remote_description = {'type':tp,'sdp':sdp}
+						console.log('Remote description received: ', remote_description);
+
+						var desc = new RTCSessionDescription(remote_description);
+						var stuff = peer.setRemoteDescription(desc, 
+							function() {
+								console.log("setRemoteDescription succeeded");
+								if (remote_description.type == "offer") {
+									console.log("Creating answer");
+									peer.createAnswer(
+										function(local_description) {
+											console.log("Answer description is: ", local_description);
+											peer.setLocalDescription(local_description,
+												function() { 
+													handler.relaySessionDescription(local_description['type'],local_description['sdp'])
+													console.log("Answer setLocalDescription succeeded");
+												},
+												function() { console.log("answer error","answer setlocaldescription failed");alert("Answer setLocalDescription failed!"); }
+											);
+										},
+										function(error) {
+											console.log("Error creating answer: ", error);
+											console.log(peer);
+										}
+										
+										);
+								}
+							},
+							function(error) {
+								console.log("setRemoteDescription error: ", error);
+							}
+						);
+						console.log("Description Object: ", desc);
+
+					});
+
+					/**
+					 * The offerer will send a number of ICE Candidate blobs to the answerer so they 
+					 * can begin trying to find the best path to one another on the net.
+					 */
+					handler.iceCandidate.connect( function(sdpMLineIndex,candidate) {
+						ice_candidate = {'sdpMLineIndex':sdpMLineIndex,'candidate':candidate };
+						console.log('received ICE candidate',ice_candidate);
+						peer.addIceCandidate(new RTCIceCandidate(ice_candidate));
+					});
+
+
+					handler.getInfo.connect( function() {
+						
+						if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
+						  handler.printInfo("enumerateDevices() not supported.");
+						  return;
+						}
+
+						// List cameras and microphones.
+
+						navigator.mediaDevices.enumerateDevices()
+						.then(function(devices) {
+						  devices.forEach(function(device) {
+							handler.printInfo(device.kind + ": " + device.label +
+										" id = " + device.deviceId);
+						  });
+						})
+						.catch(function(err) {
+						  handler.printInfo(err.name + ": " + err.message);
+						});
+
+
+
+					});
+
+
+
+
+		});
+
+
+
+	});
+
+
+
+/***********************/
+/** Local media stuff **/
+/***********************/
+function setup_local_media(callback, errorback) {
+	if (local_media_stream != null) {  // already initialized
+		if (callback) callback();
+		return; 
+	}
+	console.log("Requesting access to local audio / video inputs");
+	navigator.getUserMedia = ( navigator.getUserMedia ||
+		   navigator.webkitGetUserMedia ||
+		   navigator.mozGetUserMedia ||
+		   navigator.msGetUserMedia);
+
+
+
+
+	console.log("Open microphone");
+
+	navigator.getUserMedia({"audio":USE_AUDIO,'video':false},
+		function(stream) { /* user accepted access to a/v */
+			console.log("Access granted to audio");
+			local_media_stream = stream;
+			local_media = $('#myaudio');
+			attachMediaStream(local_media[0], stream);
+
+			$('#streamAudioButton').change(function() {
+				local_media_stream.getTracks()[0].enabled = $(this).prop('checked');
+			})
+			$('#enableVideoButton').change(function() {
+				if($(this).prop('checked')){ switchMedia(USE_VIDEO); }
+				else { switchMedia(false); }
+
+			})
+
+
+			if (callback) callback();
+		},
+		function() { /* user denied access to a/v */
+			console.log("Access denied for audio/video");
+			$('#message').text('Could not access microphone');
+			if (errorback) errorback();
+		});
+
+
+}
+
+function switchMedia(VIDEOCONSTRAINTS){
+	navigator.getUserMedia({"audio":USE_AUDIO,'video':VIDEOCONSTRAINTS},
+		function(stream) { /* user accepted access to a/v */
+			console.log("Access granted");
+			local_media_stream = stream;
+			if(USE_VIDEO){
+				local_media = $('#myvideo');
+			}else{
+				local_media = $('#myaudio');
+			}
+			attachMediaStream(local_media[0], stream);
+			if (callback) callback();
+		},
+		function() { /* user denied access to a/v */
+			$('#message').text('Could not access audio/video');
+			if (errorback) errorback();
+		});
+	
+}
+
+</script>
+
+
+</head>
+
+<body id = "root">
+
+
+	<div class="ui grid">
+		<div class = "ui divider"></div>
+		
+		<div class="ui container" id="remotevideorow">
+		</div>
+
+		<div class="ui row">
+		  <div class="five wide column">
+			  <audio id="remoteaudio" autoplay="autoplay"></audio>
+			  <div class="ui toggle checkbox">
+				<input type="checkbox" id="enableVideoButton">
+				<label><i class="ui camera icon"></i>Video On</label>
+			  </div>  
+
+
+		  </div>
+		  <div class="six wide column right aligned">
+			<p id="message">Voice call inactive.</p>
+		  </div>
+		  <div class="two wide column">
+			<audio muted id="myaudio" autoplay="autoplay" ></audio>
+				  <meter id="buffer" max="10000" value="500" width="100%" ></meter>
+		  </div>
+		  <div class="three wide column right aligned">
+				  <div class="ui toggle checkbox">
+					<input type="checkbox" id="streamAudioButton" checked>
+					<label><i class="ui microphone icon"></i></label>
+				  </div>  
+		  </div>
+		</div>
+
+
+		<div  class="four wide column left aligned">
+			  <div id="callTeacher" class="ui mini basic teal button">
+					Dial
+			  </div>  
+		</div>
+
+
+		{% block content %}
+		{% endblock %}
+
+		<div class="ui row">
+			<video muted id="myvideo" autoplay="autoplay" ></video>
+		</div>
+
+	</div>
+</body>
+
+</html>

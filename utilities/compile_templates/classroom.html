@@ -1,0 +1,353 @@
+<!-- templates/profile.html -->
+
+{% extends "base_sockets.html" %}
+
+{% block content %}
+
+
+<div class="sixteen wide centered column" id="content" >
+  <div class = "ui hidden divider"></div>
+<div class="ui content">
+  <div id = "topcontrols" class="ui padded row">
+	  
+			<button id="createRoomButton" class="ui teal right labeled icon button" onclick="$('#createroommodal').modal('show')">
+				Create Room
+				<i class="plus square outline icon"></i>
+			</button>
+	  
+
+			<button id="approveFollowersButton" class="ui green right labeled icon button right floated" onclick="queryFollowers()">
+				Connections
+				<i class="users square icon"></i>
+			</button>
+
+
+
+
+			<div class="ui floating dropdown icon button right floated content">
+				<i class="wrench icon"></i>
+				<div class="menu">
+					<div class = "ui right floated content" id="audiocontrols">
+						<div class="ui toggle checkbox">
+							<input type="checkbox" id="streamAudioButton" checked>
+							<label><i class="ui microphone icon"></i></label>
+						</div>
+
+						{% if videoenabled %}
+							{% if student %}
+							<button id="callTeacherButton" class="ui green button" onclick="callTeacher()">
+								<i class="phone icon"></i>Teacher
+							</button>
+
+							{% endif %}
+						{% endif %}
+
+
+					</div>
+
+					  <div class="ui fluid row">
+						<div class="ui toggle checkbox">
+							<input type="checkbox" id="broadcastButton">
+							<label><i class="ui rss icon"></i></label>
+						</div>
+
+
+					  </div>
+
+
+					<div class="divider"></div>
+					<div class="item" onclick="showDiagnostics()">View Diagnostics</div>
+					<div class="item">
+					  <span class="description">ctrl + o</span>
+					  Open...
+					</div>
+				</div>
+			</div>
+
+			<div id="roomselector" class="ui dropdown labeled search icon  button right floated ">
+			  <i class="sitemap icon"></i>
+			  <span id="roomselectortext" class="text">Join</span>
+			  <div id="rooms" class="menu">
+			  </div>
+			</div>
+
+
+			<div id="activerooms" class="ui padded grid row">
+			  <!-- When the user joins a room, a button is added in this space to enable exiting it -->
+			</div>
+
+
+  </div>
+
+  
+
+
+  </div>
+  <div class = "ui divider"></div>
+
+  <div class="row">
+	  <div id = "studentcards" class="ui cards">
+	  </div>
+  </div>
+
+
+</div>
+</div>
+
+<!--- modals -->
+
+<div class="ui modal" id="screenshare">	
+  <i class="close icon"></i>
+  <div id = "screenshareuser" class="ui header">
+    Student's name
+  </div>
+  <div id="screenshareimage" class="ui image content">
+  <div class="ui grid">
+	<div id="modalbusy" class="ui inverted dimmer"><div class="ui large loader"></div></div>
+	<img id="screenshotobject" class="ui huge image" style="min-height:400px"></img>
+	<!--
+    <div class="description">
+      <div  id = "screenshareexperimentheader" class="ui header">Experiment Name</div>
+      <p>This is an svg render fetched from the UI of the student</p>
+      <p>Can callbacks be assigned to individual svg elements?</p>
+    </div>
+    -->
+  </div>
+  </div>
+
+  <div class="actions">
+    <div class="ui black deny button">
+      Cancel
+    </div>
+    <div id="modalrefreshbutton" class="ui right labeled icon basic button" >
+      Refresh
+      <i class="refresh icon"></i>
+    </div>
+  </div>
+</div>
+
+
+<div id="diagnosticsmodal" class="ui modal">
+  <div class="header">Diagnostics Messages</div>
+  <div id="diagnosticscontent" class="scrolling content">
+  </div>
+</div>
+
+
+
+<div class="ui modal" id="zoominmodal">	
+  <i class="close icon"></i>
+  <div id = "zoomintitle" class="ui header">
+    Header
+  </div>
+  <div id="zoomincontent" class="ui content">
+  </div>
+</div>
+
+
+
+<div class="ui mini modal" id="createroommodal">	
+  <i class="close icon"></i>
+  <div class="ui header">
+    Create a New Room
+  </div>
+  <div class="content">
+  		<div class="ui right action fluid input">
+		  <input id="newroomname" type="text" placeholder="Room Name" onkeydown="waitForEnter(this,createRoom)">
+		  <button id="createRoomButton" class="ui teal right labeled icon button" onclick="createRoom()">
+			Create
+			<i class="plus square outline icon"></i>
+		  </button>
+		</div>
+		<div class="ui divider"></div>
+  </div>
+  <div class="ui bottom attached label" id="createRoomMessage"></div>
+
+
+
+</div>
+
+
+<div class="ui large modal" id="followersmodal">	
+  <i class="close icon"></i>
+  <div class="ui header">
+    Approve or Deny new Additions to this class
+  </div>
+  <div class="content" id="followersmodalcontent">
+
+	  <table class="ui very basic selectable table">
+
+		 <thead class="full-width">
+			<tr>
+			  <th colspan="3">
+
+				<div class="ui right action input">
+				  <input id="followusername" type="text" placeholder="User Name" onkeydown="waitForEnter(this,followUser)">
+				  <button id="followUserButton" class="ui teal right labeled icon button" onclick="followUser()">
+					Follow
+					<i class="user square outline icon"></i>
+				  </button>
+				</div>
+			  </th>
+			</tr>
+		  </tfoot>
+	  
+		  <tbody id="followerstable">
+		  </tbody>
+	  </table>
+  </div>
+  <div class="ui bottom attached label" id="followersmessage"></div>
+</div>
+
+<div class="ui large modal" id="followersmodal">	
+  <i class="close icon"></i>
+  <div class="ui header">
+    Approve or Deny new Additions to this class
+  </div>
+  <div class="content" id="followersmodalcontent">
+
+	  <table class="ui very basic selectable table">
+
+		 <thead class="full-width">
+			<tr>
+			  <th colspan="3">
+
+				<div class="ui right action input">
+				  <input id="followusername" type="text" placeholder="User Name" onkeydown="waitForEnter(this,followUser)">
+				  <button id="followUserButton" class="ui teal right labeled icon button" onclick="followUser()">
+					Follow
+					<i class="user square outline icon"></i>
+				  </button>
+				</div>
+			  </th>
+			</tr>
+		  </tfoot>
+	  
+		  <tbody id="followerstable">
+		  </tbody>
+	  </table>
+  </div>
+  <div class="ui bottom attached label" id="followersmessage"></div>
+
+
+
+</div>
+
+
+<div class="ui mini modal" id="widgetsmodal">	
+  <i class="close icon"></i>
+  <div class="ui header">
+    Click to add Widget
+  </div>
+  <div class="content" id="widgetsmodalcontent">
+
+	  <table class="ui very basic selectable table">	  
+		  <tbody id="widgetstable">
+		  </tbody>
+	  </table>
+  </div>
+  <div class="ui bottom attached label" id="widgetsmessage"></div>
+</div>
+
+
+
+
+
+
+
+
+
+
+<script>
+
+// FOR VIDEO
+
+
+
+
+
+		
+		// Initialize current state
+		var myRoom = JSON.parse({{myroom|tojson}});
+		var studentWidgets = JSON.parse({{member_widgets|tojson}});
+		var NewFollows = JSON.parse({{extrafollowers|tojson}});
+
+		/*
+		socket.on('iot', function (msg) {
+			if('tabulate' in msg){ //show in the table
+					message('Data1', msg['data1']);
+					if(msg['number'] === 0){ // clear the table on receiving the first row
+						$('#remotedata').empty();
+					}
+					  $('#remotedata').append(
+						  $('<tr>').append( 
+						   $('<td>').text(msg['number']),
+						   $('<td>').text(msg['data1']),
+						   $('<td>').text(msg['data2']),
+						   $('<td>').text(msg['data3']),
+						   $('<td>').text(msg['data4']) 
+						   )
+					   );
+				}
+
+		});
+		*/
+
+
+
+
+
+      $(document).ready(function() {
+
+		init (function(){  //video/audiocall.js . populate student cards after local_media_stream is ready
+			populateStudentCards(studentWidgets);
+
+			if(myRoom.name){
+				myRooms.add(myRoom.name);
+				addRoomLeaveButton(myRoom);
+				$('#createRoomButton').hide();
+			}
+			setTimeout(refreshRoomList, 10);
+			
+			
+			});
+
+
+		updateFollowers($('#followerstable'),NewFollows);
+
+
+		$('#createroommodal').modal('setting', 'transition', 'vertical flip');
+		$('#followersmodal').modal('setting', 'transition', 'vertical slide');
+		$('#zoominmodal').modal('setting', 'transition', 'fade');
+		
+		$('#diagnosticsmodal').modal('setting', 'transition', 'vertical slide');
+		$('.ui.dropdown')
+		  .dropdown()
+		;
+	    
+	    $('#modalrefreshbutton').click(function() { getScreenshot($(this).attr('clientid')); });
+
+        $('#roomselector').dropdown('setting', 'onChange', 
+			function(val){
+				if(myRooms.has(val)){console.log('already in this room');return;}//return . nothing to do here
+				socket.emit('join',{'room':val},function (msg) {
+				    myRooms.add(val);
+					$('#createroommodal').modal('hide');
+					$('#createRoomButton').hide();
+					addRoomLeaveButton(msg);
+				});  
+
+				});
+
+
+
+
+      });
+
+
+
+</script>
+
+
+
+{% endblock %}
