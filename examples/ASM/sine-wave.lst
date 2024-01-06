@@ -1,5 +1,5 @@
 
-/home/jithin/Documents/kuttypy-gui/examples/ASM/sine-wave:     file format elf32-avr
+/home/jithin/Documents/CSpark/kuttypy-gui/examples/ASM/sine-wave:     file format elf32-avr
 
 
 Disassembly of section .text:
@@ -69,7 +69,7 @@ Disassembly of section .text:
 
 00000092 <__vector_10>:
   92:	8d 91       	ld	r24, X+
-  94:	80 93 38 00 	sts	0x0038, r24	; 0x800038 <__TEXT_REGION_LENGTH__+0x7e0038>
+  94:	80 93 38 00 	sts	0x0038, r24	; 0x800038 <__TEXT_REGION_LENGTH__+0x7f8038>
   98:	63 95       	inc	r22
   9a:	46 13       	cpse	r20, r22
   9c:	18 95       	reti
@@ -79,15 +79,15 @@ Disassembly of section .text:
 
 000000a4 <main>:
   a4:	0f ef       	ldi	r16, 0xFF	; 255
-  a6:	00 93 37 00 	sts	0x0037, r16	; 0x800037 <__TEXT_REGION_LENGTH__+0x7e0037>
+  a6:	00 93 37 00 	sts	0x0037, r16	; 0x800037 <__TEXT_REGION_LENGTH__+0x7f8037>
   aa:	09 e0       	ldi	r16, 0x09	; 9
-  ac:	00 93 53 00 	sts	0x0053, r16	; 0x800053 <__TEXT_REGION_LENGTH__+0x7e0053>
+  ac:	00 93 53 00 	sts	0x0053, r16	; 0x800053 <__TEXT_REGION_LENGTH__+0x7f8053>
   b0:	02 e3       	ldi	r16, 0x32	; 50
-  b2:	00 93 5c 00 	sts	0x005C, r16	; 0x80005c <__TEXT_REGION_LENGTH__+0x7e005c>
+  b2:	00 93 5c 00 	sts	0x005C, r16	; 0x80005c <__TEXT_REGION_LENGTH__+0x7f805c>
   b6:	02 e0       	ldi	r16, 0x02	; 2
-  b8:	00 93 59 00 	sts	0x0059, r16	; 0x800059 <__TEXT_REGION_LENGTH__+0x7e0059>
+  b8:	00 93 59 00 	sts	0x0059, r16	; 0x800059 <__TEXT_REGION_LENGTH__+0x7f8059>
   bc:	02 e0       	ldi	r16, 0x02	; 2
-  be:	00 93 58 00 	sts	0x0058, r16	; 0x800058 <__TEXT_REGION_LENGTH__+0x7e0058>
+  be:	00 93 58 00 	sts	0x0058, r16	; 0x800058 <__TEXT_REGION_LENGTH__+0x7f8058>
   c2:	a0 e6       	ldi	r26, 0x60	; 96
   c4:	b0 e0       	ldi	r27, 0x00	; 0
   c6:	66 27       	eor	r22, r22

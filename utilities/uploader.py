@@ -66,6 +66,7 @@ class Uploader(object):
 			self.sock.write(codes)
 			time.sleep(tx_complete/1000.0)
 			reply = list(self.sock.read(size=bytesreply + 2)) #bytesreply + INSYNC + OK
+			print('reply', len(reply), reply)
 			if not reply or ([reply[0], reply[-1]] != self.INSYNC):
 				if n < self.retry:
 					n += 1
@@ -134,6 +135,7 @@ class Uploader(object):
 		self.log("Finished. Program size %s bytes in %.1f mS"%(prg_length,(time.time()-st)*1000))
 
 	def verify(self):
+		print('entered verify mode')
 		self.sync()
 		self.spi_transaction(self.ENTER_PROG_MODE)
 		address = 0

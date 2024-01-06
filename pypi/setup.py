@@ -56,7 +56,7 @@ atexit.register(make_rules)
 
 setuptools.setup(
     name="kuttyPy",
-    version="1.0.23",
+    version="1.0.24",
     install_requires=requirements,
     author="Jithin B.P",
     author_email="jithinbp@gmail.com",

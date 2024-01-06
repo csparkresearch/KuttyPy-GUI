@@ -1,10 +1,32 @@
-#Adapted from https://gist.github.com/LegoStormtroopr/6146161
+# Adapted from https://gist.github.com/LegoStormtroopr/6146161
 
-from PyQt5 import QtGui,QtCore,QtWidgets
+from PyQt5 import QtGui, QtCore, QtWidgets
+
 
 class myTextEditor(QtWidgets.QPlainTextEdit):
-    def __init__(self, parent):
+    def __init__(self, parent, codingTabBrowser):
         QtWidgets.QPlainTextEdit.__init__(self, parent)
+        self.sourceTab = parent
+        self.codingTabs = codingTabBrowser
+        self.textChanged.connect(self.textChange)
+        self.undoAvailable['bool'].connect(self.undoStatus)
+        self.changed = False
+
+    def markAsSaved(self,state):
+        self.changed = not state
+
+    def undoStatus(self, s):
+        if s == False:
+            fname = self.codingTabs.tabText(self.codingTabs.indexOf(self.sourceTab))
+            if (fname[-1] == '*'):
+                self.codingTabs.setTabText(self.codingTabs.indexOf(self.sourceTab), fname[:-1])
+                self.changed = False
+
+    def textChange(self):
+        fname = self.codingTabs.tabText(self.codingTabs.indexOf(self.sourceTab))
+        if (fname[-1] != '*'):
+            self.changed = True
+            self.codingTabs.setTabText(self.codingTabs.indexOf(self.sourceTab), fname + '*')
 
     def keyPressEvent(self, event):
         # Shift + Tab is not the same as trying to catch a Shift modifier and a tab Key.
@@ -23,7 +45,7 @@ class myTextEditor(QtWidgets.QPlainTextEdit):
             while cursor.position() < end:
                 cursor.movePosition(cursor.StartOfLine)
                 cursor.insertText(tab)
-                #end += tab.count()
+                # end += tab.count()
                 cursor.movePosition(cursor.EndOfLine)
                 cursor.movePosition(QtGui.QTextCursor.Right, 1)
         elif event.key() == QtCore.Qt.Key.Key_Backtab:

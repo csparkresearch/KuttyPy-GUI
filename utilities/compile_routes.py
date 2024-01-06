@@ -50,6 +50,11 @@ def mycompiler():
 	try:
 		print('compile...')
 		extension = '.S'
+		processor = 'atmega32'
+		if 'processor' in request.form:
+			processor = request.form.get('processor')
+			print('processor specified', processor)
+
 		if is_c(request.form.get('code')):
 			extension = '.c'
 		tfile = tempfile.NamedTemporaryFile(mode='w+', dir=kpyPath, suffix=extension)
@@ -57,7 +62,7 @@ def mycompiler():
 		tfile.flush()
 
 		name = tfile.name.replace(extension, '')
-		cmd = 'avr-gcc -Wall -O2 -mmcu=%s -o "%s" "%s%s"' % ('atmega32', name, name, extension)
+		cmd = 'avr-gcc -Wall -O2 -mmcu=%s -o "%s" "%s%s"' % (processor, name, name, extension)
 		res = subprocess.getstatusoutput(cmd)
 		showStatusSignal.emit(f'Compiler Active at {local_ip},   Client: {str(request.remote_addr)}', False)
 		if (res[0] == 1):  # Error

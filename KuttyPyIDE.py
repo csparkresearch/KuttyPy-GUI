@@ -7,8 +7,8 @@ from PyQt5 import QtGui, QtCore, QtWidgets
 import KuttyPyLib
 import socket
 
-from utilities.templates import ui_layoutplus as layout
-from utilities import dio, REGISTERS, uploader, syntax
+from utilities.templates import ui_layout_ide as layout
+from utilities import uploader, syntax, REGISTERS, dio
 from utilities import texteditor
 import constants
 import inspect
@@ -55,7 +55,6 @@ class myTimer():
 
 class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 	p = None
-	ports = ['A', 'B', 'C', 'D']
 	logThis = QtCore.pyqtSignal(str)
 	showStatusSignal = QtCore.pyqtSignal(str, bool)
 	serverSignal = QtCore.pyqtSignal(str)
@@ -71,29 +70,15 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		self.local_ip = ''
 		self.setupUi(self)
 		self.compile_thread = None
-		self.VERSION = REGISTERS.VERSION_ATMEGA32  # This needs to be dynamically changed when hardware is connected
-		self.SPECIALS = REGISTERS.VERSIONS[self.VERSION]['SPECIALS']
-		self.REGISTERS = REGISTERS.VERSIONS[self.VERSION]['REGISTERS']
-		self.EXAMPLES_DIR = REGISTERS.VERSIONS[self.VERSION]['examples directory']
 
-		self.docks = [self.padock, self.pbdock, self.pcdock, self.pddock]
-		self.sensorList = []
-		self.controllerList = []
 		self.monitoring = True
-		self.logRegisters = True
 		self.userHexRunning = False
 		self.uploadingHex = False
 		self.autoUpdateUserRegisters = False
 		self.CFile = None  # '~/kuttyPy.c'
-		self.ipy = None
 		self.defaultDirectory = path["examples"]
 		self.serverActive = False
-		examples = [a for a in os.listdir(os.path.join(path["examples"], self.EXAMPLES_DIR)) if
-		            ('.py' in a) and a != 'kuttyPy.py']  # .py files except the library
-		self.exampleList.addItems(examples)
-		blinkindex = self.exampleList.findText('blink.py')
-		if blinkindex != -1:  # default example. blink.py present in examples directory
-			self.exampleList.setCurrentIndex(blinkindex)
+		self.VERSION = REGISTERS.VERSION_ATMEGA32  # This needs to be dynamically changed when hardware is connected
 
 		self.serialGuageButton.hide()  # Hide the serial guage button
 		# Define some keyboard shortcuts for ease of use
@@ -105,28 +90,17 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 			shortcut = QtWidgets.QShortcut(QtGui.QKeySequence(a), self)
 			shortcut.activated.connect(self.shortcuts[a])
 			self.shortcutActions[a] = shortcut
-		######## PYTHON CODE
-		self.codeThread = QtCore.QThread()
-		self.codeEval = self.codeObject(self.REGISTERS)
-		self.codeEval.moveToThread(self.codeThread)
-		self.codeEval.finished.connect(self.codeThread.quit)
-		self.codeEval.logThis.connect(self.appendLog)  # Connect to the log window
-		self.logThis.connect(self.appendLog)  # Connect to the log window
-		self.logThisPlain.connect(self.appendLogPlain)  # Connect to the log window
-		self.serialGaugeSignal.connect(self.setSerialgauge)
-
-		self.codeThread.started.connect(self.codeEval.execute)
-		self.codeThread.finished.connect(self.codeFinished)
 
 		########## C CODE EDITOR SYNTAX HIGHLIGHTER
 		self.code_highlighters = []
 		####### C CODE EDITOR #########
 		self.codingTabs.tabCloseRequested.connect(self.closeCTab)
 		self.codingTabs.tabBarClicked.connect(self.CTabChanged)
-		self.addFileMenu()
 		self.listTab = None
 		self.mapTab = None
 		self.hexTab = None
+		self.serialGaugeSignal.connect(self.setSerialgauge)
+		self.logThisPlain.connect(self.appendLogPlain)  # Connect to the log window
 
 		self.activeEditor = None
 		self.activeSourceTab = None
@@ -146,13 +120,14 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		self.uploadThread.started.connect(self.UploadObject.execute)
 		self.uploadThread.finished.connect(self.codeFinished)
 
-		self.commandQ = []
-		self.btns = {}
-		self.registers = []
-		self.addPins()
-
 		self.statusBar = self.statusBar()
 		self.makeBottomMenu()
+		self.addFileMenu()
+		self.addEditMenu()
+
+		self.editorFont = QtGui.QFont()
+		self.editorFont.setPointSize(12)
+		self.editorFont.setFamily('Ubuntu mono')
 
 		global app
 
@@ -161,6 +136,8 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 			'status': myTimer(constants.STATUS_UPDATE_INTERVAL),
 			'update': myTimer(constants.AUTOUPDATE_INTERVAL),
 		}
+
+
 
 		serialgaugeoptions = {'name': 'Serial Monitor', 'init': print, 'read': None,
 		                      'fields': ['Value'],
@@ -182,8 +159,43 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		# Auto-Detector
 		self.shortlist = KuttyPyLib.getFreePorts()
 
+		## Embed a terminal if on linux
+		system = platform.system()
+		#if system == 'Linux':
+		#	self.embedWindow()
+
+	def close_maybe(self):
+		pass
+
+	def closeEvent(self, event):
+		self.external.terminate()
+		self.external.waitForFinished(1000)
+
+	def embedWindow(self):
+		import subprocess
+		self.external = QtCore.QProcess(self)
+		self.external.start('gnome-terminal', [])
+		time.sleep(1)
+		p = subprocess.run(['xprop', '-root'], stdout=subprocess.PIPE)
+		for line in p.stdout.decode().splitlines():
+			m = re.fullmatch(r'^_NET_ACTIVE_WINDOW.*[)].*window id # (0x[0-9a-f]+)', line)
+			if m:
+				window = QtGui.QWindow.fromWinId(int(m.group(1), 16))
+				window.setFlag(QtCore.Qt.FramelessWindowHint, True)
+				widget = QtWidgets.QWidget.createWindowContainer(
+					window, self.termFrame, QtCore.Qt.FramelessWindowHint)
+				widget.setFixedSize(600, 400)
+				self.termLayout.addWidget(widget)
+
+				# this is where the magic happens...
+				self.external.finished.connect(self.close_maybe)
+				break
+		else:
+			QtWidgets.QMessageBox.warning(self, 'Error', 'Could not find WID for curreent Window')
+
 	def activateCompileServer(self):
-		if self.serverActive: #Stop it
+		if self.serverActive:  # Stop it
+			'''
 			if self.compile_thread is not None:
 				self.compile_thread.terminate()
 				self.compile_thread.wait()
@@ -192,7 +204,9 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 				self.showStatus("Compiler Stopped ", False)
 				return
 			self.serverActive = False
-			self.compile_thread_button.setText("Start Online Compiler")
+			self.compile_thread_button.setText("Online Compiler")
+			'''
+			return
 		else:
 			s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 			s.settimeout(0.1)  # Set a timeout to avoid blocking indefinitely
@@ -205,12 +219,11 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 			self.serverSignal.connect(self.showServerStatus)
 			s.close()
 			self.showStatus("Compiler Active at " + self.local_ip, False)
-			self.compile_thread_button.setText("Stop Server")
+			self.compile_thread_button.setText(self.local_ip)
 			self.serverActive = True
 
 	def addFileMenu(self):
-		self.myFileMenuBar = QtWidgets.QMenuBar(self.fileMenuButton)
-		codeMenu = self.myFileMenuBar.addMenu('File:')
+		codeMenu = QtWidgets.QMenu()
 
 		newFileAction = QtWidgets.QAction('New File', self)
 		newFileAction.triggered.connect(self.addSourceTab)
@@ -238,6 +251,88 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		exitAction = QtWidgets.QAction('Exit', self)
 		exitAction.triggered.connect(QtWidgets.qApp.quit)
 		codeMenu.addAction(exitAction)
+		self.fileMenuButton.setMenu(codeMenu)
+
+	def closeEvent(self, evnt):
+		evnt.ignore()
+		self.askBeforeQuit()
+
+	def askBeforeQuit(self):
+		ask = False
+		for editors in self.sourceTabs:
+			if self.sourceTabs[editors][0].changed:
+				ask = True
+		if ask:
+			reply = QtWidgets.QMessageBox.question(self, 'Warning', 'Files may have unsaved changes.\nReally quit?',
+			                                       QtWidgets.QMessageBox.Yes, QtWidgets.QMessageBox.No)
+			if reply == QtWidgets.QMessageBox.No:
+				return
+
+		self.userHexRunning=False
+		global app
+		app.quit()
+
+	def addEditMenu(self):
+		codeMenu = QtWidgets.QMenu()
+
+		undoAction = QtWidgets.QAction('Undo( Ctrl+Z)', self)
+		undoAction.triggered.connect(self.activeEditor.undo)
+		codeMenu.addAction(undoAction)
+		redoAction = QtWidgets.QAction('Undo( Ctrl+Shft+Z)', self)
+		redoAction.triggered.connect(self.activeEditor.redo)
+		codeMenu.addAction(redoAction)
+		a = QtWidgets.QAction('Cut( Ctrl+X)', self)
+		a.triggered.connect(self.activeEditor.cut)
+		codeMenu.addAction(a)
+		a = QtWidgets.QAction('Copy( Ctrl+C)', self)
+		a.triggered.connect(self.activeEditor.copy)
+		codeMenu.addAction(a)
+		a = QtWidgets.QAction('Paste( Ctrl+V)', self)
+		a.triggered.connect(self.activeEditor.paste)
+		codeMenu.addAction(a)
+		a = QtWidgets.QAction('Select All( Ctrl+A)', self)
+		a.triggered.connect(self.activeEditor.selectAll)
+		codeMenu.addAction(a)
+
+		self.editMenuButton.setMenu(codeMenu)
+
+	def makeBottomMenu(self):
+		try:
+			self.pushbutton.setParent(None)
+		except:
+			pass
+		self.pushbutton = QtWidgets.QPushButton('Menu')
+		self.pushbutton.setStyleSheet("color: #262;")
+		menu = QtWidgets.QMenu()
+
+		menu.addAction('Save Window as Svg', self.exportSvg)
+		menu.addAction('Upload Hex File', self.uploadHex)
+
+		# Theme
+		self.themeAction = QtWidgets.QWidgetAction(menu)
+		themes = [a.split('.qss')[0] for a in os.listdir(path["themes"]) if '.qss' in a]
+		self.themeBox = QtWidgets.QComboBox();
+		self.themeBox.addItems(themes)
+		self.themeBox.currentIndexChanged['QString'].connect(self.setTheme)
+		self.themeAction.setDefaultWidget(self.themeBox)
+		menu.addAction(self.themeAction)
+
+		defaultTheme = "newtheme"
+		self.themeBox.setCurrentIndex(themes.index(defaultTheme))
+		self.setTheme(defaultTheme)
+
+		self.pushbutton.setMenu(menu)
+
+		# Compile thread
+		self.compile_thread_button = QtWidgets.QPushButton('Online Compiler')
+		self.compile_thread_button.setStyleSheet("color: #262;")
+		self.compile_thread_button.clicked.connect(self.activateCompileServer)
+		self.statusBar.addPermanentWidget(self.compile_thread_button)
+
+		self.bottomLabel = QtWidgets.QLabel("Messages")
+
+		# Menu button
+		self.statusBar.addPermanentWidget(self.pushbutton)
 
 	def closeCTab(self, index):
 		print('Close Tab', index)
@@ -290,7 +385,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		self.codingTabs.addTab(sourceTab, "")
 		self.sourceTabs[sourceTab] = [editor, None]
 		self.codingTabs.setCurrentIndex(self.codingTabs.indexOf(sourceTab))
-		self.codingTabs.setTabText(self.codingTabs.indexOf(sourceTab), 'new.c')
+		self.codingTabs.setTabText(self.codingTabs.indexOf(sourceTab), 'Untitled')
 		self.activeSourceTab = sourceTab
 		self.activeEditor = editor
 		self.code_highlighters.append(syntax.PythonHighlighter(editor.document()))
@@ -336,15 +431,11 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 
 		if index != 0:  # examples/editor tab. disable monitoring
 			self.monitoring = False
-			for a in self.docks:
-				a.hide()
 		else:  # Playground . enable monitoring and control.
 			self.monitoring = True
 			self.autoRefreshUserRegisters.setChecked(False)
 			self.userRegistersAutoRefresh(False)
 			self.setLogType('playground')
-			for a in self.docks:
-				a.show()
 
 	def setLogType(self, tp):
 		self.log.clear()
@@ -427,143 +518,6 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		self.verticalLayout_2.addWidget(self.hexEditor)
 		self.codingTabs.addTab(self.hexTab, "")
 
-	class codeObject(QtCore.QObject):
-		finished = QtCore.pyqtSignal()
-		logThis = QtCore.pyqtSignal(str)
-		code = ''
-
-		def __init__(self, REGISTERS):
-			super(AppWindow.codeObject, self).__init__()
-			self.PORTMAP = {v: k for k, v in REGISTERS.items()}  # Lookup port name based on number
-			self.compiled = ''
-			self.SR = None
-			self.GR = None
-			self.evalGlobals = {}
-
-			self.evalGlobals['getReg'] = self.getReg
-			self.evalGlobals['setReg'] = self.setReg
-			self.evalGlobals['print'] = self.printer
-
-		def setCode(self, code, **kwargs):
-			try:
-				self.compiled = compile(code.encode(), '<string>', mode='exec')
-			except SyntaxError as err:
-				error_class = err.__class__.__name__
-				detail = err.args[0]
-				line_number = err.lineno
-				return '''<span style="color:red;">%s at line %d : %s</span>''' % (error_class, line_number, detail)
-			except Exception as err:
-				error_class = err.__class__.__name__
-				detail = err.args[0]
-				cl, exc, tb = sys.exc_info()
-				line_number = traceback.extract_tb(tb)[-1][1]
-				return '''<span style="color:red;">%s at line %d: %s</span>''' % (error_class, line_number, detail)
-
-			self.SR = kwargs.get('setReg')
-			self.GR = kwargs.get('getReg')
-			self.evalGlobals = kwargs
-			self.evalGlobals['getReg'] = self.getReg  # Overwrite these three. They will be wrapped.
-			self.evalGlobals['setReg'] = self.setReg
-			self.evalGlobals['print'] = self.printer
-			return ''
-
-		def printer(self, *args):
-			self.logThis.emit('''<span style="color:cyan;">%s</span>''' % (' '.join([str(a) for a in args])))
-
-		def setReg(self, reg, value):
-			html = u'''<pre><span>W\u2193</span>{0:s}\t{1:d}\t0x{1:02x} / 0b{1:08b}</pre>'''.format(
-				self.PORTMAP.get(reg, ''), value)
-			self.logThis.emit(html)
-			self.SR(reg, value)
-
-		def getReg(self, reg):
-			value = self.GR(reg)
-			html = u'''<pre><span>R\u2191</span>{0:s}\t{1:d}\t0x{1:02x} / 0b{1:08b}</pre>'''.format(
-				self.PORTMAP.get(reg, ''), value)
-			self.logThis.emit(html)
-			return value
-
-		def execute(self):
-			# old = sys.stdout
-			# olde = sys.stderr
-			# sys.stdout = self.toLog(self.logThis)
-			# sys.stderr = self.toLog(self.logThis)
-			try:
-				exec(self.compiled, {}, self.evalGlobals)
-			except SyntaxError as err:
-				error_class = err.__class__.__name__
-				detail = err.args[0]
-				line_number = err.lineno
-				self.logThis.emit(
-					'''<span style="color:red;">%s at line %d : %s</span>''' % (error_class, line_number, detail))
-			except Exception as err:
-				error_class = err.__class__.__name__
-				detail = err.args[0]
-				cl, exc, tb = sys.exc_info()
-				line_number = traceback.extract_tb(tb)[-1][1]
-				self.logThis.emit(
-					'''<span style="color:red;">%s at line %d: %s</span>''' % (error_class, line_number, detail))
-			# sys.stdout = old
-			# sys.stderr = olde
-			self.logThis.emit("Finished executing user code")
-			self.finished.emit()
-
-	def runCode(self):
-		if self.codeThread.isRunning():
-			print('one code is already running')
-			return
-
-		self.setLogType('python')
-		self.log.clear()  # clear the log window
-		self.log.setText('''<span style="color:green;">----------User Code Started-----------</span>''')
-		kwargs = {}
-		for a in dir(self.p):
-			attr = getattr(self.p, a)
-			if inspect.ismethod(attr) and a[:2] != '__':
-				kwargs[a] = attr
-
-		compilemsg = self.codeEval.setCode('{0:s}'.format(self.userCode.toPlainText()), **kwargs)
-		if len(compilemsg):
-			self.log.append(compilemsg)
-			return
-		self.codeThread.start()
-
-		self.userCode.setStyleSheet("border: 3px dashed #53ffff;")
-		self.tabs.setTabEnabled(0, False)
-
-	def codeFinished(self):
-		print('finished')
-		self.tabs.setTabEnabled(0, True)
-		self.userCode.setStyleSheet("")
-		self.uploadingHex = False
-
-	def abort(self):
-		if self.codeThread.isRunning():
-			self.log.append(
-				'''<span style="color:red;">----------Kill Signal(Doesn't work yet. Restart the application)-----------</span>''')
-			self.codeThread.quit()
-			self.codeThread.terminate()
-			del self.codeThread
-			self.codeThread = QtCore.QThread()
-			self.codeEval = self.codeObject(self.REGISTERS)
-			self.codeEval.moveToThread(self.codeThread)
-			self.codeEval.finished.connect(self.codeThread.quit)
-			self.codeEval.logThis.connect(self.appendLog)  # Connect to the log window
-			self.codeThread.started.connect(self.codeEval.execute)
-			self.codeThread.finished.connect(self.codeFinished)
-
-	def getReg(self, reg, record=True):
-		val = self.p.getReg(reg)
-		if record:
-			self.updatedRegs[reg] = [0, val]
-		return val
-
-	def setReg(self, reg, val, record=True):
-		self.p.setReg(reg, val)
-		if record:
-			self.updatedRegs[reg] = [1, val]
-		return val
-
 	def appendLog(self, txt):
 		self.log.append(txt)
 
@@ -611,9 +565,6 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		html += "</tbody></table>"
 		self.log.setHtml(html)
 
-	def userRegistersAutoRefresh(self, state):
-		self.autoUpdateUserRegisters = state
-
 	def updateEverything(self):
 		self.locateDevices()
 		if not self.checkConnectionStatus(): return
@@ -627,140 +578,6 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 				self.serialGaugeSignal.emit(t)
 				self.logThisPlain.emit(t)
 			return
-
-		# self.setTheme('material')
-
-		if self.codeThread.isRunning():
-			return
-
-		if self.autoUpdateUserRegisters:
-			for a in range(self.registerList.count()):
-				self.registerList.itemWidget(self.registerList.item(a)).execute()
-
-		while len(self.commandQ):
-			if not self.centralWidget().isEnabled():
-				return
-			a = self.commandQ.pop(0)
-			if a[0] == 'DSTATE':  # Digital Out ['DSTATE','Pxx',state]
-				pname = 'PORT' + a[1][1].upper()
-				bit = int(a[1][2])
-				reg = self.getReg(pname)
-				reg &= ~ (1 << bit)
-				if (a[2]): reg |= (1 << bit)
-				self.setReg(pname, reg)
-			elif a[0] == 'DTYPE':  # Digital pin I/O ['DTYPE','Pxx',state]
-				pname = 'DDR' + a[1][1].upper()
-				bit = int(a[1][2])
-				reg = self.getReg(pname)
-				reg &= ~ (1 << bit)
-				if (a[2]): reg |= (1 << bit)
-				self.setReg(pname, reg);
-			elif a[0] == 'WRITE':  # ['WRITE','REGNAME',val]
-				self.setReg(a[1], a[2]);
-			elif a[0] == 'READ':  # ['READ','REGNAME',function]
-				val = self.getReg(a[1])
-				a[2](val)
-			elif a[0] == 'CNTR1':  # ['CNTR1',output with setValue function]
-				cl = self.getReg('TCNT1L', False)
-				ch = self.getReg('TCNT1H', False)
-				a[1].setValue(cl | (ch << 8))
-			elif a[0] == 'ADC':  # ['ADC',ADMUX,output with setValue function, to log, or not to log]
-				self.setReg('ADMUX', a[1], a[3])
-				self.setReg('ADCSRA', 196 | 1, a[3])
-				adcl = self.getReg('ADCL', a[3])
-				adch = self.getReg('ADCH', a[3])
-				a[2].setValue(adcl | (adch << 8))
-
-		for a in self.sensorList:
-			if a[0].isVisible():
-				a[0].setValue(a[0].read())
-
-		'''
-        if self.enableLog.isChecked():
-            if self.clearLog.isChecked() and len(self.updatedRegs):
-                self.log.clear()
-            if len(self.updatedRegs):
-                self.genLog()
-                self.updatedRegs = OrderedDict()
-        '''
-		if len(self.updatedRegs):
-			self.genLog()
-			self.updatedRegs = OrderedDict()
-
-		if self.pending['status'].ready() and self.monitoring:
-			val = self.p.getReg(self.getRegs[self.currentRegister][0])
-			self.getRegs[self.currentRegister][1](self.getRegs[self.currentRegister][0], val)
-			self.currentRegister += 1
-			if self.currentRegister == len(self.getRegs):
-				self.currentRegister = 0
-			for a in self.ports:
-				self.btns[a].setRegs(self.p.REGSTATES)
-
-		if self.pending['update'].ready():
-			pass
-
-	# print('update')
-
-	def updateInputs(self, port, value):
-		portchar = port[3]
-		for a in range(8):
-			btn = self.btns['P' + portchar + str(a)]
-			btn.nameIn.setChecked((value >> a) & 1)
-			if portchar == 'A':  # ADC
-				if btn.currentPage == 2:  # ADC Page displayed
-					self.commandQ.append(['ADC', btn.ADMUX, btn, btn.logstate])
-			elif type(btn) == dio.DIOCNTR and btn.currentPage == 2:  # CNTR
-				self.commandQ.append(['CNTR1', btn.slider])
-
-	def newStepperController(self):
-		if self.p.connected:
-			dialog = dio.DIOSTEPPER(self, total=200, device=self.p)
-			dialog.launch()
-			self.sensorList.append([dialog, None])
-
-	############ I2C SENSORS #################
-	def I2CScan(self):
-		if self.p.connected:
-			x = self.p.I2CScan()
-			print('Responses from: ', x)
-			for a in self.sensorList:
-				a[0].setParent(None)
-				a[1].setParent(None)
-			self.sensorList = []
-			for a in self.controllerList:
-				a[0].setParent(None)
-				a[1].setParent(None)
-			self.controllerList = []
-			for a in x:
-				s = self.p.sensors.get(a, None)
-				if s != None:
-					btn = QtWidgets.QPushButton(s['name'] + ':' + hex(a))
-					dialog = dio.DIOSENSOR(self, s)
-					btn.clicked.connect(dialog.launch)
-					self.sensorLayout.addWidget(btn)
-					self.sensorList.append([dialog, btn])
-					continue
-
-				s = self.p.controllers.get(a, None)
-				if s != None:
-					btn = QtWidgets.QPushButton(s['name'] + ':' + hex(a))
-					dialog = dio.DIOCONTROL(self, s)
-					btn.clicked.connect(dialog.launch)
-					self.sensorLayout.addWidget(btn)
-					self.controllerList.append([dialog, btn])
-					continue
-
-				s = self.p.special.get(a, None)
-				if s != None:
-					btn = QtWidgets.QPushButton(s['name'] + ':' + hex(a))
-					dialog = dio.DIOROBOT(self, s)
-					btn.clicked.connect(dialog.launch)
-					self.sensorLayout.addWidget(btn)
-					self.controllerList.append([dialog, btn])
-					continue
-
-	def loadExample(self, filename):
-		self.userCode.setPlainText(open(os.path.join(path["examples"], self.EXAMPLES_DIR, filename), "r").read())
 
 	########################### UPLOAD HEX FILE #######################
 
@@ -793,18 +610,18 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 						# cmd = 'avr-gcc -Wall -O2 -mmcu=%s -o "%s" -Map "%s" "%s"' %('atmega32',fname,fname+'.map',self.fname)
 						cmd = 'avr-gcc -Wall -O2 -mmcu=%s -Wl,-Map="%s" -o "%s" "%s"' % (
 							'atmega32', fname + '.map', fname, self.fname)  # includes MAP
-						self.logThis.emit('''<span style="color:green;">%sing for Atmega32</span>''' % (action))
+						self.logThis.emit('''<span style="color:#383;">%sing for Atmega32</span>''' % (action))
 					elif self.p.version == REGISTERS.VERSION_ATMEGA328P:
 						cmd = 'avr-gcc -Wall -O2 -mmcu=%s -o "%s" "%s"' % ('atmega328p', fname, self.fname)
 						self.logThis.emit(
-							'''<span style="color:green;">%sing for Atmega328p (Nano)</span>''' % (action))
+							'''<span style="color:#383;">%sing for Atmega328p (Nano)</span>''' % (action))
 					else:
-						self.logThis.emit('''<span style="color:white;">%ser UNAVAILABLE</span>''' % (action))
+						self.logThis.emit('''<span style="color:#222;">%ser UNAVAILABLE</span>''' % (action))
 						return
 					print(cmd)
 					res = subprocess.getstatusoutput(cmd)
 					if res[0] != 0:
-						self.logThis.emit('''<span style="color:#d730ee;">%se Error: %s</span>''' % (
+						self.logThis.emit('''<span style="color:#526;">%se Error: %s</span>''' % (
 							action, res[1].replace('\n', '<br>')))
 						self.finished.emit()
 						return
@@ -860,7 +677,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 						time.sleep(0.25)
 						self.p.get_version()
 						self.logThis.emit('''<span style="color:#d730ee;">Failed to upload</span>''')
-				# self.jumpToApplication(False) #Force a reset
+			# self.jumpToApplication(False) #Force a reset
 			self.finished.emit()
 
 	def uploadHex(self):
@@ -871,7 +688,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 			# self.tabs.setTabEnabled(0,False)
 			self.uploadingHex = True
 			self.log.clear()
-			self.log.setText('''<span style="color:cyan;">-- Uploading Code --</span><br>''')
+			self.log.setText('''<span style="color:#225;">-- Uploading Code --</span><br>''')
 			self.UploadObject.config('upload', self.p, filename[0])
 			self.uploadThread.start()
 
@@ -891,23 +708,33 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 				infile.read())  # self.activeEditor = self.sourceTabs[self.activeSourceTab][0]
 			infile.close()
 			self.codingTabs.setTabText(self.codingTabs.indexOf(self.activeSourceTab), os.path.split(self.CFile)[1])
-			self.log.setText('''<span style="color:cyan;">-- Opened File: %s --</span><br>''' % filename[0])
+			self.log.setText('''<span style="color:#225;">-- Opened File: %s --</span><br>''' % filename[0])
 
 	def fontPlus(self):
 		size = self.editorFont.pointSize()
 		if size > 40: return
 		self.editorFont.setPointSize(size + 1)
-		self.editor.setFont(self.editorFont)
+		self.updateFont()
 
 	def fontMinus(self):
 		size = self.editorFont.pointSize()
 		if size < 5: return
 		self.editorFont.setPointSize(size - 1)
-		self.editor.setFont(self.editorFont)
+		self.updateFont()
 
 	def setFont(self, font):
 		self.editorFont.setFamily(font)
-		self.editor.setFont(self.editorFont)
+		self.updateFont()
+
+	def updateFont(self):
+		for editors in self.sourceTabs:
+			self.sourceTabs[editors][0].setFont(self.editorFont)
+		if hasattr(self, 'hexEditor') and self.hexEditor is not None:
+			self.hexEditor.setFont(self.editorFont)
+		if hasattr(self, 'listEditor') and self.listEditor is not None:
+			self.listEditor.setFont(self.editorFont)
+		if hasattr(self, 'mapEditor') and self.mapEditor is not None:
+			self.mapEditor.setFont(self.editorFont)
 
 	def compileAndUpload(self):
 		self.setLogType('avr')
@@ -917,7 +744,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 				self.launchFirmwareButton.setChecked(False)
 				self.jumpToApplication(False)
 			self.uploadingHex = True
-			self.log.setText('''<span style="color:cyan;">-- Compiling and Uploading Code --</span><br>''')
+			self.log.setText('''<span style="color:#225;">-- Compiling and Uploading Code --</span><br>''')
 			self.UploadObject.config('compileupload', self.p, self.CFile)
 			self.uploadThread.start()
 
@@ -946,6 +773,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 			self.CFile = self.saveAs()
 		if self.CFile is not None and len(self.CFile) > 1:
 			self.sourceTabs[self.activeSourceTab][1] = self.CFile
+			self.activeEditor.markAsSaved(True)
 			fn = open(self.CFile, 'w')
 			fn.write(self.activeEditor.toPlainText())
 			fn.close()
@@ -978,32 +806,14 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 			self.p = KuttyPyLib.connect(port=port)
 		else:
 			self.p = KuttyPyLib.connect(autoscan=True)
-		if self.p.connected:
-			self.launchFirmwareButton.setChecked(False)
-			self.setWindowTitle('KuttyPy Interactive Console [{0:s}]'.format(self.p.portname))
-			self.updatedRegs = OrderedDict()
-			self.currentRegister = 0
-			self.VERSION = self.p.version
-			self.SPECIALS = REGISTERS.VERSIONS[self.VERSION]['SPECIALS']
-			self.REGISTERS = REGISTERS.VERSIONS[self.VERSION]['REGISTERS']
-			self.EXAMPLES_DIR = REGISTERS.VERSIONS[self.VERSION]['examples directory']
-			if self.p.version == REGISTERS.VERSION_ATMEGA328P:
-				self.getRegs = [
-					('PINB', self.updateInputs),
-					('PINC', self.updateInputs),
-					('PIND', self.updateInputs),
-				]
-			elif self.p.version == REGISTERS.VERSION_ATMEGA32:
-				self.getRegs = [
-					('PINA', self.updateInputs),
-					('PINB', self.updateInputs),
-					('PINC', self.updateInputs),
-					('PIND', self.updateInputs),
-				]
 
+		if self.p.connected:
+			self.VERSION = self.p.version
+			self.launchFirmwareButton.setChecked(False)
+			self.setWindowTitle('KuttyPy Integrated Development Environment [{0:s}]'.format(self.p.portname))
 
 		else:
-			self.setWindowTitle('KuttyPy Interactive Console [ Hardware not detected ]')
+			self.setWindowTitle('KuttyPy Integrated Development Environment [ Hardware not detected ]')
 
 	def setLanguage(self, lang='fr_FR'):
 		translate(lang)
@@ -1012,7 +822,12 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 	def showSerialGauge(self):
 		self.serialGauge.show()
 
+	def codeFinished(self):
+		print('finished')
+		self.uploadingHex = False
+
 	def jumpToApplication(self, state):
+		print('run firmware', state)
 		if self.p:
 			if state:
 				self.serialGuageButton.show()
@@ -1020,11 +835,8 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 				self.p.fd.write(b'j')  # Skip to application (Bootloader resets)
 				self.launchFirmwareButton.setText('Stop')
 
-				for a in self.docks:
-					a.setEnabled(False)
-				# self.tabs.setEnabled(False)
 				self.setLogType('monitor')
-				self.log.setText('''<span style="color:cyan;">-- Serial Port Monitor --</span><br>''')
+				self.log.setText('''<span style="color:#004;">-- Serial Port Monitor --</span><br>''')
 			# self.serialGauge.show()
 
 			else:
@@ -1038,8 +850,6 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 				while self.p.fd.in_waiting:
 					self.p.fd.read()
 				self.p.get_version()
-				for a in self.docks:
-					a.setEnabled(True)
 				self.userHexRunning = False
 				self.launchFirmwareButton.setText('Run')
 				# self.tabs.setEnabled(True)
@@ -1048,76 +858,19 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 			if self.isChecked():
 				self.setChecked(False)
 
-	def makeBottomMenu(self):
-		try:
-			self.pushbutton.setParent(None)
-		except:
-			pass
-		self.pushbutton = QtWidgets.QPushButton('Menu')
-		self.pushbutton.setStyleSheet("height: 13px;padding:3px;color: #7c7;")
-		menu = QtWidgets.QMenu()
-
-		menu.addAction('Save Window as Svg', self.exportSvg)
-		menu.addAction('Open Stepper Controller', self.newStepperController)
-
-		menu.addAction('Upload Hex File', self.uploadHex)
-
-		# Theme
-		'''
-        self.themeAction = QtWidgets.QWidgetAction(menu)
-        themes = [a.split('.qss')[0] for a in os.listdir(path["themes"]) if '.qss' in a]
-        self.themeBox = QtWidgets.QComboBox(); self.themeBox.addItems(themes)
-        self.themeBox.currentIndexChanged['QString'].connect(self.setTheme)
-        self.themeAction.setDefaultWidget(self.themeBox)
-        menu.addAction(self.themeAction)
-        '''
-		themes = [a.split('.qss')[0] for a in os.listdir(path["themes"]) if '.qss' in a]
-		self.themeBox = QtWidgets.QComboBox();
-		self.themeBox.addItems(themes)
-		self.themeBox.currentIndexChanged['QString'].connect(self.setTheme)
-		self.statusBar.addPermanentWidget(self.themeBox)
-
-		defaultTheme = "material"
-		self.themeBox.setCurrentIndex(themes.index(defaultTheme))
-		self.setTheme(defaultTheme)
-
-		self.pushbutton.setMenu(menu)
-
-		# self.userApplication = QtWidgets.QCheckBox("User App");
-		# self.userApplication.toggled['bool'].connect(self.jumpToApplication)
-		# self.statusBar.addPermanentWidget(self.userApplication)
-
-		self.speedbutton = QtWidgets.QComboBox();
-		self.speedbutton.addItems(['Slow', 'Fast', 'Ultra']);
-		self.speedbutton.setCurrentIndex(1);
-		self.speedbutton.currentIndexChanged['int'].connect(self.setSpeed)
-		self.statusBar.addPermanentWidget(self.speedbutton)
-
-		# Compile thread
-		self.compile_thread_button = QtWidgets.QPushButton('Online Compiler')
-		self.compile_thread_button.setStyleSheet("height: 13px;padding:3px;color: #7c7;")
-		self.compile_thread_button.clicked.connect(self.activateCompileServer)
-		self.statusBar.addPermanentWidget(self.compile_thread_button)
-
-		self.bottomLabel = QtWidgets.QLabel("Messages")
-
-		# Menu button
-		self.statusBar.addPermanentWidget(self.pushbutton)
-
 	def showServerStatus(self, msg):
 		self.showStatus("Compiler: Error Launching Server (Restart app) ", True)
 		QtWidgets.QMessageBox.warning(self, 'Server Error', msg)
-		#self.statusBar.addPermanentWidget(self.compile_thread_button)
+		self.compile_thread_button.setText("Online Compiler")
+
+	# self.statusBar.addPermanentWidget(self.compile_thread_button)
 
 	def showStatus(self, msg, error=None):
 		if error:
-			self.statusBar.setStyleSheet("color:#F77")
+			self.statusBar.setStyleSheet("color:#633")
 		else:
-			self.statusBar.setStyleSheet("color:#FFF")
+			self.statusBar.setStyleSheet("color:#333")
 		self.statusBar.showMessage(msg)
-
-	def setSpeed(self, index):
-		self.timer.setInterval([100, 20, 5][index])
 
 	def locateDevices(self):
 		try:
@@ -1138,7 +891,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 					except:
 						pass
 					self.p.connected = False
-					self.setWindowTitle('KuttyPy Interactive Console [ Hardware not detected ]')
+					self.setWindowTitle('KuttyPy Integrated Development Environment [ Hardware not detected ]')
 
 			elif True in L.values():
 				reply = QtWidgets.QMessageBox.question(self, 'Connection', 'Device Available. Connect?',
@@ -1173,15 +926,6 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 			p.begin(generator)
 			self.render(p)
 			p.end()
-
-	def ipython(self):  # Experimental feature. Import ipython and launch console
-		if not self.p.connected:
-			return
-		from utilities import ipy
-		if not self.ipy:
-			self.ipy = ipy.AppWindow(self, kp=self.p)
-		self.ipy.show()
-		self.ipy.updateDevice(self.p)
 
 
 def translators(langDir, lang=None):
@@ -1271,7 +1015,7 @@ def run():
 		myapp.compile_thread.terminate()
 		print('waiting to quit compile_thread')
 		myapp.compile_thread.wait()
-	print('delete app..')
+
 	app.deleteLater()
 	sys.exit(r)
 

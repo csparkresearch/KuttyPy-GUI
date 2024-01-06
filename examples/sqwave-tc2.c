@@ -1,4 +1,5 @@
 // Attempts to set 1500 Hz squarewave on OC2 (PD7) and displays the actual value on LCD
+
 #include "mh-timer.c"
 #include "mh-lcd.c"
 

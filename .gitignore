@@ -1,6 +1,11 @@
 examples/*.map
 examples/*.hex
 examples/*.lst
+examples/*.map
+examples/ASM/*.map
+examples/ASM/*.hex
+examples/ASM/*.lst
+examples/ASM/*.map
 pypi
 __pycache__
 .cache
