@@ -17,12 +17,13 @@ Given the paucity of time, the fastest ways for [installing](https://csparkresea
 
 ??? abstract "Windows with Python3 installed"
     * [Python3](https://www.python.org/ftp/python/3.8.0/python-3.8.0-amd64.exe) must be installed, and `pip` should be accessible.
-    * Open a command prompt, and use pip3 to install the KuttyPy package
+    * Open a command prompt as administrator, and use pip3 to install the KuttyPy package
     ```
     py -3 -m pip install KuttyPy
     ```
     * Download and install the [CH341 USB Driver](../assets/CH341SER.EXE)
-    * You will now be able to launch `kuttypy` from the prompt, and import the `kuttyPy` library from any Python script.
+    * You will now be able to launch `kuttypyplus` from the prompt, and import the `kuttyPy` library from any Python script.
+	* you can also launch `kuttypyide`
     * If you wish to compile C code and upload to the KuttyPy hardware, winavr must be installed, and `avr-gcc` must be accessible from a command prompt.
         * Download and install `winavr` from [winavr.sourceforge.net](https://sourceforge.net/projects/winavr/files/WinAVR/20100110/WinAVR-20100110-install.exe/download)
 
@@ -58,7 +59,7 @@ Given the paucity of time, the fastest ways for [installing](https://csparkresea
     
 ??? abstract "Using PIP on other OSes"
     * Python3 must be installed
-    * Open a command prompt, and use pip3 to install the KuttyPy package
+    * Open a command prompt as administrator, and use pip3 to install the KuttyPy package
     ```
     pip3 install kuttyPy
     ```

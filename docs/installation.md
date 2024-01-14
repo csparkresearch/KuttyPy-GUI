@@ -3,11 +3,23 @@
 [![PyPI version](https://badge.fury.io/py/kuttyPy.svg)](https://badge.fury.io/py/kuttyPy)
 ### Windows
 
-Python3 must be installed. kuttyPy package will install other dependencies such as PyQt5, qtconsole, numpy, scipy, pyqtgraph etc
+Python3 must be installed. kuttyPy package will install other dependencies such as PyQt5, qtconsole, numpy, scipy, pyqtgraph etc.
+Open the `cmd` terminal as administrator, and run the following command. This fetches KuttyPy and all required dependencies.
 
 ```
 py -3 -m pip install kuttyPy
-kuttypy
+```
+
+In order to launch the kuttypy interface
+
+```shell
+kuttypyplus
+```
+
+In order to launch the kuttypy IDE
+
+```shell
+kuttypyide
 ```
 
 ### Ubuntu

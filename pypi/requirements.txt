@@ -1,9 +1,0 @@
-pyserial
-numpy
-scipy
-pyqt5
-pyqtgraph
-qtconsole
-flask
-flask-cors
-werkzeug
