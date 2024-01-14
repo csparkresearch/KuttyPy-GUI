@@ -10,3 +10,5 @@ pypi
 __pycache__
 .cache
 .idea
+docs/workshopnano.md
+docs/boards.md

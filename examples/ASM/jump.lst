@@ -1,5 +1,5 @@
 
-/home/jithin/Documents/kuttypy-gui/examples/ASM/jump:     file format elf32-avr
+/home/jithin/Documents/CSpark/kuttypy-gui/examples/ASM/jump:     file format elf32-avr
 
 
 Disassembly of section .text:
@@ -41,13 +41,11 @@ Disassembly of section .text:
   68:	0c 94 00 00 	jmp	0	; 0x0 <__vectors>
 
 0000006c <main>:
-  6c:	0f ef       	ldi	r16, 0xFF	; 255
+  6c:	0e ef       	ldi	r16, 0xFE	; 254
   6e:	07 bb       	out	0x17, r16	; 23
-  70:	0c 94 3b 00 	jmp	0x76	; 0x76 <lab1>
-  74:	0f e0       	ldi	r16, 0x0F	; 15
-
-00000076 <lab1>:
-  76:	08 bb       	out	0x18, r16	; 24
+  70:	08 bb       	out	0x18, r16	; 24
+  72:	0c 94 3c 00 	jmp	0x78	; 0x78 <_exit>
+  76:	0f e0       	ldi	r16, 0x0F	; 15
 
 00000078 <_exit>:
   78:	f8 94       	cli

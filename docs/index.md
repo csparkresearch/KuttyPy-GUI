@@ -1,14 +1,11 @@
 # Welcome to KuttyPy's documentation
 
-The kuttyPy (/kʊtipʌɪ/) Microcontroller training software allows live manipulation of the registers
+The [kuttyPy (/kʊtipʌɪ/)](https://csparkresearch.in/kuttypyplus) Microcontroller training software allows live manipulation of the registers
 in microcontrollers via a connected computer through a Python library or Graphical interface.
 
 The kuttyPy hardware is an ATMEGA32 microcontroller development board developed by the [ExpEYES](http://expeyes.in) project, and is 
 currently supported. The hardware contains the kuttyPy firmware, but can also be used to run other
 programs via its bootloader functionality.
-The software is being extended to support other microcontroller platforms as well, such as the 328p
- found on Arduino Nano boards.
-
 
 setReg and getReg Python function calls act as debugging and monitoring tools, and combined with Python's visualization 
 and analytical utilities, this approach has immense pedagogical potential for beginners to the microcontroller world. 
@@ -19,13 +16,11 @@ setReg('PORTD',160) # PD5 and PD7 set to HIGH. Both LEDs start glowing
 ```
 
 !!! info "The KuttyPy ATMEGA32 hardware"
-	![Screenshot](images/banner_pcb.png)
+	![Screenshot](images/kuttypyplus.jpg)
 
-!!! info "The KuttyPy Nano hardware"
-	![Screenshot](imagesnano/banner_nano.jpg)
 
 !!! info "And its companion Python software"
-	![Screenshot](images/main.gif?raw=true "Recording of the User Interface")
+	![Screenshot](images/main.png?raw=true "The User Interface")
 
 !!! tip "Atmega32 Datasheet"
 	[Download](http://ww1.microchip.com/downloads/en/devicedoc/doc2503.pdf) the datasheet before diving

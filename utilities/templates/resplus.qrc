@@ -1,5 +1,9 @@
 <RCC>
   <qresource prefix="control">
+    <file>asm.png</file>
+    <file>c.png</file>
+    <file>hex.png</file>
+    <file>utilities-terminal.png</file>
     <file>download.svg</file>
     <file>kpyplus.jpeg</file>
     <file>refresh.svg</file>

@@ -48,7 +48,7 @@ kuttypy
 + python3 KuttyPyGUI.py
 
 ### Installing from the deb file
-+ download the [latest deb](https://csparkresearch.in/kuttypy)
++ download the [latest deb](https://csparkresearch.in/kuttypyplus)
 + use gdebi to install it.
 
 ### Installing from the Ubuntu repository

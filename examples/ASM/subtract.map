@@ -18,7 +18,7 @@ user_signatures  0x0000000000850000 0x0000000000000400 rw !x
 Linker script and memory map
 
 LOAD /usr/lib/gcc/avr/5.4.0/../../../avr/lib/avr5/crtatmega32.o
-LOAD /tmp/ccDhvBJw.o
+LOAD /tmp/ccnOGLxR.o
 START GROUP
 LOAD /usr/lib/gcc/avr/5.4.0/avr5/libgcc.a
 LOAD /usr/lib/gcc/avr/5.4.0/../../../avr/lib/avr5/libm.a
@@ -201,7 +201,7 @@ END GROUP
                 0x0000000000000068                __vector_16
                 0x0000000000000068                __vector_18
                 0x0000000000000068                __vector_20
- .text          0x000000000000006c       0x14 /tmp/ccDhvBJw.o
+ .text          0x000000000000006c       0x14 /tmp/ccnOGLxR.o
                 0x000000000000006c                main
  .text          0x0000000000000080        0x0 /usr/lib/gcc/avr/5.4.0/avr5/libgcc.a(_exit.o)
                 0x0000000000000080                . = ALIGN (0x2)
@@ -250,7 +250,7 @@ END GROUP
                 [!provide]                        PROVIDE (__data_start, .)
  *(.data)
  .data          0x0000000000800060        0x0 /usr/lib/gcc/avr/5.4.0/../../../avr/lib/avr5/crtatmega32.o
- .data          0x0000000000800060        0x0 /tmp/ccDhvBJw.o
+ .data          0x0000000000800060        0x0 /tmp/ccnOGLxR.o
  .data          0x0000000000800060        0x0 /usr/lib/gcc/avr/5.4.0/avr5/libgcc.a(_exit.o)
  *(.data*)
  *(.gnu.linkonce.d*)
@@ -265,7 +265,7 @@ END GROUP
                 [!provide]                        PROVIDE (__bss_start, .)
  *(.bss)
  .bss           0x0000000000800060        0x0 /usr/lib/gcc/avr/5.4.0/../../../avr/lib/avr5/crtatmega32.o
- .bss           0x0000000000800060        0x0 /tmp/ccDhvBJw.o
+ .bss           0x0000000000800060        0x0 /tmp/ccnOGLxR.o
  .bss           0x0000000000800060        0x0 /usr/lib/gcc/avr/5.4.0/avr5/libgcc.a(_exit.o)
  *(.bss*)
  *(COMMON)

@@ -9,11 +9,11 @@
 	
 	
 !!! info ""
-	![Screenshot](images/kuttypy.jpg){: style="align:center;max-width:400px"}
+	![Screenshot](images/kuttypyplus.jpg){: style="position:relative;left:0px;right:0px;"}
 
 ## Software Installation 
 
-Given the paucity of time, the fastest ways for installing the toolchain on different operating systems are listed. Click to expand.
+Given the paucity of time, the fastest ways for [installing](https://csparkresearch.in/kuttypyplus) the toolchain on different operating systems are listed. Click to expand.
 
 ??? abstract "Windows with Python3 installed"
     * [Python3](https://www.python.org/ftp/python/3.8.0/python-3.8.0-amd64.exe) must be installed, and `pip` should be accessible.
@@ -29,7 +29,7 @@ Given the paucity of time, the fastest ways for installing the toolchain on diff
 ??? warning "Windows bundled installer"
     * The bundled installer includes Python3 and dependencies and KuttyPy software. Also includes winavr, usb driver.
 
-	[Download Bundled Installer](https://drive.google.com/uc?export=download&id=1giJuDNIql8X5oaIcOLFACXD05-hmkBAy)
+	[Download Bundled Installer](https://drive.google.com/uc?export=download&id=18PD-Llx12PTfMRWlHA447TCMxTA6smWZ)
 
 	!!! error "Made with Pyinstaller: Python will not be accessible globally"
 		Since the installer was made using PyInstaller, Python3 will not be accessible globally, and you will be limited to the ipython console within the KuttyPy software.
@@ -38,27 +38,32 @@ Given the paucity of time, the fastest ways for installing the toolchain on diff
 
 
 ??? abstract "Ubuntu"
-    * Download the [deb file from here](../assets/KuttyPy-1.0.6.deb)
+    * Download the [deb file from here](https://csparkresearch.in/assets/installers/KuttyPy-1.0.19.deb)
     * Navigate to the Downloaded deb file location, and install it. This also fetches dependencies : scipy, qtconsole, avr-gcc etc
     ```
-    sudo apt install ./KuttyPy-1.0.6.deb 
+    sudo apt install ./KuttyPy-1.0.19.deb 
     ```
     * launch the kuttyPy GUI from the command prompt using the command
     ```
     kuttypy
     ```
+
     It is also present in the applications menu as `KuttyPy GUI` .
     
-    * You should see a graphical interface which looks like [this](#kuttypy-software)
+    * You can also launch the kuttyPy IDE from the menu, or using the command
+    ```
+    kuttypyide
+    ```
+
     
 ??? abstract "Using PIP on other OSes"
     * Python3 must be installed
     * Open a command prompt, and use pip3 to install the KuttyPy package
     ```
-    pip3 install KuttyPy
+    pip3 install kuttyPy
     ```
     * You will now be able to launch `kuttypy` from the prompt, and import the `kuttyPy` library from Python.
-    * If you wish to to compile C code, `avr-gcc` must be accessible from a command prompt. Install it from the package manager of your OS.
+    * If you wish to compile C code, `avr-gcc` must be accessible from a command prompt. Install it from the package manager of your OS.
 
     ???warning "setting permissions on Linux based systems "
     	Accessing the hardware on linux requires certain permissions to be set.
@@ -83,7 +88,7 @@ Given the paucity of time, the fastest ways for installing the toolchain on diff
     sudo apt install python3-serial python3-pyqt5 python3-pyqt5.qtsvg gcc-avr avr-libc python3-qtconsole python3-scipy python3-pyqtgraph
     git clone http://github.com/csparkresearch/kuttypy-gui
     cd kuttypy-gui
-    python3 KuttyPyGUI.py
+    python3 KuttyPyPlus.py
     ```
     For setting hardware permissions, refer to the previous section
 
@@ -91,7 +96,7 @@ Given the paucity of time, the fastest ways for installing the toolchain on diff
 ## KuttyPy Software
 
 ???+ success "Screenshot of the Graphical interface after launching `kuttypy` "
-    ![](../images/main.gif)
+    ![](../images/main.png)
     The title will show `Hardware not Detected` if not connected, or if a permissions issue exists
 
 ### Explore the functions

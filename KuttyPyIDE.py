@@ -84,8 +84,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		# Define some keyboard shortcuts for ease of use
 		self.shortcutActions = {}
 		self.shortcuts = {"f": partial(self.setLanguage, 'fr_FR'), "e": partial(self.setLanguage, 'en_IN'),
-		                  "m": partial(self.setLanguage, 'ml_IN'), "Ctrl+S": self.saveFile, "Ctrl+O": self.openFile,
-		                  "Ctrl+Shift+S": self.saveAs, "Ctrl+N": self.addSourceTab}
+		                  "m": partial(self.setLanguage, 'ml_IN')}
 		for a in self.shortcuts:
 			shortcut = QtWidgets.QShortcut(QtGui.QKeySequence(a), self)
 			shortcut.activated.connect(self.shortcuts[a])
@@ -137,8 +136,6 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 			'update': myTimer(constants.AUTOUPDATE_INTERVAL),
 		}
 
-
-
 		serialgaugeoptions = {'name': 'Serial Monitor', 'init': print, 'read': None,
 		                      'fields': ['Value'],
 		                      'min': [0],
@@ -159,23 +156,23 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		# Auto-Detector
 		self.shortlist = KuttyPyLib.getFreePorts()
 
-		## Embed a terminal if on linux
-		system = platform.system()
-		#if system == 'Linux':
-		#	self.embedWindow()
-
-	def close_maybe(self):
-		pass
-
 	def closeEvent(self, event):
 		self.external.terminate()
 		self.external.waitForFinished(1000)
 
-	def embedWindow(self):
+	def embedTerminal(self):
 		import subprocess
+		system = platform.system()
 		self.external = QtCore.QProcess(self)
-		self.external.start('gnome-terminal', [])
+		if system == 'Linux':
+			self.external.start('gnome-terminal', ["--working-directory", self.defaultDirectory])
+		if system == 'Windows':
+			self.external.start('cmd')
+
+		'''
 		time.sleep(1)
+		self.external.write(b"hello")
+
 		p = subprocess.run(['xprop', '-root'], stdout=subprocess.PIPE)
 		for line in p.stdout.decode().splitlines():
 			m = re.fullmatch(r'^_NET_ACTIVE_WINDOW.*[)].*window id # (0x[0-9a-f]+)', line)
@@ -186,12 +183,16 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 					window, self.termFrame, QtCore.Qt.FramelessWindowHint)
 				widget.setFixedSize(600, 400)
 				self.termLayout.addWidget(widget)
-
 				# this is where the magic happens...
 				self.external.finished.connect(self.close_maybe)
 				break
 		else:
 			QtWidgets.QMessageBox.warning(self, 'Error', 'Could not find WID for curreent Window')
+		'''
+
+	def close_maybe(self):
+		print('terminal closed')
+		pass
 
 	def activateCompileServer(self):
 		if self.serverActive:  # Stop it
@@ -226,10 +227,15 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		codeMenu = QtWidgets.QMenu()
 
 		newFileAction = QtWidgets.QAction('New File', self)
+		newFileAction.setShortcut(QtGui.QKeySequence("Ctrl+N"))
+		ico = QtGui.QIcon()
+		ico.addPixmap(QtGui.QPixmap(":/control/plus.svg"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+		newFileAction.setIcon(ico)
 		newFileAction.triggered.connect(self.addSourceTab)
 		codeMenu.addAction(newFileAction)
 
 		openFileAction = QtWidgets.QAction('Open File', self)
+		openFileAction.setShortcut(QtGui.QKeySequence("Ctrl+O"))
 		openFileAction.triggered.connect(self.openFile)
 		openIcon = QtGui.QIcon()
 		openIcon.addPixmap(QtGui.QPixmap(":/control/document-open.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
@@ -237,6 +243,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		codeMenu.addAction(openFileAction)
 
 		saveFileAction = QtWidgets.QAction('Save File', self)
+		saveFileAction.setShortcut(QtGui.QKeySequence("Ctrl+S"))
 		saveFileAction.triggered.connect(self.saveFile)
 		saveIcon = QtGui.QIcon()
 		saveIcon.addPixmap(QtGui.QPixmap(":/control/saveall.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
@@ -244,9 +251,18 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		codeMenu.addAction(saveFileAction)
 
 		saveAsFileAction = QtWidgets.QAction('Save As', self)
+		saveAsFileAction.setShortcut(QtGui.QKeySequence("Ctrl+Shift+S"))
 		saveAsFileAction.triggered.connect(self.saveAs)
 		saveAsFileAction.setIcon(saveIcon)
 		codeMenu.addAction(saveAsFileAction)
+
+		a = QtWidgets.QAction('Terminal', self)
+		a.setShortcut(QtGui.QKeySequence("Ctrl+Shift+T"))
+		a.triggered.connect(self.embedTerminal)
+		termIcon = QtGui.QIcon()
+		termIcon.addPixmap(QtGui.QPixmap(":/control/utilities-terminal.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+		a.setIcon(termIcon)
+		codeMenu.addAction(a)
 
 		exitAction = QtWidgets.QAction('Exit', self)
 		exitAction.triggered.connect(QtWidgets.qApp.quit)
@@ -268,29 +284,39 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 			if reply == QtWidgets.QMessageBox.No:
 				return
 
-		self.userHexRunning=False
+		self.userHexRunning = False
 		global app
 		app.quit()
 
 	def addEditMenu(self):
 		codeMenu = QtWidgets.QMenu()
 
-		undoAction = QtWidgets.QAction('Undo( Ctrl+Z)', self)
+		undoAction = QtWidgets.QAction('Undo', self)
+		undoAction.setShortcut(QtGui.QKeySequence("Ctrl+Z"))
 		undoAction.triggered.connect(self.activeEditor.undo)
+		ico = QtGui.QIcon()
+		ico.addPixmap(QtGui.QPixmap(":/control/reset.svg"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+		undoAction.setIcon(ico)
 		codeMenu.addAction(undoAction)
-		redoAction = QtWidgets.QAction('Undo( Ctrl+Shft+Z)', self)
+
+		redoAction = QtWidgets.QAction('Redo', self)
+		redoAction.setShortcut(QtGui.QKeySequence("Ctrl+Shift+Z"))
 		redoAction.triggered.connect(self.activeEditor.redo)
 		codeMenu.addAction(redoAction)
-		a = QtWidgets.QAction('Cut( Ctrl+X)', self)
+		a = QtWidgets.QAction('Cut', self)
+		a.setShortcut(QtGui.QKeySequence("Ctrl+X"))
 		a.triggered.connect(self.activeEditor.cut)
 		codeMenu.addAction(a)
-		a = QtWidgets.QAction('Copy( Ctrl+C)', self)
+		a = QtWidgets.QAction('Copy', self)
+		a.setShortcut(QtGui.QKeySequence("Ctrl+C"))
 		a.triggered.connect(self.activeEditor.copy)
 		codeMenu.addAction(a)
-		a = QtWidgets.QAction('Paste( Ctrl+V)', self)
+		a = QtWidgets.QAction('Paste', self)
+		a.setShortcut(QtGui.QKeySequence("Ctrl+V"))
 		a.triggered.connect(self.activeEditor.paste)
 		codeMenu.addAction(a)
-		a = QtWidgets.QAction('Select All( Ctrl+A)', self)
+		a = QtWidgets.QAction('Select All', self)
+		a.setShortcut(QtGui.QKeySequence("Ctrl+A"))
 		a.triggered.connect(self.activeEditor.selectAll)
 		codeMenu.addAction(a)
 
@@ -353,6 +379,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 				return
 			else:
 				print('closing source tab', widget.objectName())
+				self.closeCompileTabs(self.codingTabs.tabText(self.codingTabs.indexOf(widget)))
 				self.sourceTabs.pop(widget)
 				sourceTabClosed = True
 
@@ -362,7 +389,18 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 			self.activeEditor = self.sourceTabs[self.activeSourceTab][0]
 			self.CFile = self.sourceTabs[self.activeSourceTab][1]
 			self.codingTabs.setCurrentIndex(self.codingTabs.indexOf(self.activeSourceTab))
-			print('New Source Tab:', self.getActiveFilename, self.CFile)
+			print('New Source Tab:', self.getActiveFilename(), self.CFile)
+
+	def closeCompileTabs(self, fullname):
+		name = os.path.split(fullname)[1].split('.')[0]
+		for tab, ext in zip([self.mapTab, self.hexTab, self.listTab], ['.map', '.hex', '.lst']):
+			if tab is not None:
+				print(self.codingTabs.tabText(self.codingTabs.indexOf(tab)), name + ext)
+				if self.codingTabs.tabText(self.codingTabs.indexOf(tab)) == name + ext:
+					self.codingTabs.removeTab(self.codingTabs.indexOf(tab))
+					#print(f"closing {ext} tab")
+
+		pass
 
 	def getActiveFilename(self):
 		self.codingTabs.tabText(self.codingTabs.indexOf(self.activeSourceTab))
@@ -468,19 +506,28 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		if filetype == 'list':
 			if self.listTab is None:
 				self.openListTab()
+			elif self.listTab.isHidden():
+				print('hidden')
+				self.codingTabs.addTab(self.listTab, "")
 			tab = self.listTab
 		elif filetype == 'map':
 			if self.mapTab is None:
 				self.openMapTab()
+			elif self.mapTab.isHidden():
+				print('hidden')
+				self.codingTabs.addTab(self.mapTab, "")
 			tab = self.mapTab
 		elif filetype == 'hex':
 			if self.hexTab is None:
 				self.openHexTab()
+			elif self.hexTab.isHidden():
+				print('hidden')
+				self.codingTabs.addTab(self.hexTab, "")
 			tab = self.hexTab
 
 		if tab != None:
 			fname = filename.split
-			self.codingTabs.setTabText(self.codingTabs.indexOf(tab), filetype + ":" + os.path.basename(filename))
+			self.codingTabs.setTabText(self.codingTabs.indexOf(tab), os.path.basename(filename))  # filetype + ":" +
 
 	def openListTab(self):
 		self.listTab = QtWidgets.QWidget()
@@ -517,6 +564,9 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		self.hexEditor.setObjectName("hexEditor")
 		self.verticalLayout_2.addWidget(self.hexEditor)
 		self.codingTabs.addTab(self.hexTab, "")
+		ico = QtGui.QIcon()
+		ico.addPixmap(QtGui.QPixmap(":/control/hex.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+		self.codingTabs.setTabIcon(self.codingTabs.indexOf(self.hexTab),ico)
 
 	def appendLog(self, txt):
 		self.log.append(txt)
@@ -628,19 +678,20 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 
 					else:
 						self.logThis.emit('''<span style="color:gray;">%s</span><br>''' % res[1])
-						self.resultSignal.emit('map', fname + '.map')
 
 					cmd = 'avr-objcopy -j .text -j .data -O ihex "%s" "%s.hex"' % (fname, fname)
 					res = subprocess.getstatusoutput(cmd)
 					self.logThis.emit(res[1])  # '''<span style="color:gray;">%s</span><br>'''%res[1])
-					self.resultSignal.emit('hex', fname + '.hex')
 
 					cmd = 'avr-objdump -S "%s" > "%s.lst"' % (fname, fname)
 					res = subprocess.getstatusoutput(cmd)
 					self.logThis.emit(res[1])  # '''<span style="color:gray;">%s</span><br>'''%res[1])
 					self.logThis.emit(
 						'Finished %sing: Generated Hex File' % action)  # '''<span style="color:darkgreen;">Finished %sing: Generated Hex File</span>'''%(action))
+
 					self.resultSignal.emit('list', fname + '.lst')
+					self.resultSignal.emit('hex', fname + '.hex')
+					self.resultSignal.emit('map', fname + '.map')
 				except Exception as err:
 					self.logThis.emit('''<span style="color:#d730ee;">Failed to %se:%s</span>''' % str(action, err))
 
@@ -698,9 +749,10 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		if len(filename[0]):
 			if self.CFile is not None:  # A file is altready open
 				self.addSourceTab()
-			self.defaultDirectory = ''
+			# self.defaultDirectory = ''
 			self.filenameLabel.setText(filename[0])
 			self.CFile = filename[0]
+			self.defaultDirectory = os.path.split(self.CFile)[0]
 			self.sourceTabs[self.activeSourceTab][1] = self.CFile
 			self.log.clear()
 			infile = open(filename[0], 'r')
@@ -709,6 +761,12 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 			infile.close()
 			self.codingTabs.setTabText(self.codingTabs.indexOf(self.activeSourceTab), os.path.split(self.CFile)[1])
 			self.log.setText('''<span style="color:#225;">-- Opened File: %s --</span><br>''' % filename[0])
+			filetype = 'c'
+			if self.CFile.endswith('.S') or self.CFile.endswith('.s'):
+				filetype='asm'
+			ico = QtGui.QIcon()
+			ico.addPixmap(QtGui.QPixmap(f":/control/{filetype}.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+			self.codingTabs.setTabIcon(self.codingTabs.indexOf(self.activeSourceTab), ico)
 
 	def fontPlus(self):
 		size = self.editorFont.pointSize()

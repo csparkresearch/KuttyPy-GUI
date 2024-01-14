@@ -10,91 +10,101 @@ Similarly, PORTB register is used to turn an output HIGH(5V), or LOW(0V/Ground)
 
 
 ![](../images/PORTB.png "PB5 and PB7 set to HIGH")
+
 PB5 and PB7 set to Output type (DDRB=160), and made HIGH(PORTB=160).
 
 ### Test this with a simple code to turn on an LED connected to PB3
 
-```python tab="Python Code"
-from kuttyPy import *   # automatically connects to an available device.
-setReg('DDRB',8) # PB3 made output. 0b00001000 = 8
-setReg('PORTB', 8) #PB3 to 5 Volt supply. RED LED turns on
-```
+=== "Python Code"
+	```python
+	from kuttyPy import *   # automatically connects to an available device.
+	setReg('DDRB',8) # PB3 made output. 0b00001000 = 8
+	setReg('PORTB', 8) #PB3 to 5 Volt supply. RED LED turns on
+	```
 
-```C tab="C equivalent" hl_lines="1"
-/* Compile with AVR-GCC for atmega32, and upload with avrdude/kuttypy-gui */
-#include <avr/io.h>
-int main (void) {
-  DDRB = 8;		// Data Direction Register for port B
-  PORTB = 8;    // PB3 HIGH
-  }
-return 0;
-}
-```
+=== "C equivalent"
+	```C hl_lines="1"
+	/* Compile with AVR-GCC for atmega32, and upload with avrdude/kuttypy-gui */
+	#include <avr/io.h>
+	int main (void) {
+	  DDRB = 8;		// Data Direction Register for port B
+	  PORTB = 8;    // PB3 HIGH
+	  }
+	return 0;
+	}
+	```
 
 ## Python Functions for basic register access
 
 ### setting and reading register values
 
-```python tab="setReg" hl_lines="1"
-def setReg(Register Name, Value)
-writes a value to a REGISTER defined in the datasheet of the processor
+=== "setReg"
+	```python hl_lines="1"
+	
+	def setReg(Register Name, Value)
+	writes a value to a REGISTER defined in the datasheet of the processor
+	
+	  Register Name : a string representing the register. e.g. 'DDRB', 'ADMUX' etc
+	  Value: an integer between 0 and 255 , because atmega32 is an 8 bit microcontroller.
+	  return: True if success
+	
+	```
 
-  Register Name : a string representing the register. e.g. 'DDRB', 'ADMUX' etc
-  Value: an integer between 0 and 255 , because atmega32 is an 8 bit microcontroller.
-  return: True if success
 
-```
+=== "getReg"
+	```python hl_lines="1"
+	
+	def getReg(Register Name)
+	reads a value frm a REGISTER defined in the datasheet of the processor
+	
+	  Register Name : a string representing the register. e.g. 'PINB', 'ADCL', 'ADCH' etc
+	  return: Contents of the register. an integer between 0 and 255
+	
+	```
 
 
-
-```python tab="getReg" hl_lines="1"
-def getReg(Register Name)
-reads a value frm a REGISTER defined in the datasheet of the processor
-
-  Register Name : a string representing the register. e.g. 'PINB', 'ADCL', 'ADCH' etc
-  return: Contents of the register. an integer between 0 and 255
-
-```
-
-```python tab="example"  hl_lines="1"
-# Read value from Analog to Digital converter(ADC) channel 0 (PA0)
-from kuttyPy import *
-setReg('ADMUX', (1<<6) | 0) #REF_AVCC | Channel 0
-setReg('ADCSRA', 196)  #Set ADC conversion speeds, and enable it. Refer to the ATMEGA32 datasheet for details.
-cl = getReg('ADCL')  #LSB 8 bits
-ch = getReg('ADCH')  # MSB 2 bits
-print( (ch<<8)|cl )  # Combine the two to make a 10 bit number, and print to the screen
-```
-
+=== "Example"
+	```python hl_lines="1"
+	# Read value from Analog to Digital converter(ADC) channel 0 (PA0)
+	from kuttyPy import *
+	setReg('ADMUX', (1<<6) | 0) #REF_AVCC | Channel 0
+	setReg('ADCSRA', 196)  #Set ADC conversion speeds, and enable it. Refer to the ATMEGA32 datasheet for details.
+	cl = getReg('ADCL')  #LSB 8 bits
+	ch = getReg('ADCH')  # MSB 2 bits
+	print( (ch<<8)|cl )  # Combine the two to make a 10 bit number, and print to the screen
+	```
 
 You can also twiddle bits on various registers inside the "Registers" tab to watch
 changes in real time. In the animation below, the ADC is being continuously read.
+
 ![Screencast](../images/custom_registers.gif?raw=true "Add Register widgets, twiddle bits, and see what happens!")
 
+=== "readADC"
+	```python hl_lines="1"
+	def readADC(channel)
+	reads a voltage value from the specified channel, and returns it
+	
+	  channel : 0 to 7
+	  return: 10 bit number( an integer between 0 and 1023 )
+	
+	```
 
-```python tab="readADC" hl_lines="1"
-def readADC(channel)
-reads a voltage value from the specified channel, and returns it
-
-  channel : 0 to 7
-  return: 10 bit number( an integer between 0 and 1023 )
-
-```
-
-```python tab="data logger example with matplotlib"  hl_lines="1"
-# Read values from Analog to Digital converter(ADC) channel 5 (PA5), and plot them
-import time
-from kuttyPy import *
-from matplotlib import pyplot as plt
-
-setReg('ADMUX', (1<<6) | 5) #REF_AVCC | Channel 5
-for a in range(50):
-    setReg('ADCSRA', 196)
-    cl = getReg('ADCL')
-    ch = getReg('ADCH')
-    plt.scatter(a, (ch<<8)|cl ,s=5)
-    plt.pause(0.01) #Wait 10 mS
-```
+=== "data logger example with matplotlib"
+	```python  hl_lines="1"
+	# Read values from Analog to Digital converter(ADC)
+	# channel 5 (PA5), and plot them
+	import time
+	from kuttyPy import *
+	from matplotlib import pyplot as plt
+	
+	setReg('ADMUX', (1<<6) | 5) #REF_AVCC | Channel 5
+	for a in range(50):
+		setReg('ADCSRA', 196)
+		cl = getReg('ADCL')
+		ch = getReg('ADCH')
+		plt.scatter(a, (ch<<8)|cl ,s=5)
+		plt.pause(0.01) #Wait 10 mS
+	```
 
 ## Embedded iPython Console
 

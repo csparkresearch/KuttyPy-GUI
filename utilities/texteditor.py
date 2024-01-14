@@ -12,7 +12,7 @@ class myTextEditor(QtWidgets.QPlainTextEdit):
         self.undoAvailable['bool'].connect(self.undoStatus)
         self.changed = False
 
-    def markAsSaved(self,state):
+    def markAsSaved(self, state):
         self.changed = not state
 
     def undoStatus(self, s):
@@ -31,9 +31,13 @@ class myTextEditor(QtWidgets.QPlainTextEdit):
     def keyPressEvent(self, event):
         # Shift + Tab is not the same as trying to catch a Shift modifier and a tab Key.
         # Shift + Tab is a Backtab!!
+        cursor = self.textCursor()
+
         if event.key() == QtCore.Qt.Key.Key_Tab:
+            if cursor.selectionStart() == cursor.selectionEnd():
+                return QtWidgets.QPlainTextEdit.keyPressEvent(self, event)
+
             tab = "\t"
-            cursor = self.textCursor()
             start = cursor.selectionStart()
             end = cursor.selectionEnd()
             cursor.setPosition(end)
@@ -48,35 +52,64 @@ class myTextEditor(QtWidgets.QPlainTextEdit):
                 # end += tab.count()
                 cursor.movePosition(cursor.EndOfLine)
                 cursor.movePosition(QtGui.QTextCursor.Right, 1)
+
         elif event.key() == QtCore.Qt.Key.Key_Backtab:
-            cur = self.textCursor()
+            self.unindentSelectedBlock()
+            return
+
             # Copy the current selection
-            pos = cur.position()  # Where a selection ends
-            anchor = cur.anchor()  # Where a selection starts (can be the same as above)
+            pos = cursor.position()  # Where a selection ends
+            anchor = cursor.anchor()  # Where a selection starts (can be the same as above)
             # Can put QtGui.QTextCursor.MoveAnchor as the 2nd arg, but this is the default
-            cur.setPosition(pos)
-
+            cursor.setPosition(pos)
             # Move the position back one, selection the character prior to the original position
-            cur.setPosition(pos - 1, QtGui.QTextCursor.KeepAnchor)
+            cursor.setPosition(pos - 1, QtGui.QTextCursor.KeepAnchor)
 
-            if str(cur.selectedText()) == "\t":
+            if str(cursor.selectedText()) == "\t":
                 # The prior character is a tab, so delete the selection
-                cur.removeSelectedText()
+                cursor.removeSelectedText()
                 # Reposition the cursor with the one character offset
-                cur.setPosition(anchor - 1)
-                cur.setPosition(pos - 1, QtGui.QTextCursor.KeepAnchor)
+                cursor.setPosition(anchor - 1)
+                cursor.setPosition(pos - 1, QtGui.QTextCursor.KeepAnchor)
             else:
                 # Try all of the above, looking before the anchor (This helps if the achor is before a tab)
-                cur.setPosition(anchor)
-                cur.setPosition(anchor - 1, QtGui.QTextCursor.KeepAnchor)
-                if str(cur.selectedText()) == "\t":
-                    cur.removeSelectedText()
-                    cur.setPosition(anchor - 1)
-                    cur.setPosition(pos - 1, QtGui.QTextCursor.KeepAnchor)
+                cursor.setPosition(anchor)
+                cursor.setPosition(anchor - 1, QtGui.QTextCursor.KeepAnchor)
+                if str(cursor.selectedText()) == "\t":
+                    self.unindentSelectedBlock()
+                    return
+                    cursor.removeSelectedText()
+                    cursor.setPosition(anchor - 1)
+                    cursor.setPosition(pos - 1, QtGui.QTextCursor.KeepAnchor)
                 else:
-
                     # Its not a tab, so reset the selection to what it was
-                    cur.setPosition(anchor)
-                    cur.setPosition(pos, QtGui.QTextCursor.KeepAnchor)
+                    cursor.setPosition(anchor)
+                    cursor.setPosition(pos, QtGui.QTextCursor.KeepAnchor)
         else:
             return QtWidgets.QPlainTextEdit.keyPressEvent(self, event)
+
+    def unindentSelectedBlock(self):
+        cursor = self.textCursor()
+        # Copy the current selection
+
+        # Save the current cursor position
+        original_position = cursor.position()
+
+        # Get the selected text
+        selected_text = cursor.selectedText()
+        # Perform replacement on the selected text
+        modified_text = selected_text.replace('\u2029\t', '\u2029')
+        if modified_text.startswith('\t'):
+            print('remove starting tab')
+            modified_text=modified_text[1:]
+
+        #print('unindent', selected_text, modified_text)
+        # Replace the original selected block with the modified text
+        cursor.removeSelectedText()
+        cursor.insertText(modified_text)
+
+        # Restore the cursor position
+        cursor.setPosition(original_position)
+
+        # Set the cursor position to the updated position
+        self.setTextCursor(cursor)

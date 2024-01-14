@@ -70,3 +70,24 @@ QFrame {
 }
 
 
+/* --- RUN button --*/
+QCheckBox::indicator:checked {
+
+	height: 10px;
+	width: 10px;
+	border-style:solid;
+	border-width: 1px;
+	border-color: #0f0;
+	color: #a9b7c6;
+	background-color: #02ff6f;
+}
+QCheckBox::indicator:unchecked {
+
+	height: 10px;
+	width: 10px;
+	border-style:solid;
+	border-width: 1px;
+	border-color: #411;
+	color: #a9b7c6;
+	background-color: #994444;
+}

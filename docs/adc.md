@@ -15,30 +15,31 @@ the joystick is tilted along either axis
 
 ## Access via Python
 
+=== "readADC"
+	```python hl_lines="1"
+	def readADC(channel)
+	reads a voltage value from the specified channel, and returns it
+	
+	  channel : 0 to 7
+	  return: 10 bit number( an integer between 0 and 1023 )
+	
+	```
 
-```python tab="readADC" hl_lines="1"
-def readADC(channel)
-reads a voltage value from the specified channel, and returns it
-
-  channel : 0 to 7
-  return: 10 bit number( an integer between 0 and 1023 )
-
-```
-
-```python tab="data logger example with matplotlib"  hl_lines="1"
-# Read values from Analog to Digital converter(ADC) channel 5 (PA5), and plot them
-import time
-from kuttyPy import *
-from matplotlib import pyplot as plt
-
-setReg('ADMUX', (1<<6) | 5) #REF_AVCC | Channel 5
-for a in range(50):
-    setReg('ADCSRA', 196)
-    cl = getReg('ADCL')
-    ch = getReg('ADCH')
-    plt.scatter(a, (ch<<8)|cl ,s=5)
-    plt.pause(0.01) #Wait 10 mS
-```
+=== "data logger example with matplotlib"
+	```python  hl_lines="1"
+	# Read values from Analog to Digital converter(ADC) channel 5 (PA5), and plot them
+	import time
+	from kuttyPy import *
+	from matplotlib import pyplot as plt
+	
+	setReg('ADMUX', (1<<6) | 5) #REF_AVCC | Channel 5
+	for a in range(50):
+	    setReg('ADCSRA', 196)
+	    cl = getReg('ADCL')
+	    ch = getReg('ADCH')
+	    plt.scatter(a, (ch<<8)|cl ,s=5)
+	    plt.pause(0.01) #Wait 10 mS
+	```
 
 ![Screenshot](images/code.gif?raw=true "Recording of the ADC logging example")
 

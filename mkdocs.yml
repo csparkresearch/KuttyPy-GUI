@@ -46,6 +46,8 @@ markdown_extensions:
     - pymdownx.smartsymbols
     - pymdownx.superfences:
        preserve_tabs: true
+    - pymdownx.tabbed:
+        alternate_style: true
     - pymdownx.tasklist:
         custom_checkbox: True
     - pymdownx.tilde
@@ -69,6 +71,10 @@ extra:
 
 plugins:
    - search
+   - exclude-search:
+      exclude:
+        - workshopnano.md
+        - boards.md
    - table-reader
    - material/social:
       cards: true
@@ -106,7 +112,7 @@ nav:
       - 'Design': 'hw.md'
       - 'Firmware': 'boot.md'
       - 'Enclosures': 'enclosures.md'
-  - Nano Tutorial: 'workshopnano.md'
+#  - Nano Tutorial: 'workshopnano.md'
   - 2 Hour Tutorial: 'workshop.md'
-  - Arduino Boards : 'boards.md'
+#  - Arduino Boards : 'boards.md'
 
