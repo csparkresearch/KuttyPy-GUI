@@ -8,7 +8,6 @@ int main()
 {
 uint16_t data;
 double   v;
-
 lcd_init();
 adc_enable();
 while(1)

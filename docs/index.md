@@ -9,6 +9,7 @@ programs via its bootloader functionality.
 
 setReg and getReg Python function calls act as debugging and monitoring tools, and combined with Python's visualization 
 and analytical utilities, this approach has immense pedagogical potential for beginners to the microcontroller world. 
+
 ```python
 from kuttyPy import * #Import the library. also automatically connects to any available kuttypy hardware.
 setReg('DDRD',160) #0b10100000 PD7(BLUE LED) and PD5(GREEN LED) made output type
@@ -16,7 +17,7 @@ setReg('PORTD',160) # PD5 and PD7 set to HIGH. Both LEDs start glowing
 ```
 
 !!! info "The KuttyPy ATMEGA32 hardware"
-	![Screenshot](images/kuttypyplus.jpg)
+	![Screenshot](images/kpy_components.jpg)
 
 
 !!! info "And its companion Python software"

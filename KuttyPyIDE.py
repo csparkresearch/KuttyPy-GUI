@@ -53,6 +53,9 @@ class myTimer():
 		return 100 * (self.interval - self.timeout + time.time()) / (self.interval)
 
 
+LKP = True
+
+
 class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 	p = None
 	logThis = QtCore.pyqtSignal(str)
@@ -69,6 +72,10 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 
 		self.local_ip = ''
 		self.setupUi(self)
+
+		self.fs_watcher = None
+		self.reloadFrame.setVisible(False)
+
 		self.compile_thread = None
 
 		self.monitoring = True
@@ -80,7 +87,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		self.serverActive = False
 		self.VERSION = REGISTERS.VERSION_ATMEGA32  # This needs to be dynamically changed when hardware is connected
 
-		self.serialGuageButton.hide()  # Hide the serial guage button
+		self.serialFrame.hide()  # Hide the serial guage button
 		# Define some keyboard shortcuts for ease of use
 		self.shortcutActions = {}
 		self.shortcuts = {"f": partial(self.setLanguage, 'fr_FR'), "e": partial(self.setLanguage, 'en_IN'),
@@ -123,6 +130,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		self.makeBottomMenu()
 		self.addFileMenu()
 		self.addEditMenu()
+		self.addBuildOptionsMenu()
 
 		self.editorFont = QtGui.QFont()
 		self.editorFont.setPointSize(12)
@@ -269,6 +277,20 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		codeMenu.addAction(exitAction)
 		self.fileMenuButton.setMenu(codeMenu)
 
+	def addBuildOptionsMenu(self):
+		codeMenu = QtWidgets.QMenu()
+		toggleLKPAction = QtWidgets.QAction('Include KP Library', self)
+		toggleLKPAction.setCheckable(True)
+		toggleLKPAction.setChecked(True)
+		toggleLKPAction.triggered[bool].connect(self.setLKP)
+		codeMenu.addAction(toggleLKPAction)
+		self.buildOptionsButton.setMenu(codeMenu)
+
+	def setLKP(self, state):
+		global LKP
+		print('LKP linking', state)
+		LKP = state
+
 	def closeEvent(self, evnt):
 		evnt.ignore()
 		self.askBeforeQuit()
@@ -398,7 +420,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 				print(self.codingTabs.tabText(self.codingTabs.indexOf(tab)), name + ext)
 				if self.codingTabs.tabText(self.codingTabs.indexOf(tab)) == name + ext:
 					self.codingTabs.removeTab(self.codingTabs.indexOf(tab))
-					#print(f"closing {ext} tab")
+			# print(f"closing {ext} tab")
 
 		pass
 
@@ -424,9 +446,10 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		self.sourceTabs[sourceTab] = [editor, None]
 		self.codingTabs.setCurrentIndex(self.codingTabs.indexOf(sourceTab))
 		self.codingTabs.setTabText(self.codingTabs.indexOf(sourceTab), 'Untitled')
+		self.CFile = None
 		self.activeSourceTab = sourceTab
 		self.activeEditor = editor
-		self.code_highlighters.append(syntax.PythonHighlighter(editor.document()))
+		self.code_highlighters.append(syntax.CHighlighter(editor.document()))
 
 	def CTabChanged(self, index):
 		widget = self.codingTabs.widget(index)
@@ -434,6 +457,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 			self.activeSourceTab = widget
 			self.activeEditor = self.sourceTabs[widget][0]
 			self.CFile = self.sourceTabs[widget][1]
+			self.filenameLabel.setText(self.CFile)
 			print('Change Tab', index, self.codingTabs.tabText(index), self.CFile)
 
 	def newRegister(self):
@@ -507,21 +531,18 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 			if self.listTab is None:
 				self.openListTab()
 			elif self.listTab.isHidden():
-				print('hidden')
 				self.codingTabs.addTab(self.listTab, "")
 			tab = self.listTab
 		elif filetype == 'map':
 			if self.mapTab is None:
 				self.openMapTab()
 			elif self.mapTab.isHidden():
-				print('hidden')
 				self.codingTabs.addTab(self.mapTab, "")
 			tab = self.mapTab
 		elif filetype == 'hex':
 			if self.hexTab is None:
 				self.openHexTab()
 			elif self.hexTab.isHidden():
-				print('hidden')
 				self.codingTabs.addTab(self.hexTab, "")
 			tab = self.hexTab
 
@@ -566,7 +587,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		self.codingTabs.addTab(self.hexTab, "")
 		ico = QtGui.QIcon()
 		ico.addPixmap(QtGui.QPixmap(":/control/hex.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-		self.codingTabs.setTabIcon(self.codingTabs.indexOf(self.hexTab),ico)
+		self.codingTabs.setTabIcon(self.codingTabs.indexOf(self.hexTab), ico)
 
 	def appendLog(self, txt):
 		self.log.append(txt)
@@ -648,6 +669,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 			self.mode = mode
 
 		def execute(self):
+			global LKP
 			if 'compile' in self.mode:
 				try:
 					import subprocess
@@ -658,11 +680,12 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 					fname = '.'.join(self.fname.split('.')[:-1])
 					if self.p.version == REGISTERS.VERSION_ATMEGA32 or self.p.connected == False:  # by default, compile for ATMEGA32.
 						# cmd = 'avr-gcc -Wall -O2 -mmcu=%s -o "%s" -Map "%s" "%s"' %('atmega32',fname,fname+'.map',self.fname)
-						cmd = 'avr-gcc -Wall -O2 -mmcu=%s -Wl,-Map="%s" -o "%s" "%s"' % (
-							'atmega32', fname + '.map', fname, self.fname)  # includes MAP
+						cmd = 'avr-gcc -Wall -O2 -mmcu=%s -Wl,-Map="%s" -o "%s" "%s" %s' % (
+							'atmega32', fname + '.map', fname, self.fname, "-lkp" if LKP else "")  # includes MAP
 						self.logThis.emit('''<span style="color:#383;">%sing for Atmega32</span>''' % (action))
 					elif self.p.version == REGISTERS.VERSION_ATMEGA328P:
-						cmd = 'avr-gcc -Wall -O2 -mmcu=%s -o "%s" "%s"' % ('atmega328p', fname, self.fname)
+						cmd = 'avr-gcc -Wall -O2 -mmcu=%s -o "%s" "%s"  %s' % (
+						'atmega328p', fname, self.fname, "-lkp" if LKP else "")
 						self.logThis.emit(
 							'''<span style="color:#383;">%sing for Atmega328p (Nano)</span>''' % (action))
 					else:
@@ -747,26 +770,86 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		filename = QtWidgets.QFileDialog.getOpenFileName(self, " Open a C/Asm file to edit", self.defaultDirectory,
 		                                                 "C/ASM Files (*.c *.C *.s *.S);; Asm Files (*.s *.S);; C Files (*.c *.C)")
 		if len(filename[0]):
-			if self.CFile is not None:  # A file is altready open
-				self.addSourceTab()
-			# self.defaultDirectory = ''
-			self.filenameLabel.setText(filename[0])
-			self.CFile = filename[0]
-			self.defaultDirectory = os.path.split(self.CFile)[0]
-			self.sourceTabs[self.activeSourceTab][1] = self.CFile
-			self.log.clear()
-			infile = open(filename[0], 'r')
-			self.activeEditor.setPlainText(
-				infile.read())  # self.activeEditor = self.sourceTabs[self.activeSourceTab][0]
-			infile.close()
-			self.codingTabs.setTabText(self.codingTabs.indexOf(self.activeSourceTab), os.path.split(self.CFile)[1])
-			self.log.setText('''<span style="color:#225;">-- Opened File: %s --</span><br>''' % filename[0])
-			filetype = 'c'
-			if self.CFile.endswith('.S') or self.CFile.endswith('.s'):
-				filetype='asm'
-			ico = QtGui.QIcon()
-			ico.addPixmap(QtGui.QPixmap(f":/control/{filetype}.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-			self.codingTabs.setTabIcon(self.codingTabs.indexOf(self.activeSourceTab), ico)
+			self.openFile_(filename[0])
+
+	def openFile_(self, fname):
+		for sourceTab in self.sourceTabs:
+			print(self.sourceTabs[sourceTab][1], fname)
+			if fname == self.sourceTabs[sourceTab][1]:  # File is already open
+				self.activeSourceTab = sourceTab
+				self.activeEditor = self.sourceTabs[sourceTab][0]
+				self.CFile = self.sourceTabs[sourceTab][1]
+				self.filenameLabel.setText(self.CFile)
+				self.codingTabs.setCurrentIndex(self.codingTabs.indexOf(sourceTab))
+				return
+
+		if self.CFile is not None:  # A file is altready open
+			self.addSourceTab()
+		# self.defaultDirectory = ''
+		self.filenameLabel.setText(fname)
+		self.CFile = fname
+		self.defaultDirectory = os.path.split(self.CFile)[0]
+		self.sourceTabs[self.activeSourceTab][1] = self.CFile
+		self.log.clear()
+		infile = open(fname, 'r')
+		self.activeEditor.setPlainText(
+			infile.read())  # self.activeEditor = self.sourceTabs[self.activeSourceTab][0]
+		infile.close()
+		self.codingTabs.setTabText(self.codingTabs.indexOf(self.activeSourceTab), os.path.split(self.CFile)[1])
+		self.log.setText('''<span style="color:#225;">-- Opened File: %s --</span><br>''' % fname)
+		filetype = 'c'
+		if self.CFile.endswith('.S') or self.CFile.endswith('.s'):
+			filetype = 'asm'
+		ico = QtGui.QIcon()
+		ico.addPixmap(QtGui.QPixmap(f":/control/{filetype}.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+		self.codingTabs.setTabIcon(self.codingTabs.indexOf(self.activeSourceTab), ico)
+		self.updateWatcher()
+
+	def updateWatcher(self):
+		paths = []
+		for sourceTab in self.sourceTabs:
+			paths.append(self.sourceTabs[sourceTab][1])
+		self.fs_watcher = QtCore.QFileSystemWatcher(paths)
+		self.fs_watcher.fileChanged.connect(self.file_changed)
+		print('updated watcher', paths)
+
+	def file_changed(self, path):
+		print('File Changed: %s' % path)
+		self.reloadLabel.setText(path)
+		self.reloadFrame.setVisible(True)
+
+	def reloadFile(self):
+		self.reloadFrame.setVisible(False)
+		fname = self.reloadLabel.text()
+		for sourceTab in self.sourceTabs:
+			print(self.sourceTabs[sourceTab][1], fname)
+			if fname == self.sourceTabs[sourceTab][1]:  # File is already open
+				self.activeSourceTab = sourceTab
+				self.activeEditor = self.sourceTabs[sourceTab][0]
+				self.CFile = self.sourceTabs[sourceTab][1]
+				self.filenameLabel.setText(self.CFile)
+				self.codingTabs.setCurrentIndex(self.codingTabs.indexOf(sourceTab))
+				self.defaultDirectory = os.path.split(self.CFile)[0]
+
+				self.log.clear()
+				infile = open(fname, 'r')
+				self.activeEditor.setPlainText(
+					infile.read())  # self.activeEditor = self.sourceTabs[self.activeSourceTab][0]
+				infile.close()
+				self.log.setText('''<span style="color:#225;">-- Reloaded File: %s --</span><br>''' % fname)
+				filetype = 'c'
+				if self.CFile.endswith('.S') or self.CFile.endswith('.s'):
+					filetype = 'asm'
+				ico = QtGui.QIcon()
+				ico.addPixmap(QtGui.QPixmap(f":/control/{filetype}.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+				self.codingTabs.setTabIcon(self.codingTabs.indexOf(self.activeSourceTab), ico)
+				self.updateWatcher()
+				return
+		print(' Modified file is not open anymore', fname)
+
+	def cancelReload(self):
+		self.reloadFrame.setVisible(False)
+		self.updateWatcher()
 
 	def fontPlus(self):
 		size = self.editorFont.pointSize()
@@ -832,9 +915,11 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		if self.CFile is not None and len(self.CFile) > 1:
 			self.sourceTabs[self.activeSourceTab][1] = self.CFile
 			self.activeEditor.markAsSaved(True)
+			self.fs_watcher.removePath(self.CFile)
 			fn = open(self.CFile, 'w')
 			fn.write(self.activeEditor.toPlainText())
 			fn.close()
+			self.fs_watcher.addPath(self.CFile)
 			self.codingTabs.setTabText(self.codingTabs.indexOf(self.activeSourceTab), os.path.split(self.CFile)[1])
 			self.log.setText('''<span style="color:green;">-- Saved to: %s --</span><br>''' % self.CFile)
 		else:
@@ -845,8 +930,10 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		print('created new file:', name)
 		if len(name) > 0 and len(name[0]) > 1:
 			self.CFile = name[0]
+			self.filenameLabel.setText(self.CFile)
 			self.log.setText('''<span style="color:green;">-- Created new file: %s --</span><br>''' % self.CFile)
 			self.codingTabs.setTabText(self.codingTabs.indexOf(self.activeSourceTab), os.path.split(self.CFile)[1])
+			self.saveFile()
 			return self.CFile
 
 	##############################
@@ -888,7 +975,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		print('run firmware', state)
 		if self.p:
 			if state:
-				self.serialGuageButton.show()
+				self.serialFrame.show()
 				self.userHexRunning = True
 				self.p.fd.write(b'j')  # Skip to application (Bootloader resets)
 				self.launchFirmwareButton.setText('Stop')
@@ -898,7 +985,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 			# self.serialGauge.show()
 
 			else:
-				self.serialGuageButton.hide()
+				self.serialFrame.hide()
 				self.p.fd.setRTS(0);
 				self.p.fd.setDTR(0);
 				time.sleep(0.01);
@@ -915,6 +1002,17 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 		else:
 			if self.isChecked():
 				self.setChecked(False)
+
+	def sendASCII(self):
+		s = self.serialData.text()
+		self.p.fd.write(s.encode('utf-8'))
+
+	def sendBinary(self):
+		s = self.serialData.text()
+		try:
+			self.p.fd.write(chr(int(s) & 0xFF).encode('utf-8'))
+		except Exception as e:
+			print(e)
 
 	def showServerStatus(self, msg):
 		self.showStatus("Compiler: Error Launching Server (Restart app) ", True)

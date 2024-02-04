@@ -791,11 +791,11 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 					fname = '.'.join(self.fname.split('.')[:-1])
 					if self.p.version == REGISTERS.VERSION_ATMEGA32 or self.p.connected == False:  # by default, compile for ATMEGA32.
 						# cmd = 'avr-gcc -Wall -O2 -mmcu=%s -o "%s" -Map "%s" "%s"' %('atmega32',fname,fname+'.map',self.fname)
-						cmd = 'avr-gcc -Wall -O2 -mmcu=%s -Wl,-Map="%s" -o "%s" "%s"' % (
+						cmd = 'avr-gcc -Wall -O2 -mmcu=%s -Wl,-Map="%s" -o "%s" "%s" -lkp' % (
 							'atmega32', fname + '.map', fname, self.fname)  # includes MAP
 						self.logThis.emit('''<span style="color:green;">%sing for Atmega32</span>''' % (action))
 					elif self.p.version == REGISTERS.VERSION_ATMEGA328P:
-						cmd = 'avr-gcc -Wall -O2 -mmcu=%s -o "%s" "%s"' % ('atmega328p', fname, self.fname)
+						cmd = 'avr-gcc -Wall -O2 -mmcu=%s -o "%s" "%s" -lkp' % ('atmega328p', fname, self.fname)
 						self.logThis.emit(
 							'''<span style="color:green;">%sing for Atmega328p (Nano)</span>''' % (action))
 					else:
