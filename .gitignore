@@ -1,11 +1,13 @@
-examples/*.map
-examples/*.hex
-examples/*.lst
-examples/*.map
-examples/ASM/*.map
-examples/ASM/*.hex
-examples/ASM/*.lst
-examples/ASM/*.map
+# Ignore all in examples. not ASM directory
+examples/*
+!examples/ASM
+examples/ASM/*
+
+# Unignore all c extensions
+!examples/*.c
+!examples/*.C
+!examples/ASM/*.S
+
 pypi
 __pycache__
 .cache
