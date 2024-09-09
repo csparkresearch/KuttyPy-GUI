@@ -18,7 +18,7 @@ Kuttypy software has an IDE with many examples for learning embedded systems
 	This uses the AVR-GCC compiler to create a hex file. the map and lst files are also shown in new tabs
 	![Screenshot](images/ide/compile.png)
 
-!!! info "upload"
+!!! info "uploading"
 	Upload the compiled hex file to the hardware. 
 	![Screenshot](images/ide/upload.png)
 
