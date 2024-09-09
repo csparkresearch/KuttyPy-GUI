@@ -1,17 +1,14 @@
-    ; jump.s  ,  demonstrates JUMP instruction
 
-IO_DDRB = 0x17
-IO_PORTB = 0x18
+#include <avr/io.h>      
 
-        .section .text   
-
-        .global main                           
+.section .text    ; denotes code section
+.global main
 main:
-        ldi  r16, 254
-        out  IO_DDRB,  r16   ; DDRB 
-        out  IO_PORTB, r16    ; r16 to PortB
-	jmp lab1
-        ldi r16, 15               ; load 15 ro r16
-lab1:
-;        out IO_PORTB, r16    ; r16 to PortB
-	.end
+    LDI R16, 255      
+    STS DDRB, R16
+
+    ;JMP skip
+    LDI R16, 15
+skip: 
+    STS PORTB, R16
+.end

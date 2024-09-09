@@ -5,7 +5,7 @@ Author: jihtin
 /* Define color palette */
 
 /* General styling for buttons */
-QPushButton, QCheckBox {
+QCheckBox {
     background-color: #ccd0d1;
     color: #333333;
     border: 1px solid #bdc3c7;
@@ -13,21 +13,9 @@ QPushButton, QCheckBox {
     padding: 8px 16px;
 }
 
-QPushButton:hover , QCheckBox:hover{
+QCheckBox:hover{
     background-color: #d0d3d4;
     border: 1px solid #bdc3c7;
-}
-
-/* Primary button styling */
-QPushButton[primary="true"] {
-    background-color: #3498db;
-    color: #ffffff;
-    border: 1px solid #3498db;
-}
-
-QPushButton[primary="true"]:hover {
-    background-color: #2980b9;
-    border: 1px solid #2980b9;
 }
 
 /* Dropdown styling */
@@ -90,4 +78,59 @@ QCheckBox::indicator:unchecked {
 	border-color: #411;
 	color: #a9b7c6;
 	background-color: #994444;
+}
+
+.dirframe {
+    background-color: #fff;
+}
+
+
+.materialcard {
+    background-color: #fff;
+    border-radius: 8px;
+}
+
+#nameLabel {
+    color: #009688; /* Teal color */
+    font-size: 11pt;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+QPushButton{
+	border-style: solid;
+	border-top-color: qlineargradient(spread:pad, x1:0.5, y1:1, x2:0.5, y2:0, stop:0 rgb(215, 215, 215), stop:1 rgb(222, 222, 222));
+	border-right-color: qlineargradient(spread:pad, x1:0, y1:0.5, x2:1, y2:0.5, stop:0 rgb(217, 217, 217), stop:1 rgb(227, 227, 227));
+	border-left-color: qlineargradient(spread:pad, x1:0, y1:0.5, x2:1, y2:0.5, stop:0 rgb(227, 227, 227), stop:1 rgb(217, 217, 217));
+	border-bottom-color: qlineargradient(spread:pad, x1:0.5, y1:1, x2:0.5, y2:0, stop:0 rgb(215, 215, 215), stop:1 rgb(222, 222, 222));
+	border-width: 1px;
+	color: rgb(0,0,0);
+    border-radius: 5px;
+    padding: 8px 16px;
+	background-color: rgb(255,255,255);
+}
+
+QPushButton:hover{
+	border-style: solid;
+	border-top-color: qlineargradient(spread:pad, x1:0.5, y1:1, x2:0.5, y2:0, stop:0 rgb(195, 195, 195), stop:1 rgb(222, 222, 222));
+	border-right-color: qlineargradient(spread:pad, x1:0, y1:0.5, x2:1, y2:0.5, stop:0 rgb(197, 197, 197), stop:1 rgb(227, 227, 227));
+	border-left-color: qlineargradient(spread:pad, x1:0, y1:0.5, x2:1, y2:0.5, stop:0 rgb(227, 227, 227), stop:1 rgb(197, 197, 197));
+	border-bottom-color: qlineargradient(spread:pad, x1:0.5, y1:1, x2:0.5, y2:0, stop:0 rgb(195, 195, 195), stop:1 rgb(222, 222, 222));
+	border-width: 1px;
+	border-radius: 10px;
+	color: rgb(0,0,0);
+	padding: 2px;
+	background-color: rgb(180,150,190);
+}
+QPushButton:pressed{
+	border-style: solid;
+	border-top-color: qlineargradient(spread:pad, x1:0.5, y1:1, x2:0.5, y2:0, stop:0 rgb(215, 215, 215), stop:1 rgb(222, 222, 222));
+	border-right-color: qlineargradient(spread:pad, x1:0, y1:0.5, x2:1, y2:0.5, stop:0 rgb(217, 217, 217), stop:1 rgb(227, 227, 227));
+	border-left-color: qlineargradient(spread:pad, x1:0, y1:0.5, x2:1, y2:0.5, stop:0 rgb(227, 227, 227), stop:1 rgb(217, 217, 217));
+	border-bottom-color: qlineargradient(spread:pad, x1:0.5, y1:1, x2:0.5, y2:0, stop:0 rgb(215, 215, 215), stop:1 rgb(222, 222, 222));
+	border-width: 1px;
+	border-radius: 5px;
+	color: rgb(0,0,0);
+	padding: 2px;
+	background-color: rgb(142,142,142);
 }

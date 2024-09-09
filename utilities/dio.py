@@ -1,6 +1,6 @@
 from PyQt5 import QtGui,QtCore,QtWidgets
 from .templates import ui_dio,ui_dio_pwm,ui_dio_adc,ui_dio_adcLog,ui_dio_sensor,ui_regvals,ui_dio_cntr,ui_regedit,ui_dio_control
-from .templates import ui_dio_robot,ui_dio_stepper,ui_dummyio
+from .templates import ui_dio_robot,ui_dio_stepper,ui_dummyio, ui_dio_motor_shield
 
 from . import REGISTERS
 from .templates.gauge import Gauge
@@ -810,6 +810,73 @@ class DIOSTEPPER(QtWidgets.QDialog,ui_dio_stepper.Ui_Dialog):
 		return self.position
 
 	def setValue(self,val):
+		if val is not None:
+			self.gauge.update_value(val)
+
+	def add(self):
+		self.positions.append(self.position)
+		item = QtWidgets.QListWidgetItem("%s" % self.position)
+		self.listWidget.addItem(item)
+
+	def play(self):
+		pass
+
+	def launch(self):
+		self.initialize()
+		self.show()
+
+
+class DIOMOTORSHIELD(QtWidgets.QDialog, ui_dio_motor_shield.Ui_Dialog):
+	def __init__(self, parent, **configuration):
+		super(DIOMOTORSHIELD, self).__init__(parent)
+		name = 'motorshield'
+		self.setupUi(self)
+		self.p = configuration.get('device', None)
+		self.p.setReg('DDRB', 255)
+		self.state = None
+
+
+		self.setWindowTitle('Uno Motor Shield Controller')
+
+
+	def initialize(self):
+		pass
+
+	def stepLeft(self):
+		self.state = 'left'
+
+	def stepRight(self):
+		self.state = 'right'
+
+	def stepForward(self):
+		self.state = 'forward'
+
+	def stepBackward(self):
+		self.state = 'backward'
+
+	def stop(self):
+		self.state = 'stop'
+		pass
+
+	def read(self):  # Read is not read. it actually updates the motor position.
+		pass
+		#self.p.setReg('PORTB', prev & self.mask | self.steps[self.lastStep])
+		if self.state is not None:
+			if self.state == 'forward':
+				pass
+			elif self.state == 'backward':
+				pass
+			elif self.state == 'right':
+				pass
+			elif self.state == 'left':
+				pass
+		else:
+			pass
+		self.state = None
+
+		return self.position
+
+	def setValue(self, val):
 		if val is not None:
 			self.gauge.update_value(val)
 

@@ -1,20 +1,26 @@
 
- ; global-init.s  , demonstrates global variable initialization
- ; code segments  __do_copy_data abd __do_clear_bss 
+ddrb = 0x17  
+portb = 0x18 
+ddrd = 0x11
+portd = 0x12 
 
-DDRB = 0x37
-PORTB = 0x38
-   
-         .section .data  
-var1:  
-        .byte  0xee
 
-         .section .text    ; denotes code section
-         .global __do_copy_data  ; initialize global variables 
-         .global __do_clear_bss  ; and setup stack pointer
-         .global main
-main: 	
-       lds    r16, var1            ; content of RAM at var1 to r16
-       sts     DDRB, r16        ; Do the same again using 
-       sts     PORTB, r16     ;  memory mapped addresses
-       .end
+.section .text    ; denotes code section
+  .global __do_clear_bss  ; and setup stack pointer
+
+  .global main
+  main: 	
+     LDI R16, 0xff        ; load r16 with 255    
+     OUT ddrb, R16        ; make all bits of port B as output 
+     OUT ddrd, R16        ; make all bits of port D as output
+
+     LDI R16, 1           
+     PUSH R16             ; push R16 content to the stack
+     INC R16
+     PUSH R16             ; push the incremented value
+     POP R17              ; should pop the last pushed value
+     POP R18              ; shoul pop the previous
+
+     OUT portb, R17       ; display on port B
+     OUT portd, R18       ; display on port D
+.end

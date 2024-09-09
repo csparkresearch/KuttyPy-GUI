@@ -1,20 +1,21 @@
-    ; sub-routine.s  , CALL instruction
 
-IO_DDRB = 0x17
-IO_PORTB = 0x18
+#include <avr/io.h>
 
-        .section .text    ; denotes code section
 
-disp:  	                   ; subroutine 
-        inc r1 
-        out  IO_PORTB, r1      ; PORTB 
-	ret
+.section .text    ; denotes code section
+.global main
+  
+disp:  	               ; subroutine 
+    STS PORTB, R17       ; send R1 PORTB 
+    RET
 
-        .global main                           
+.global main                           
 main:
-        ldi  r16, 255
-        out  IO_DDRB,  r16   ; DDRB 
-	clr  r1               
-	rcall disp   ; relative call
-	call disp    ; direct call
-	.end
+     LDI  R16, 255
+     STS  DDRB, R16     ; DDRB 
+
+     LDI R17, 3              
+
+     RCALL disp        ; relative call
+     CALL  disp    ; direct call
+.end

@@ -104,7 +104,12 @@ nav:
       - 'Introduction': 'programming/intro.md'
       - 'Basic I/O': 'programming/basics.md'
       - 'I2C and Sensors': 'programming/i2c.md'
-  - Programming - C: 'programming/c.md'
+  - Programming - C:
+      - 'Introduction': 'programming/c.md'
+      - 'What is the IDE': 'IDE.md'
+      - 'BMP180 temperature': 'programming/BMP180.md'
+      - 'MPU6050 accelerometer': 'programming/MPU6050.md'
+
   - Projects:
       - 'R2R DAC Wavegen': 'programming/r2r_wavegen.md'
       - 'Optics: Malus Law': 'malus.md'
@@ -114,5 +119,6 @@ nav:
       - 'Enclosures': 'enclosures.md'
 #  - Nano Tutorial: 'workshopnano.md'
   - 2 Hour Tutorial: 'workshop.md'
+  - Beginner Workshop with Android: 'androidworkshop.md'
 #  - Arduino Boards : 'boards.md'
 

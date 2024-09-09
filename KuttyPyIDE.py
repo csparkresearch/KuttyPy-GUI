@@ -725,19 +725,20 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 							self.fname = self.fname[:-2] + '.hex'  # Replace .c with .hex
 						self.logThis.emit('''<span style="font-size:12pt">Upload Code... Trigger Reset...</span>''')
 						dude = uploader.Uploader(self.p.fd, hexfile=self.fname, logger=self.logThis)
-						self.p.fd.setRTS(0);
-						self.p.fd.setDTR(0);
-						time.sleep(0.01);
-						self.p.fd.setRTS(1);
-						self.p.fd.setDTR(1);
+						self.p.fd.setRTS(0)
+						self.p.fd.setDTR(0)
+						time.sleep(0.002)
+						self.p.fd.setRTS(1)
+						self.p.fd.setDTR(1)
 						time.sleep(0.05)
+						dude.sync()
 						dude.program()
 						dude.verify()
-						self.p.fd.setRTS(0);
-						self.p.fd.setDTR(0);
-						time.sleep(0.01);
-						self.p.fd.setRTS(1);
-						self.p.fd.setDTR(1);
+						self.p.fd.setRTS(0)
+						self.p.fd.setDTR(0)
+						time.sleep(0.01)
+						self.p.fd.setRTS(1)
+						self.p.fd.setDTR(1)
 						time.sleep(0.25)
 						self.p.get_version()
 						self.logThis.emit('''<span style="color:darkgreen;">Finished upload</span>''')
@@ -768,7 +769,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 
 	def openFile(self):
 		filename = QtWidgets.QFileDialog.getOpenFileName(self, " Open a C/Asm file to edit", self.defaultDirectory,
-		                                                 "C/ASM Files (*.c *.C *.s *.S);; Asm Files (*.s *.S);; C Files (*.c *.C)")
+		                                                 "C/ASM Files (*.c *.C *.s *.S *.h);; Asm Files (*.s *.S);; C Files (*.c *.C *.h)")
 		if len(filename[0]):
 			self.openFile_(filename[0])
 
@@ -912,7 +913,9 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 	def saveFile(self):
 		if not self.CFile:
 			self.CFile = self.saveAs()
+			return
 		if self.CFile is not None and len(self.CFile) > 1:
+			self.updateWatcher()
 			self.sourceTabs[self.activeSourceTab][1] = self.CFile
 			self.activeEditor.markAsSaved(True)
 			self.fs_watcher.removePath(self.CFile)

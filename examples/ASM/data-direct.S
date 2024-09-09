@@ -1,20 +1,15 @@
 
- ; data-direct.s  , demonstrate data direct mode
+ddrb = 0x17       ; I/O mapped address of register DDRB
+portb = 0x18
+PORTA = 0x3b      ; memory mapped address of PORTA
 
-DDRB = 0x37
-PORTB = 0x38
-   
-         .section .data  
-var1:
-
-         .section .text    ; denotes code section
-         .global main
+.section .text    ; denotes code section
+.global main
 main: 	
-       ldi      r17, 0xf0             ; load r16 with 255
-       sts	var1, r17           ; store r17 to location var1 
-       lds    r16, var1            ; content of RAM at var1 to r16
-       out 0x17, r16             ; Display content of R16
-       out 0x18, r16             ; using LEDs on port B
-       sts     DDRB, r16        ; Do the same again using 
-       sts     PORTB, r16     ;  memory mapped addresses
-       .end
+   LDI    R16, 0xff           ; load r16 with 255
+   OUT ddrb, R16              ; set port B as output 
+
+   STS PORTA, R16   ; Store R16 to the memory location PORTA
+   LDS R17, PORTA    ; read it back to R17
+   OUT portb, R17   ; display it on port B LEDs     
+.end

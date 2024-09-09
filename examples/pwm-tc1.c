@@ -1,16 +1,10 @@
-#include "mh-utils.c"
+#include <avr/kp.h>
+
  
-int main()
-{
-DDRD = 48; // PD4, PD5 output
-TCCR1A = 179;
-TCCR1B=1;
+uint8_t csb = 2;           // Clock select bits 
+uint16_t ocra = 63;       // Output Compare register vaule
 
-OCR1BH=1;
-OCR1BL=255;
-
-OCR1AH=1;
-OCR1AL=255;
-
-for(;;);
+int main() 
+{ 
+pwm10_tc1(csb, ocra);
 }

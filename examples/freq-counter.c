@@ -1,8 +1,6 @@
-#include "mh-utils.c"
-#include "mh-timer.c"
-#include "mh-lcd.c"
+// Connect the pulse  output set on PD7 to the input PB1
 
-// Connect input to PB1, test frequency available on PD7
+#include <avr/kp.h>   // Include file libkp
 
 int main()
 {
@@ -14,8 +12,8 @@ while(1)
    {
    f = measure_freq();   // Measures on T1 (PB1)
    lcd_clear();
+   lcd_put_string("f=");
    lcd_put_long(f);
    delay_ms(200);
    }
-return 0;
 }

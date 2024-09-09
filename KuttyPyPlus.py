@@ -717,6 +717,11 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 			dialog = dio.DIOSTEPPER(self, total=200, device=self.p)
 			dialog.launch()
 			self.sensorList.append([dialog, None])
+	def newMotorShield(self):
+		if self.p.connected:
+			dialog = dio.DIOMOTORSHIELD(self, device=self.p)
+			dialog.launch()
+			self.sensorList.append([dialog, None])
 
 	############ I2C SENSORS #################
 	def I2CScan(self):
@@ -1059,6 +1064,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 
 		menu.addAction('Save Window as Svg', self.exportSvg)
 		menu.addAction('Open Stepper Controller', self.newStepperController)
+		menu.addAction('Open Motor Shield(Uno)', self.newMotorShield)
 
 		menu.addAction('Upload Hex File', self.uploadHex)
 

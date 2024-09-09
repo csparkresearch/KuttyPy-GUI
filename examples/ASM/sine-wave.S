@@ -1,4 +1,4 @@
-; generates sine wave on the R-2R DAC connected on port B
+; generates sine wave on the R-2R DAC connected on port C
 
 #include <avr/io.h>
 
@@ -9,26 +9,25 @@ stab:	; sine table
 	223 , 209 , 191 , 171 , 150 , 128 , 105 , 84 , 64 , 46 , 32 , 21 ,\
          15 , 13 , 15 , 21 , 32 , 46 , 64 , 84 , 105 , 127
 	
-    .section .text             ; code section
-    .global __do_copy_data
-   	.global __do_clear_bss
+.section .text             ; code section
+.global __do_copy_data
+.global __do_clear_bss
 
-
-	.global  TIMER0_COMP_vect
+.global  TIMER0_COMP_vect
 TIMER0_COMP_vect:       ; ISR
-	ld  r24, X+			; value from the sine table, increment pointer
-    sts PORTB, r24		; write it to PORTB
-	inc	r22				; increment r22
-	CPSE	r20,r22		; is it 32 ?
-	reti				; if not return, else skip reti
-	clr	r22				; set it bck to 0
-	subi	r26,32		; set X to beginning of table
-	reti
+    ld  r24, X+         ; value from the sine table, increment pointer
+    sts PORTC, r24	    ; write it to PORTC
+    inc	r22	    ; increment r22
+    CPSE	r20,r22	    ; is it 32 ?
+    reti		    ; if not equal return, else skip reti
+    clr	r22	    ; set it back to 0
+    subi	r26,32	    ; subtract 32 from XL, set X to beginning of the table
+    reti
 
         .global main                           
 main:
          ldi    r16, 255         
-         sts   DDRB, r16
+         sts   DDRC, r16
 
 	 ldi   r16,  (1 << WGM01) |  1  ; Set TCCR0 in the CTC mode
   	 sts  TCCR0 , r16
