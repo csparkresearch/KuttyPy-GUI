@@ -1,0 +1,354 @@
+<xml xmlns="https://developers.google.com/blockly/xml">
+<description>
+<![CDATA[
+
+## Play Piano with PORTA switches
+
+Only enable one switch at a time 
+
+]]>
+</description>
+      <variables>
+        <variable id="LbE2%mV/CRs,w^fwYIZy">switches</variable>
+      </variables>
+      <block type="add_piano" id="-g!{fH|z*m+5X!QOlm(|" x="0" y="0">
+        <next>
+          <block type="set_reg_bits" id="|3waDCpz*X@8wo~J$=0i">
+            <field name="REGISTER">DDRA</field>
+            <field name="B7">FALSE</field>
+            <field name="B6">FALSE</field>
+            <field name="B5">FALSE</field>
+            <field name="B4">FALSE</field>
+            <field name="B3">FALSE</field>
+            <field name="B2">FALSE</field>
+            <field name="B1">FALSE</field>
+            <field name="B0">FALSE</field>
+            <next>
+              <block type="set_reg_bits_string" id="Cr|-y.+Yayrl/:Reg}ii">
+                <field name="REGISTER">PORTA</field>
+                <field name="B7">TRUE</field>
+                <field name="B6">TRUE</field>
+                <field name="B5">TRUE</field>
+                <field name="B4">TRUE</field>
+                <field name="B3">TRUE</field>
+                <field name="B2">TRUE</field>
+                <field name="B1">TRUE</field>
+                <field name="B0">TRUE</field>
+                <next>
+                  <block type="controls_repeat_ext" id="%oI+O+xp08-zmsfzKoyk">
+                    <value name="TIMES">
+                      <shadow type="math_number" id="Pb=`jTZVX`sMgtde:KX_">
+                        <field name="NUM">10000</field>
+                      </shadow>
+                    </value>
+                    <statement name="DO">
+                      <block type="variables_set" id="LfL+XY^=}JyNca24Oqdc">
+                        <field name="VAR" id="LbE2%mV/CRs,w^fwYIZy">switches</field>
+                        <value name="VALUE">
+                          <block type="get_reg_from_string" id="NBHFr]A@6%^5?wb.VlR+">
+                            <field name="REGISTER">PINA</field>
+                          </block>
+                        </value>
+                        <next>
+                          <block type="controls_if" id="tc-BNo0UQPSRs$PH18=:">
+                            <value name="IF0">
+                              <block type="logic_compare" id=";Nyvp]VTUhj2sG^:VU;P">
+                                <field name="OP">EQ</field>
+                                <value name="A">
+                                  <block type="variables_get" id="2w1Mk,Q_OkI;,%u*#yKM">
+                                    <field name="VAR" id="LbE2%mV/CRs,w^fwYIZy">switches</field>
+                                  </block>
+                                </value>
+                                <value name="B">
+                                  <block type="math_number" id="ae#3HVHSwG+EKgCiLfRS">
+                                    <field name="NUM">128</field>
+                                  </block>
+                                </value>
+                              </block>
+                            </value>
+                            <statement name="DO0">
+                              <block type="play_piano" id="#;2~$Sa?x!WKqou4LJ}K">
+                                <value name="NOTE">
+                                  <shadow type="text" id=";LB}ie$t]dPN]2ZLMk;l">
+                                    <field name="TEXT">C</field>
+                                  </shadow>
+                                  <block type="text" id="}_uw0wnrLIlilPPJyMs(">
+                                    <field name="TEXT">C</field>
+                                  </block>
+                                </value>
+                                <next>
+                                  <block type="wait_seconds" id="+D2sW#zYT^DB4m(J,s]v">
+                                    <field name="SECONDS">0.5</field>
+                                  </block>
+                                </next>
+                              </block>
+                            </statement>
+                            <next>
+                              <block type="controls_if" id="a8kLjUl87!Ja9x!U9xy/">
+                                <value name="IF0">
+                                  <block type="logic_compare" id="KF.hp0,LfGL2?UvD1,$7">
+                                    <field name="OP">EQ</field>
+                                    <value name="A">
+                                    <block type="variables_get" id="%S+^L,Ggb^0/u)=`nr=b">
+                                        <field name="VAR" id="LbE2%mV/CRs,w^fwYIZy">switches</field>
+                                      </block>
+                                    </value>
+                                    <value name="B">
+                                      <block type="math_number" id="|q.;%:8{`+~#-E0~3=AJ">
+                                        <field name="NUM">64</field>
+                                      </block>
+                                    </value>
+                                  </block>
+                                </value>
+                                <statement name="DO0">
+                                  <block type="play_piano" id=",q)h`t:M:^Tx-crOMIzI">
+                                    <value name="NOTE">
+                                      <shadow type="text" id=";LB}ie$t]dPN]2ZLMk;l">
+                                        <field name="TEXT">C</field>
+                                      </shadow>
+                                      <block type="text" id="yL#v2of)p2c8;o`j@d8;">
+                                        <field name="TEXT">D</field>
+                                      </block>
+                                    </value>
+                                    <next>
+                                      <block type="wait_seconds" id="6Lwnv+o`?;Z7omX|uTSN">
+                                        <field name="SECONDS">0.5</field>
+                                      </block>
+                                    </next>
+                                  </block>
+                                </statement>
+                                <next>
+                                  <block type="controls_if" id="`hyDs~6/F%YrHjXK{u*I">
+                                    <value name="IF0">
+                                      <block type="logic_compare" id="$-.|QL=EY8`V)ex`84I2">
+                                        <field name="OP">EQ</field>
+                                        <value name="A">
+                                          <block type="variables_get" id="~Btc4N?+Q_B%E^1!{oR-">
+                                            <field name="VAR" id="LbE2%mV/CRs,w^fwYIZy">switches</field>
+                                          </block>
+                                        </value>
+                                        <value name="B">
+                                          <block type="math_number" id="@%aiv6?,43,gCGI}/8@N">
+                                            <field name="NUM">32</field>
+                                          </block>
+                                        </value>
+                                      </block>
+                                    </value>
+                                    <statement name="DO0">
+                                      <block type="play_piano" id="@V4hYx#z7LYpeyQK+?*3">
+                                        <value name="NOTE">
+                                          <shadow type="text" id=";LB}ie$t]dPN]2ZLMk;l">
+                                            <field name="TEXT">C</field>
+                                          </shadow>
+                                          <block type="text" id="P;0KfoQ_{-R..@2@QQdB">
+                                            <field name="TEXT">E</field>
+                                          </block>
+                                        </value>
+                                        <next>
+                                          <block type="wait_seconds" id="T-@sPjR[i)-wFeCmd?[^">
+                                            <field name="SECONDS">0.5</field>
+                                          </block>
+                                        </next>
+                                      </block>
+                                    </statement>
+                                    <next>
+                                      <block type="controls_if" id=",v02U_U!1Sj[=.3!EE:A">
+                                        <value name="IF0">
+                                          <block type="logic_compare" id="RwBqTvL8i:=4]l/1qc#M">
+                                            <field name="OP">EQ</field>
+                                            <value name="A">
+                                              <block type="variables_get" id="~yDeRva=hI=Ky:R(eZNW">
+                                                <field name="VAR" id="LbE2%mV/CRs,w^fwYIZy">switches</field>
+                                              </block>
+                                            </value>
+                                            <value name="B">
+                                              <block type="math_number" id="8;3Hj?GYn[si$?is,Aas">
+                                                <field name="NUM">16</field>
+                                              </block>
+                                            </value>
+                                          </block>
+                                        </value>
+                                        <statement name="DO0">
+                                          <block type="play_piano" id="FI*Q0.WX1uHha(FG6H@=">
+                                            <value name="NOTE">
+                                              <shadow type="text" id=";LB}ie$t]dPN]2ZLMk;l">
+                                                <field name="TEXT">C</field>
+                                              </shadow>
+                                              <block type="text" id="9`~`Ei+[[d%7c5)6IBJr">
+                                                <field name="TEXT">F</field>
+                                              </block>
+                                            </value>
+                                            <next>
+                                              <block type="wait_seconds" id="Aq)CVp)J@!jw`fqXm+4P">
+                                                <field name="SECONDS">0.5</field>
+                                              </block>
+                                            </next>
+                                          </block>
+                                        </statement>
+                                        <next>
+                                          <block type="controls_if" id="I{{Q}sWKBc.Q;*7}/uI`">
+                                            <value name="IF0">
+                                              <block type="logic_compare" id="r)3;}9Htr;cLBTeEjci-">
+                                                <field name="OP">EQ</field>
+                                                <value name="A">
+                                                  <block type="variables_get" id="dk-tWuk:78}=M-37Oag:">
+                                                    <field name="VAR" id="LbE2%mV/CRs,w^fwYIZy">switches</field>
+                                                  </block>
+                                                </value>
+                                                <value name="B">
+                                                  <block type="math_number" id="y;g=K?/qt$nG*_T(RX~=">
+                                                    <field name="NUM">8</field>
+                                                  </block>
+                                                </value>
+                                              </block>
+                                            </value>
+                                            <statement name="DO0">
+                                              <block type="play_piano" id="o-V6zqlv_vL`wPsSc`^/">
+                                                <value name="NOTE">
+                                                  <shadow type="text" id=";LB}ie$t]dPN]2ZLMk;l">
+                                                    <field name="TEXT">C</field>
+                                                  </shadow>
+                                                  <block type="text" id="7U1R:/.uF;l~*KM4+VNY">
+                                                    <field name="TEXT">G</field>
+                                                  </block>
+                                                </value>
+                                                <next>
+                                                  <block type="wait_seconds" id="^X46C@z1CLY4i6hXUm|-">
+                                                    <field name="SECONDS">0.5</field>
+                                                    </block>
+                                                </next>
+                                              </block>
+                                            </statement>
+                                            <next>
+                                              <block type="controls_if" id="TQ20{7I^vo,#shT?5mQM">
+                                                <value name="IF0">
+                                                  <block type="logic_compare" id="}t1YIn{+$gEhHT|Q:OkV">
+                                                    <field name="OP">EQ</field>
+                                                    <value name="A">
+                                                      <block type="variables_get" id="b|3kpE+Jgv.Pyclv;npn">
+                                                        <field name="VAR" id="LbE2%mV/CRs,w^fwYIZy">switches</field>
+                                                      </block>
+                                                    </value>
+                                                    <value name="B">
+                                                      <block type="math_number" id="=^UaLGF|W3Xe|#/A1EnG">
+                                                        <field name="NUM">4</field>
+                                                      </block>
+                                                    </value>
+                                                  </block>
+                                                </value>
+                                                <statement name="DO0">
+                                                  <block type="play_piano" id="g.b;)mmRrphbKqUqd|/}">
+                                                    <value name="NOTE">
+                                                      <shadow type="text" id=";LB}ie$t]dPN]2ZLMk;l">
+                                                        <field name="TEXT">C</field>
+                                                      </shadow>
+                                                      <block type="text" id="MIiwcgw16~abkkM}+kCm">
+                                                        <field name="TEXT">A</field>
+                                                      </block>
+                                                    </value>
+                                                    <next>
+                                                      <block type="wait_seconds" id="CMj$]g)9i51)0=E=Uvz:">
+                                                        <field name="SECONDS">0.5</field>
+                                                      </block>
+                                                    </next>
+                                                  </block>
+                                                </statement>
+                                                <next>
+                                                  <block type="controls_if" id="o1=/Hxr%7@:%][2*qTof">
+                                                    <value name="IF0">
+                                                      <block type="logic_compare" id="$;!P:t56U|[lgW0oiQO2">
+                                                        <field name="OP">EQ</field>
+                                                        <value name="A">
+                                                          <block type="variables_get" id="lEvu#B8;$-xYAVwo~(bL">
+                                                            <field name="VAR" id="LbE2%mV/CRs,w^fwYIZy">switches</field>
+                                                          </block>
+                                                        </value>
+                                                        <value name="B">
+                                                          <block type="math_number" id="8i%{FEN5czKk_EOfn+fa">
+                                                            <field name="NUM">2</field>
+                                                          </block>
+                                                        </value>
+                                                      </block>
+                                                    </value>
+                                                    <statement name="DO0">
+                                                      <block type="play_piano" id="3CqP@pX_3A7+[s:19fjG">
+                                                        <value name="NOTE">
+                                                          <shadow type="text" id=";LB}ie$t]dPN]2ZLMk;l">
+                                                            <field name="TEXT">C</field>
+                                                          </shadow>
+                                                          <block type="text" id="t?R;Ro$gB+KZ)-{;,I`n">
+                                                            <field name="TEXT">B</field>
+                                                          </block>
+                                                        </value>
+                                                        <next>
+                                                          <block type="wait_seconds" id="ffi2qmelrJ17`L`|YNhr">
+                                                            <field name="SECONDS">0.5</field>
+                                                          </block>
+                                                        </next>
+                                                      </block>
+                                                    </statement>
+                                                    <next>
+                                                      <block type="controls_if" id="r0RTm`RWtsGGksxsy}GE">
+                                                        <value name="IF0">
+                                                          <block type="logic_compare" id="wd:9u$2Yg51Mfq)M?f6D">
+                                                            <field name="OP">EQ</field>
+                                                            <value name="A">
+                                                              <block type="variables_get" id="FEVBAP+y+QW/7ncsoqOV">
+                                                                <field name="VAR" id="LbE2%mV/CRs,w^fwYIZy">switches</field>
+                                                              </block>
+                                                            </value>
+                                                            <value name="B">
+                                                              <block type="math_number" id="(|wJp*T73O;Jut7]cMtB">
+                                                                <field name="NUM">1</field>
+                                                              </block>
+                                                            </value>
+                                                          </block>
+                                                        </value>
+                                                        <statement name="DO0">
+                                                          <block type="play_piano" id=";DW6B5n[z1Jo_)|8/#YJ">
+                                                            <value name="NOTE">
+                                                              <shadow type="text" id=";LB}ie$t]dPN]2ZLMk;l">
+                                                                <field name="TEXT">C</field>
+                                                              </shadow>
+                                                              <block type="text" id="/rKSm2Af^(tjc9=g]=g!">
+                                                                <field name="TEXT">2C</field>
+                                                              </block>
+                                                            </value>
+                                                            <next>
+                                                              <block type="wait_seconds" id=":pvgd+cvq.cI~ZBA3T6M">
+                                                                <field name="SECONDS">0.5</field>
+                                                              </block>
+                                                            </next>
+                                                          </block>
+                                                          </statement>
+                                                          <next>
+                                                          <block type="wait_seconds" id="{5atP%v(8N*p%B2]BP`/">
+                                                            <field name="SECONDS">0.01</field>
+                                                          </block>
+                                                        </next>                                                          
+                                                      </block>
+                                                    </next>
+                                                  </block>
+                                                </next>
+                                              </block>
+                                            </next>
+                                          </block>
+                                        </next>
+                                      </block>
+                                    </next>
+                                  </block>
+                                </next>
+                              </block>
+                            </next>
+                          </block>
+                        </next>
+                      </block>
+                    </statement>
+                  </block>
+                </next>
+              </block>
+            </next>
+          </block>
+        </next>
+      </block>
+    </xml>

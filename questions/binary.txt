@@ -1,0 +1,27 @@
+Convert the binary number 101010 to decimal.
+a) 42
+b) 52
+c) 62
+d) 72
+ANSWER: 1
+
+Convert the decimal number 75 to binary.
+1001011
+1010110
+1101010
+1110010
+ANSWER: 1
+
+What is the decimal equivalent of the binary number 110010?
+a) 38
+b) 44
+c) 50
+d) 52
+ANSWER: 2
+
+Convert the decimal number 92 to binary.
+a) 1011100
+b) 1100100
+c) 1110010
+d) 1001010
+ANSWER: 1

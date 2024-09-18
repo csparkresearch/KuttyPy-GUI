@@ -1,0 +1,36 @@
+Which device DOES NOT contain a microcontroller?
+LCD TV
+Washing Machine
+bicycle
+Air Conditioner
+ANSWER: 3
+
+What does the term "microcontroller" refer to?
+A tiny robot
+A small computer on a single chip
+A miniature smartphone
+A handheld gaming device
+ANSWER: 2
+
+Which is <em><strong>NOT</strong></em> an input device for a computer?
+WEBCAM
+TOUCHPAD
+SPEAKER
+MICROPHONE
+ANSWER: 3
+
+What is the power supply voltage for KuttyPy?
+3 Volts
+5 Volts
+220 Volts
+12 Volts
+ANSWER: 2
+
+How many bits are in one byte
+10
+8
+16
+4
+ANSWER: 2
+
+

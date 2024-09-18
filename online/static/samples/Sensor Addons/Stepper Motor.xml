@@ -1,0 +1,37 @@
+<xml xmlns="https://developers.google.com/blockly/xml">
+  <block type="init_stepper" id="cV+-sycIk65#_?bh*Qry" x="17" y="109">
+    <next>
+      <block type="move_stepper" id="54HnkcL2=fTzrQIQ%[Qq">
+        <field name="PINS">B1</field>
+        <value name="STEPS">
+          <block type="math_number" id="W:mj0T{RBG(U,:2-q)1@">
+            <field name="NUM">1000</field>
+          </block>
+        </value>
+        <value name="DELAY">
+          <block type="math_number" id="F1B}YD*7#Kp+NNu6/90*">
+            <field name="NUM">1</field>
+          </block>
+        </value>
+        <next>
+          <block type="move_stepper" id="fL|a]?R$y,l;GT+ieaV3">
+            <field name="PINS">B1</field>
+            <value name="STEPS">
+              <block type="math_number" id="aOBh0jA58DKcrDm$*N1D">
+                <field name="NUM">-1000</field>
+              </block>
+            </value>
+            <value name="DELAY">
+              <block type="math_number" id="T#j.**e`c}80BH.=]9YT">
+                <field name="NUM">1</field>
+              </block>
+            </value>
+          </block>
+        </next>
+      </block>
+    </next>
+  </block>
+<description>
+<![CDATA[<h1>Test stepper motor</h1><p><br></p><p>PB0 to PB3 pins are used.</p><p><br></p><p><br></p><p><br></p><p><br></p><h3>Connect to the motor in the following order</h3><p><br></p><p>PB0 A+</p><p>PB1 B+</p><p>PB2 A-</p><p>PB3 B-</p><p><br></p><p>The program will rotate few steps clockwise, and then return.</p>]]>
+</description>
+</xml>

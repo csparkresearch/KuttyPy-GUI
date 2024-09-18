@@ -1,0 +1,93 @@
+<xml xmlns="https://developers.google.com/blockly/xml">
+  <variables>
+    <variable id="Cdj/5QpJqUCX5l)~{U,p">x</variable>
+  </variables>
+  <block type="controls_repeat_ext" id="Odzf3Y#sTnMyi$I1.5@a" x="8" y="9">
+    <value name="TIMES">
+      <shadow type="math_number" id="Kixn4;htb{!gT^w;x~TN">
+        <field name="NUM">10000</field>
+      </shadow>
+    </value>
+    <statement name="DO">
+      <block type="set_reg_bits" id=",O`vf/V4rob+CL^$OyWY">
+        <field name="REGISTER">DDRD</field>
+        <field name="B7">TRUE</field>
+        <field name="B6">TRUE</field>
+        <field name="B5">TRUE</field>
+        <field name="B4">TRUE</field>
+        <field name="B3">TRUE</field>
+        <field name="B2">TRUE</field>
+        <field name="B1">TRUE</field>
+        <field name="B0">TRUE</field>
+        <next>
+          <block type="variables_set" id="f=!~k{i8UPNpc4/I|_p+">
+            <field name="VAR" id="Cdj/5QpJqUCX5l)~{U,p">x</field>
+            <value name="VALUE">
+              <block type="math_arithmetic" id="dez%:k)/CfSB4Hx70TtE">
+                <field name="OP">MULTIPLY</field>
+                <value name="A">
+                  <shadow type="math_number" id="porAvH?`3tO5OoKXE)hk">
+                    <field name="NUM">127</field>
+                  </shadow>
+                </value>
+                <value name="B">
+                  <shadow type="math_number" id="gv(POd-$xw=C5B~#FoCW">
+                    <field name="NUM">1</field>
+                  </shadow>
+                  <block type="math_arithmetic" id="xz?cuZXCZK;|ao@FtLc2">
+                    <field name="OP">ADD</field>
+                    <value name="A">
+                      <shadow type="math_number" id="IZ3[i]of;lwES(B?gi[[">
+                        <field name="NUM">1</field>
+                      </shadow>
+                    </value>
+                    <value name="B">
+                      <shadow type="math_number" id="Um]9m7_!Uofrf%X@E6ti">
+                        <field name="NUM">1</field>
+                      </shadow>
+                      <block type="get_phone_rotation" id="_xU|=^W=68l6IkhcwDb9">
+                        <field name="CHANNEL">2</field>
+                      </block>
+                    </value>
+                  </block>
+                </value>
+              </block>
+            </value>
+            <next>
+              <block type="plot_datapoint" id="{hy,{2tw+rFN[Q$*N]PG">
+                <value name="YAXIS">
+                  <shadow type="text" id="R__3GBzGOeWeMZHM6*yk">
+                    <field name="TEXT">Y-Axis</field>
+                  </shadow>
+                </value>
+                <value name="VALUE">
+                  <block type="variables_get" id="$r2@z+~jzX}(ZRk`L*Aj">
+                    <field name="VAR" id="Cdj/5QpJqUCX5l)~{U,p">x</field>
+                  </block>
+                </value>
+                <next>
+                  <block type="set_reg_from_string" id="h7VbDZs}qdMdCh+ZoY^C">
+                    <field name="REGISTER">PORTD</field>
+                    <value name="VALUE">
+                      <shadow type="math_number" id="ybOH@UOESVizTBR!`x3G">
+                        <field name="NUM">0</field>
+                      </shadow>
+                      <block type="variables_get" id="PN@/A#wcr,m^t5@IM/40">
+                        <field name="VAR" id="Cdj/5QpJqUCX5l)~{U,p">x</field>
+                      </block>
+                    </value>
+                    <next>
+                      <block type="wait_seconds" id="Mkf26j(YME4vxBl}+RTU">
+                        <field name="SECONDS">0.01</field>
+                      </block>
+                    </next>
+                  </block>
+                </next>
+              </block>
+            </next>
+          </block>
+        </next>
+      </block>
+    </statement>
+  </block>
+</xml>

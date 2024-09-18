@@ -15,7 +15,7 @@ from utilities.templates import ui_layout_quiz as layout
 from utilities.templates import ui_quiz_row
 
 #from utilities.quiz_server import create_server, connections
-from utilities.quiz_server_socketio import create_client,connections
+from utilities.quiz_server_socketio import SocketIOClient,connections
 
 
 class ImageDialog(QtWidgets.QDialog):
@@ -38,13 +38,23 @@ class ImageDialog(QtWidgets.QDialog):
 class QUIZROW(QtWidgets.QWidget, ui_quiz_row.Ui_Form):
     conn = None
 
-    def __init__(self, parent, address, name, score, result):
+    def __init__(self, parent, name, score, result):
         super(QUIZROW, self).__init__(parent)
         self.setupUi(self)
-        self.setToolTip('IP:'+str(address[0]))
+        self.setToolTip('Name:'+name)
         self.nameLabel.setText(name)
         self.scoreLabel.setText(score)
         self.resultLabel.setText(result)
+
+    def fullScore(self,state):
+        if state==1:
+            self.scoreLabel.setStyleSheet('''background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgba(9, 41, 4, 255), stop:0.085 rgba(2, 79, 0, 255), stop:0.19 rgba(50, 147, 22, 255), stop:0.275 rgba(236, 191, 49, 255), stop:0.39 rgba(243, 61, 34, 255), stop:0.555 rgba(135, 81, 60, 255), stop:0.667 rgba(121, 75, 255, 255), stop:0.825 rgba(164, 255, 244, 255), stop:0.885 rgba(104, 222, 71, 255), stop:1 rgba(93, 128, 0, 255));''')
+        elif state>0.8:
+            self.scoreLabel.setStyleSheet("background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgba(9, 41, 4, 255), stop:0.085 rgba(2, 79, 0, 255), stop:0.19 rgba(50, 147, 22, 255), stop:0.275 rgba(236, 191, 49, 255), stop:0.32 rgba(243, 61, 34, 255), stop:0.45 rgba(135, 81, 60, 255), stop:0.57 rgba(121, 75, 255, 255), stop:0.8 rgba(255,255,255, 255), stop:1 rgba(255,255,255, 255));")
+        elif state>0.4:
+            self.scoreLabel.setStyleSheet("background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 rgba(9, 41, 4, 255), stop:0.085 rgba(2, 79, 0, 255), stop:0.19 rgba(50, 147, 22, 255), stop:0.275 rgba(236, 191, 49, 255), stop:0.8 rgba(255,255,255, 255), stop:1 rgba(255,255,255, 255));")
+        else:
+            self.scoreLabel.setStyleSheet("")
 
     def getscr(self):
         if self.conn is not None:
@@ -58,6 +68,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
     serverSignal = QtCore.pyqtSignal(str,str)
     removeSignal = QtCore.pyqtSignal(str)
     imageSignal = QtCore.pyqtSignal(str,bytes)
+    memSig = QtCore.pyqtSignal(list)
     logThisPlain = QtCore.pyqtSignal(bytes)
     codeOutput = QtCore.pyqtSignal(str, str)
 
@@ -104,6 +115,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 
         self.showStatusSignal.connect(self.showStatus)
         self.serverSignal.connect(self.registerResponse)
+        self.memSig.connect(self.addmembers)
         self.imageSignal.connect(self.registerScreenshot)
         self.removeSignal.connect(self.removeClient)
         self.addSourceTab()
@@ -130,14 +142,18 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 
         #self.ipLabel.setText('IP: '+self.local_ip)
 
-        self.quiz_thread = create_client(self.showStatusSignal, self.serverSignal,self.removeSignal,self.imageSignal,
-                                         [self.teacherName.text(),self.roomName.text(),self.roomPassword.text()] ,
+        # Create an instance of the server
+        self.quiz_thread = SocketIOClient(self.showStatusSignal, self.serverSignal, self.removeSignal, self.imageSignal, self.memSig,
+                                          [self.teacherName.text(), self.roomName.text(), self.roomPassword.text()],
                                          self.serverName.text(),self.local_ip)
+        # Start the server in a separate thread
+        self.quiz_thread.start_client()
+
         s.close()
 
     def addDummies(self):
         for a in range(20):
-            row = QUIZROW(self,'hi'+str(a),'----', '---', '--------')
+            row = QUIZROW(self,'hi'+str(a),'----', '---')
             self.responsesLayout.addWidget(row,self.response_row,self.response_column)
             self.responses[id] = row
             self.response_column+=1
@@ -190,10 +206,12 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
         except Exception as e:
             print(e)
 
-    def registerResponse(self, addr, msg):
-        print('got',msg)
-        if addr not in self.clients:
-            self.clients.append(addr)
+
+    def registerResponse(self, clientname, msg):
+        print('got',msg,' from ',clientname)
+        #addr = username , not SID
+        if clientname not in self.clients:
+            self.clients.append(clientname)
         '''
         if addr == 'ERROR':
             self.termFrame.setStyleSheet('background: #f00;')
@@ -203,23 +221,43 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
         '''
         name,res = msg.split(':')
         score, responses = res.split('\t')
-        id = addr
-        if id not in self.responses:
-            row = QUIZROW(self,addr,name, score, responses)
+        if clientname not in self.responses:
+            row = QUIZROW(self,name, score, responses)
             self.responsesLayout.addWidget(row,self.response_row,self.response_column)
-            self.responses[id] = row
-            print(connections)
-            self.responses[id].conn = connections[id]
+            self.responses[clientname] = row
             self.response_column+=1
             if self.response_column>self.MAX_COLUMNS:
                 self.response_column = 0
                 self.response_row+=1
 
         else:
-            row = self.responses[id]
+            row = self.responses[clientname]
             row.scoreLabel.setText(score)
             row.resultLabel.setText(responses)
-            row.nameLabel.setText(name+'|'+addr)
+            row.nameLabel.setText(name+'|'+clientname)
+
+        if ' / ' in score:
+            s,t = score.split(' / ')
+            s = int(s) #Score
+            t = int(t) #Total answered
+            row.fullScore(1.*s/t)
+
+
+    def addmembers(self, members):
+        self.clear_layout(self.responsesLayout)
+        for a in members:
+            self.addmember(a)
+
+    def addmember(self, name):
+        row = QUIZROW(self, name, '', '')
+        self.responsesLayout.addWidget(row, self.response_row, self.response_column)
+        self.responses[name] = row
+        #print(connections)
+        #self.responses[name].conn = connections[name]
+        self.response_column += 1
+        if self.response_column > self.MAX_COLUMNS:
+            self.response_column = 0
+            self.response_row += 1
 
     def registerScreenshot(self, addr, msg):
         if addr in self.responses:
@@ -493,33 +531,18 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
         self.updateWatcher()
 
     def upload(self):
-        print('upload',connections)
+        print('upload',self.responses)
         for id in self.responses:
-            row = self.responses[id]
-            row.scoreLabel.setText('0/0')
-            row.resultLabel.setText('---')
+            try:
+                row = self.responses[id]
+                row.scoreLabel.setText('0/0')
+                row.resultLabel.setText('---')
+                row.fullScore(0)
+            except:
+                pass
 
         dat = self.activeEditor.toPlainText()
-        '''
-        for ip in connections:
-            try:
-                connections[ip].send(('QUIZ'+chr(1)+dat.replace('\n',chr(1))+'\n').encode('utf-8'))
-            except Exception as e:
-                connections.pop(ip)
-                print(type(ip), e)
-        '''
         self.quiz_thread.dispatch(('QUIZ'+chr(1)+dat.replace('\n',chr(1))+'\n').encode('utf-8'))
-        #self.sock.sendto(dat, (self.MCAST_GRP, self.MCAST_PORT)) # no multicast for now.
-        '''
-        for a in self.clients:
-            try:
-                s = socket.socket()
-                s.connect((a, 9090))
-                s.send(dat)
-                s.close()
-            except Exception as e:
-                print(e)
-            '''
 
     def saveFile(self):
         if not self.CFile:
@@ -571,6 +594,16 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
             p.begin(generator)
             self.render(p)
             p.end()
+
+
+    def clear_layout(self,layout):
+        if layout is not None:
+            while layout.count():
+                item = layout.takeAt(0)
+                if item.widget():
+                    item.widget().deleteLater()
+                elif item.layout():
+                    self.clear_layout(item.layout())
 
 
 def translators(langDir, lang=None):

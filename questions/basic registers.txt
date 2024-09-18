@@ -1,0 +1,28 @@
+DDR stands for?
+DATA DIGITAL READING
+DATA DIRECTION REGISTER
+DIGITAL DIRECTION RECORD
+DEFINITELY DON'T REMEMBER
+ANSWER: 2
+
+VCC Pin for Any IC is used for?
+POWER SUPPLY INPUT
+GROUND
+OUTPUT LED CONTROL
+INPUT PIN READING
+ANSWER: 1
+
+Full form of USB-OTG?
+USB On-The-Go
+USB Optical Transmission Gateway
+USB Organic Tech Genius
+USB Over The Grid
+ANSWER: 1
+
+Which of the following is NOT a common use of microcontrollers?
+Home automation
+Robotics
+Video editing
+Wearable devices
+ANSWER: 3
+

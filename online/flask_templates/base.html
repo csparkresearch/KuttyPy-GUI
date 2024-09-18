@@ -1,0 +1,45 @@
+<!-- templates/base.html -->
+<html>
+<head>
+	<link href="/semantic/semantic.min.css" rel="stylesheet" />
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>KuttyPy AVR-GCC Compiler</title>
+
+
+
+
+</head>
+
+
+<body id = "root">
+
+    <div class="ui padded grid">
+      <div class="ui inverted borderless top fixed fluid menu">
+        <a class="header item" href="{{ url_for('main.index') }}">
+			KuttyPy AVR-GCC Compiler
+			</a>
+      </div>
+    </div>
+
+      <div class="sixteen wide mobile thirteen wide tablet thirteen wide computer right floated column" id="content" >
+        <div class="ui padded container">
+
+          <div class="row">
+           <div class="ui section divider"></div>
+           <p id="message"></p>
+          </div>
+
+          {% block content %}
+          {% endblock %}
+
+
+        </div>
+      </div>
+
+	</div>
+</body>
+
+
+</html>

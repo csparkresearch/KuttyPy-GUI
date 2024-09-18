@@ -32,6 +32,7 @@ class Ui_Dialog(object):
         self.configLayout.setObjectName("configLayout")
         self.gridLayout.addLayout(self.configLayout, 1, 0, 1, 4)
         self.switcher = QtWidgets.QPushButton(Dialog)
+        self.switcher.setMinimumSize(QtCore.QSize(0, 40))
         self.switcher.setObjectName("switcher")
         self.gridLayout.addWidget(self.switcher, 0, 3, 1, 1)
         self.pushButton = QtWidgets.QPushButton(Dialog)

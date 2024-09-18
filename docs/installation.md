@@ -1,36 +1,20 @@
 
 ## Using PIP 
+
+---
+
 [![PyPI version](https://badge.fury.io/py/kuttyPy.svg)](https://badge.fury.io/py/kuttyPy)
-### Windows
 
-Python3 must be installed. kuttyPy package will install other dependencies such as PyQt5, qtconsole, numpy, scipy, pyqtgraph etc.
-Open the `cmd` terminal as administrator, and run the following command. This fetches KuttyPy and all required dependencies.
-
-```
-py -3 -m pip install kuttyPy
-```
-
-In order to launch the kuttypy interface
-
-```shell
-kuttypyplus
-```
-
-In order to launch the kuttypy IDE
-
-```shell
-kuttypyide
-```
 
 ### Ubuntu
 
 run as superuser in order to install the `kuttypy` library, and application entry point in /usr/bin/
 ```
 sudo pip3 install kuttyPy
-kuttypy
+kuttypyplus
 ```
 
-!!!warning "setting permissions"
+!!! warning "setting permissions"
 	Accessing the hardware on linux requires certain permissions to be set.
 	Due to an apparent bug with pip3, the install script may fail to do this.
 
@@ -49,19 +33,44 @@ kuttypy
 
 	*If this is too hard, please install the deb file linked in the following section*
 
----
+### Windows
+
+Python3 must be installed. kuttyPy package will install other dependencies such as PyQt5, qtconsole, numpy, scipy, pyqtgraph etc.
+Open the `cmd` terminal as administrator, and run the following command. This fetches KuttyPy and all required dependencies.
+
+```
+py -3 -m pip install kuttyPy
+```
+
+In order to launch the kuttypy interface
+
+```shell
+kuttypyplus
+```
+
+In order to launch the kuttypy IDE / Visual programming interface
+
+```shell
+kuttypyide
+```
+
 
 ## On Ubuntu:
+
+---
+
+
+### Installing from the deb file
++ download the [latest deb](https://csparkresearch.in/kuttypyplus)
++ use gdebi to install it.
+  + or navigate to directory, and `sudo apt install ./KuttyPy-1.0.25.deb`
+
 ### Installing from source
 
 + sudo apt-get install python3-serial python3-pyqt5 python3-pyqt5.qtsvg gcc-avr avr-libc python3-qtconsole python3-scipy python3-pyqtgraph
 + git clone http://github.com/csparkresearch/kuttypy-gui
 + cd kuttypy-gui
-+ python3 KuttyPyGUI.py
-
-### Installing from the deb file
-+ download the [latest deb](https://csparkresearch.in/kuttypyplus)
-+ use gdebi to install it.
++ python3 KuttyPyPlus.py
 
 ### Installing from the Ubuntu repository
 ![Ubuntu package](https://img.shields.io/ubuntu/v/kuttypy?color=darkgreen&style=plastic)

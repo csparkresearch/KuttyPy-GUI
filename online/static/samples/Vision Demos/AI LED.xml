@@ -1,0 +1,69 @@
+<xml xmlns="https://developers.google.com/blockly/xml">
+  <block type="add_mp_hands" id="8z8W[PaSTZ+16P-GHvRw" x="28" y="30">
+    <next>
+      <block type="set_reg_bits_string" id="8s18^H9%8uv6z-o%Sc:S">
+        <field name="REGISTER">DDRB</field>
+        <field name="B7">FALSE</field>
+        <field name="B6">FALSE</field>
+        <field name="B5">TRUE</field>
+        <field name="B4">FALSE</field>
+        <field name="B3">FALSE</field>
+        <field name="B2">FALSE</field>
+        <field name="B1">FALSE</field>
+        <field name="B0">FALSE</field>
+        <next>
+          <block type="controls_whileUntil" id=".{Z)z=N#scEFP4Cd]#kB">
+            <field name="MODE">WHILE</field>
+            <value name="BOOL">
+              <block type="logic_boolean" id="T%vh,hWbmX`rmg(.]Gaw">
+                <field name="BOOL">TRUE</field>
+              </block>
+            </value>
+            <statement name="DO">
+              <block type="controls_if" id="2;I.?M*_T6(TLAb(,Ypr">
+                <mutation else="1"></mutation>
+                <value name="IF0">
+                  <block type="ai_isIndexExtendend" id="^6P1ydsnFKL(qo%RJe$%"></block>
+                </value>
+                <statement name="DO0">
+                  <block type="set_reg_bits_string" id="P^jqS{F#C~!o(~Ob(Kgv">
+                    <field name="REGISTER">PORTB</field>
+                    <field name="B7">FALSE</field>
+                    <field name="B6">FALSE</field>
+                    <field name="B5">TRUE</field>
+                    <field name="B4">FALSE</field>
+                    <field name="B3">FALSE</field>
+                    <field name="B2">FALSE</field>
+                    <field name="B1">FALSE</field>
+                    <field name="B0">FALSE</field>
+                  </block>
+                </statement>
+                <statement name="ELSE">
+                  <block type="set_reg_bits_string" id="BTl^C[)v:#RHzrd%[pYA">
+                    <field name="REGISTER">PORTB</field>
+                    <field name="B7">FALSE</field>
+                    <field name="B6">FALSE</field>
+                    <field name="B5">FALSE</field>
+                    <field name="B4">FALSE</field>
+                    <field name="B3">FALSE</field>
+                    <field name="B2">FALSE</field>
+                    <field name="B1">FALSE</field>
+                    <field name="B0">FALSE</field>
+                  </block>
+                </statement>
+                <next>
+                  <block type="wait_seconds" id="f*o+{~Od%}rD/R3RXOL$">
+                    <field name="SECONDS">0.1</field>
+                  </block>
+                </next>
+              </block>
+            </statement>
+          </block>
+        </next>
+      </block>
+    </next>
+  </block>
+<description>
+<![CDATA[<h2>Introduction</h2><p>KuttyPy apps can exchange data over local wifi. This is an experimental feature</p><p><br></p><p><br></p><p><br></p><p><br></p><p><br></p><h2>Bird game Remote</h2><ul><li>Open the <code>Bird Game with Remote Light Sensor</code> on another phone connected to the same WiFi network</li><li>Click on the wifi icon next to the help icon on both phones</li><li>On one of the phones, you will see a message just above the toolbar of the form <code>Found Client, IP Address.</code> followed by a connect button</li><li>Once they are connected successfully with each other, both phones will show a message <code>Connected to &lt;IP&gt;: Kuttypy</code></li></ul><p>Now you can run the game on the other phone which will wait for luminosity readings from this connected phone in order to control the bird.</p><p>The readings of the sensor increase with intensity of light falling on the light sensor which is usually located next to the front camera. These readings are measured and used to set the height of the character in the game.</p><p>Stand under a tubelight and move this second phone close and away from the light to observe how the bird moves along with it on the other phone.</p>]]>
+</description>
+</xml>

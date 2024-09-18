@@ -52,6 +52,12 @@
    </item>
    <item row="0" column="3">
     <widget class="QPushButton" name="switcher">
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>40</height>
+      </size>
+     </property>
      <property name="text">
       <string>Data Logger</string>
      </property>
@@ -81,7 +87,16 @@
        <property name="spacing">
         <number>0</number>
        </property>
-       <property name="margin">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
         <number>0</number>
        </property>
        <item>
@@ -95,13 +110,22 @@
      </widget>
      <widget class="QWidget" name="page_2">
       <layout class="QGridLayout" name="gridLayout_2">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
        <property name="horizontalSpacing">
         <number>2</number>
        </property>
        <property name="verticalSpacing">
-        <number>0</number>
-       </property>
-       <property name="margin">
         <number>0</number>
        </property>
        <item row="2" column="1">

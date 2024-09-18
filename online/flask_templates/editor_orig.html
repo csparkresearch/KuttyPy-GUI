@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width,height=device-width, initial-scale=0.9, maximum-scale=1">
+
+	<link rel="stylesheet" type="text/css" href="semantic.min.css">
+
+	<script src="jquery.min.js"></script>
+	<script src="semantic.min.js"></script>
+
+	<script src="blocks/allApis.js"></script>
+
+	<script language="javascript" type="text/javascript" src="flot/jquery.canvaswrapper.js"></script>
+	<script language="javascript" type="text/javascript" src="flot/jquery.colorhelpers.js"></script>
+	<script language="javascript" type="text/javascript" src="flot/jquery.flot.js"></script>
+	<script language="javascript" type="text/javascript" src="flot/jquery.flot.saturated.js"></script>
+	<script language="javascript" type="text/javascript" src="flot/jquery.flot.browser.js"></script>
+	<script language="javascript" type="text/javascript" src="flot/jquery.flot.drawSeries.js"></script>
+	<script language="javascript" type="text/javascript" src="flot/jquery.flot.uiConstants.js"></script>
+	<script language="javascript" type="text/javascript" src="flot/jquery.flot.legend.js"></script>
+	<script language="javascript" type="text/javascript" src="flot/jquery.flot.symbol.js"></script>
+	<script language="javascript" type="text/javascript" src="flot/jquery.flot.axislabels.js"></script>
+
+	<link rel="stylesheet" type="text/css" href="webviewstyle.css">
+	<link rel="stylesheet" type="text/css" href="gauge.min.css">
+	<link rel="stylesheet" type="text/css" href="gauge-glossy.min.css">
+
+
+	<script src="jspdf.min.js"></script>
+	<script src="html2canvas.min.js"></script>
+
+	<script src="blocks/acorn_interpreter.js"></script>
+
+	<title>Editor</title>
+	<style type="text/css" media="screen">
+    body {
+        overflow: hidden;
+    }
+
+    #editor {
+        margin: 0;
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+    }
+  </style>
+</head>
+<body>
+
+<div class="ui very wide bottom results sidebar overlay" >
+	<div class="ui centered header">
+		Output
+		<a onclick="savePDF()" class="ui right corner huge blue label" ><i class="download icon pdfdownloadicon"></i></a>
+
+	</div>
+
+	<div class="ui content mygrid" style="padding:0.2rem ! important;">
+		<div id="myresults" class="ui two column stackable top aligned grid ">
+			<div class="ui vertical divider"></div>
+			<div class="top aligned row">
+				<div class="ui relaxed horizontal divided list gauges">
+				</div>
+			</div>
+			<div class="top aligned row">
+				<div class="column resplotarea"  style="background:#fffe;">
+					<div id="resplot" class="ui description resplot">
+					</div>
+				</div>
+
+				<div class="column">
+					<div class="ui celled list registers" style="color:#a33;">
+					</div>
+					<div class="ui description cmdarea" style="color:darkgreen;">
+					</div>
+
+					<div class="ui scrolling content description printarea" style="color:black;scrollable:true;">
+					</div>
+				</div>
+
+
+			</div>
+		</div>
+
+	</div>
+
+</div>
+
+
+<div id="maincontent" class="pusher">
+
+	<div class="ui icon error mini hidden message missingdevice" style="padding: 3px !important;margin:0px;">
+		<div class="content">
+			<p>Missing Hardware! Is a device Connected?</p>
+		</div>
+	</div>
+
+	<div id="toolbar" class="ui secondary menu mini ">
+		<div class="item">
+			<a onclick="toggleRun()" class="ui mini primary button runbutton"><i class="play icon"></i><span class="text">Run!</span></a>
+		</div>
+
+
+		<div class="right menu">
+
+			<div class="ui right aligned item">
+				<a onclick="saveXML()" class="ui mini red button" ><i class="download icon"></i></a>
+			</div>
+			<div class="ui right aligned item">
+				<a onclick="loadXML(JSBridge.loadLocalXML('kuttypyeditor'))" class="ui mini teal button right floated" ><i class="upload icon"></i></a>
+			</div>
+			<div class="ui right aligned item">
+				<a onclick="saveFile()" class="ui mini red button" ><i class="file icon"></i>Save</a>
+			</div>
+
+		</div>
+	</div>
+
+	<div class = "ui clearing green segment" style="height:60em;">
+		<div class="ui content" style="bottom:10%;top:10%;">
+		<pre id="editor">
+//Example code to plot a parabola
+var i;
+for (i = -20; i <= 20; i++) {
+	plot_xy(i,i*i);
+	sleep(0.01);
+}
+
+
+		</pre>
+		</div>
+	</div>
+
+</div>
+
+
+
+<script src="ace/ace.js" type="text/javascript" charset="utf-8"></script>
+<script>
+    var editor = ace.edit("editor");
+    editor.setTheme("ace/theme/github");
+    editor.session.setMode("ace/mode/javascript");
+</script>
+
+
+
+
+<script type="text/javascript">
+
+
+	var workspaceHelp = '';
+	var workspaceMD = '';
+	var results = $('.description.printarea');
+	var resultModal = 	  $('.modal.results');
+    var resplotarea = $('.resplotarea');
+    var resultplots = $('.description.resplot');
+    var mygrid = $('.content.mygrid');
+
+    var isRunning = false;
+
+	var registers = 	  $('.list.registers');
+	var gaugearea = 	  $('.list.gauges');
+	var regvals = [];
+	var command = $('.description.cmdarea');
+
+
+	function showReg(reg, val){
+	    regclass = 'reg_'+reg.replace(/ /g,"_").replace(/-/g,"_");
+		if(regvals.indexOf(regclass)!=-1){ // Register is already shown in the results segment. update it.
+			registers.find('.'+regclass).text(reg+"="+val);
+		}else{
+			registers.append(`<div class="item ${regclass}">${reg}=${val}</div>`)
+			regvals.push(regclass);
+		}
+	}
+
+    $('.ui.results.sidebar').sidebar('hide');
+
+    function savePDF(){
+
+        $('.pdfdownloadicon').addClass('notched circle loading').removeClass('download');
+        setTimeout(()=>{
+
+              var element = $('#myresults');
+              var HTML_Width = element.width();
+              var HTML_Height = element.height();
+              var top_left_margin = 15;
+              var PDF_Width = HTML_Width + (top_left_margin * 2);
+              var PDF_Height = (PDF_Width * 1.5) + (top_left_margin * 2);
+              var canvas_image_width = HTML_Width;
+              var canvas_image_height = HTML_Height;
+
+              var totalPDFPages = Math.ceil(HTML_Height / PDF_Height) - 1;
+
+              html2canvas(element[0]).then(function (canvas) {
+                  var imgData = canvas.toDataURL("image/jpeg", 0.85);
+                  var pdf = new jsPDF('p', 'pt', [PDF_Width, PDF_Height]);
+                  pdf.addImage(imgData, 'JPG', top_left_margin, top_left_margin, canvas_image_width, canvas_image_height);
+                  for (var i = 1; i <= totalPDFPages; i++) {
+                      console.log(HTML_Width+','+HTML_Height+','+i);
+                      pdf.addPage(PDF_Width, PDF_Height);
+                      pdf.addImage(imgData, 'JPG', top_left_margin, -(PDF_Height*i)+(top_left_margin*4),canvas_image_width,canvas_image_height);
+                  }
+                  //pdf.save("results.pdf");
+                  $('.pdfdownloadicon').removeClass('notched circle loading').addClass('download');
+                  if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent))
+                  {
+                      JSBridge.savePDF("results", pdf.output('datauristring'));
+
+                  }
+                  else
+                  {
+                       pdf.save('filename.pdf');
+                  }
+              });
+        }, 50);
+
+    }
+
+
+    function on() {
+      isRunning = true;
+      $('.ui.error.program.message').hide();//close any error messages
+      $('.runbutton').removeClass('primary').addClass('red');
+      $('.runbutton > .text').text('Stop');
+      $('.runbutton > .icon').removeClass('play').addClass('stop');
+
+      registers.empty();
+      regvals = [];
+	  results.html("");
+      $('.ui.results.sidebar').sidebar('setting', {
+        dimPage             : false,
+        transition          : 'overlay',
+        closable           : false,
+        exclusive           : true,
+        mobileTransition    : 'overlay'})
+        .sidebar('toggle');
+
+	}
+
+	function off() {
+      isRunning = false;
+      $('.runbutton').removeClass('red').removeClass('orange').addClass('primary');
+      $('.runbutton > .text').text('Run!');
+      $('.runbutton > .icon').removeClass('stop').removeClass('double angle down').addClass('play');
+
+      $('.ui.results.sidebar').sidebar('hide');
+
+	  resetInterpreter();
+      if(typeof JSBridge != 'undefined')
+    	  JSBridge.closeFiles();
+	  stopGame();
+	}
+
+
+
+
+
+    function resetInterpreter() {
+      myInterpreter = null;
+      if (runner) {
+        clearTimeout(runner);
+        runner = null;
+      }
+    }
+
+
+
+    var myInterpreter;
+
+    var runner;
+    var latestCode = '';
+
+    var autoScalingX = true;
+    var autoScalingY = true;
+
+
+    var devState = false;
+    if(typeof HWBridge != 'undefined')
+		devState = HWBridge.get_device_status();
+
+	if(!devState){$('.message.missingdevice').closest('.message').transition('fade in','1000mS').transition('glow');}
+	function deviceConnected(){
+		$('.message.missingdevice').closest('.message').transition('fade out','300mS');
+	}
+	function deviceDisconnected(){
+		$('.message.missingdevice').closest('.message').transition('fade in','1000mS').transition('glow');
+	}
+
+
+    function toggleRun(){
+      if(isRunning){
+        if(  $('.runbutton').hasClass('red') ){ // Abort the program
+          // Program is aborting...
+          $('.runbutton').removeClass('red').addClass('orange');
+          $('.runbutton > .text').text('Aborted!');
+          $('.runbutton > .icon').removeClass('stop').addClass('double angle down');
+
+          resetInterpreter();
+
+        }else{ // Close the results window
+          off();
+        }
+      }else{
+        startStep();
+      }
+    }
+
+    function startStep() {
+	  latestCode = editor.getValue();
+      on();
+      clearPlot();
+      resplotarea.show();
+      createPlots(latestCode);
+      runCode();
+    }
+
+
+
+
+    function runCode() {
+      if (!myInterpreter) {
+        // First statement of this code.
+        // Clear the program output.
+
+        // And then show generated code in an alert.
+        // In a timeout to allow the outputArea.value to reset first.
+        setTimeout(function() {
+          // Begin execution
+          try{
+              highlightPause = false;
+              if(!latestCode.startsWith('programStarting'))
+                 latestCode = 'programStarting();' + latestCode;
+              if((latestCode.search('write_to_file') != -1 ) || (latestCode.search('save_lists') != -1 ))
+                  latestCode = 'startStorage();\n' + latestCode;
+
+              myInterpreter = new Interpreter(latestCode, initAllApis);
+              if(latestCode.search("alert") != -1) // -1 means not found
+                on();
+
+              runner = function() {
+                if (myInterpreter) {
+                  try{
+                    var hasMore = myInterpreter.run();
+                  }catch(e){
+                      console.log(e);
+                      var stack = ''
+                      var segments = e.stack.split('\n');
+                      for(var i=0;i<segments.length && i<10;i++){
+                          stack+=segments[segments.length-i-1].split('file:')[0]+',';
+                        }
+                      results.append(`<p style="color:red">${e.name}:${e.message}</p>`);
+                      $('#maincontent').prepend(`
+                            <div class="ui error program message">
+                              <i class="close icon"></i>
+                              <div class="header">
+                                ${e.name}. Check the Highlighted Block
+                              </div>
+                              <ul class="list">
+                                <li>
+                                ${e.message}
+                                </li>
+                                <li>
+                                ${stack}
+                                </li>
+                              </ul>
+                            </div>
+                      `);
+                      $(".close.icon").click(function(){
+                        $(this).parent().hide();
+                      });
+                      // Stop Program.
+                      off();
+                      setTimeout(()=>{ $('.ui.results.sidebar').sidebar('setting',{closable:true,dimPage:true}).sidebar('show'); },50 );
+                      return;
+                  }
+
+                  if (hasMore) {
+                    // Execution is currently blocked by some async call.
+                    // Try again later.
+                    setTimeout(runner, 3); // TODO . Critical . can cause crashes.
+                    return;
+                  } else {
+                    console.log("we're done here");
+                    // Program is complete.
+                    $('.runbutton').removeClass('red').addClass('orange');
+                    $('.runbutton > .text').text('Done!');
+                    $('.runbutton > .icon').removeClass('stop').addClass('double angle down');
+
+                    resetInterpreter();
+                  }
+                }
+              };
+
+              runner();
+
+              }catch(e){
+                console.log(e);
+                var stack = ''
+                var segments = e.stack.split('\n');
+                for(var i=0;i<segments.length && i<5;i++){
+                    stack+=segments[segments.length-i-1].split('(file:')[0]+',';
+                  }
+                $('#maincontent').prepend(`
+                      <div class="ui error program message">
+                        <i class="close icon"></i>
+                        <div class="header">
+                          ${e.name} . Check the plots.
+                        </div>
+                        <div class="content">
+                        ${e.message}
+                        ${stack}
+
+                        </div>
+                      </div>
+                `);
+                $(".close.icon").click(function(){
+                  $(this).parent().hide();
+                });
+                // Stop Program.
+                off();
+                setTimeout(()=>{console.log('closing due to error');  $('.ui.results.sidebar').sidebar('hide');},50);
+                return;
+              }
+
+
+        }, 1);
+        return;
+      }
+    }
+
+
+
+
+
+
+	function saveXML(){
+		JSBridge.saveXML("kuttypyeditor",editor.getValue());
+	}
+	function saveFile(){
+		JSBridge.saveFile("kuttypyeditor.js",editor.getValue());
+	}
+
+
+	function loadXML(xml) {
+		editor.setValue(xml);
+	}
+
+	// Loads js file contents passed by OnlineExplorer.java .
+	if(typeof JSBridge != 'undefined')
+		loadXML(JSBridge.loadXMLFile("js"));
+
+
+  </script>
+
+
+
+
+
+
+
+</body>
+</html>
+

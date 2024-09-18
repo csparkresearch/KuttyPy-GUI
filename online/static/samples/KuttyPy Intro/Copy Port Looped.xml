@@ -1,0 +1,66 @@
+<xml xmlns="https://developers.google.com/blockly/xml">
+  <block type="set_reg" id="ZFe;(x=UB42ffqEO`I^D" x="52" y="164">
+    <field name="REGISTER">DDRB</field>
+    <comment pinned="false" h="80" w="160">Set the data direction register</comment>
+    <value name="VALUE">
+      <block type="math_number" id="M(_(ELoPFC(#XXnc[mX?">
+        <field name="NUM">255</field>
+      </block>
+    </value>
+    <next>
+      <block type="set_reg" id="h6aPPH}*T}.m`(cTnF=E">
+        <field name="REGISTER">DDRA</field>
+        <comment pinned="false" h="80" w="160">Set the data direction register</comment>
+        <value name="VALUE">
+          <block type="math_number" id="1Kj1g(Li1TMQia.^{SB+">
+            <field name="NUM">0</field>
+          </block>
+        </value>
+        <next>
+          <block type="set_reg" id="u@wPM*WFz*8aam:01C48">
+            <field name="REGISTER">PORTA</field>
+            <value name="VALUE">
+              <block type="math_number" id="kXIDI!}RulX:;JJUwU6R">
+                <field name="NUM">255</field>
+              </block>
+            </value>
+            <next>
+              <block type="controls_whileUntil" id="3]/Z5#xCu%p/EQK~+F|$">
+                <field name="MODE">WHILE</field>
+                <value name="BOOL">
+                  <block type="logic_boolean" id="(4o+t,Vc~6?YX?KZ|*uK">
+                    <field name="BOOL">TRUE</field>
+                  </block>
+                </value>
+                <statement name="DO">
+                  <block type="set_reg" id="McY2zCQS}t;0F.G7VIvh">
+                    <field name="REGISTER">PORTB</field>
+                    <value name="VALUE">
+                      <block type="get_reg" id="HReQ4?~X|+m1Sv{DfLEd">
+                        <field name="REGISTER">PINA</field>
+                      </block>
+                    </value>
+                    <next>
+                      <block type="wait_seconds" id="Fs29U[v$=zn.8o;Qu8^^">
+                        <field name="SECONDS">0.1</field>
+                      </block>
+                    </next>
+                  </block>
+                </statement>
+                <next>
+                  <block type="cs_print" id="6.E$r!1rvZortZW?r$A%">
+                    <value name="TEXT">
+                      <shadow type="text" id="Dz*/xI6]0k*at{D9y0ln">
+                        <field name="TEXT">done </field>
+                      </shadow>
+                    </value>
+                  </block>
+                </next>
+              </block>
+            </next>
+          </block>
+        </next>
+      </block>
+    </next>
+  </block>
+</xml>

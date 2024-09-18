@@ -1,0 +1,110 @@
+{
+  "Getting Started":
+  {
+    "image": "Getting Started",
+    "directory": "Getting Started",
+    "description": "A collection of simple introductory topics for learning coding",
+    "files": {
+      "Hello World": "My First Program. Show the words Hello World on the screen",
+      "Print N Times": "Print repeatedly using a loop",
+      "Calculate Area Of A Circle": "Calculate the area of a circle using well known formula",
+      "Print Multiplication Table": "Print tables of any huge number",
+      "If Condition": "",
+      "Read Text Input": "",
+      "Input and Output Text": "",
+      "While Loops": "",
+      "Plot Datapoints": "",
+      "Plot Using Loops": "Plot data continuously using loops",
+      "Write Data To A File": "Save data into a file"
+    }
+  },
+  "KuttyPy Intro":
+  {
+    "image": "KuttyPy Intro",
+    "directory": "KuttyPy Intro",
+    "description": "Introduction to the KuttyPy hardware",
+    "files": {
+      "Blink" : "Blink all LEDs on PORTB every 2 seconds",
+      "Blink LEDs alternately":"Flash PB0 to  PB3 , then flash PB4 to PB7. repeat ad nauseum",
+      "Read Port": "",
+      "Set Port": "",
+      "Copy Port Once": "",
+      "Copy Port Looped": "",
+      "Read N Voltages": "",
+      "I2C Data Logger": ""
+    }
+
+  },
+  "Explore Atmega32":
+  {
+    "image": "Explore Atmega32",
+    "directory": "Explore Atmega32",
+    "description": "More detailed introduction to the KuttyPy microcontroller ...",
+    "files" : {
+      "Read N Voltages":"Read and display some ADC readings",
+      "PORTB LED WATERFALL": "Dancing LEDs on PORTB (PB0 to PB7)",
+      "Read ADC Registers" : "ReadADC values frmo the kuttypy hardware",
+      "LED BRIGHTNESS CONTROL simple" : "Control LED brightness using PWM",
+      "Copy INPUT A2-A7 to LED D2-D7" : "Use switches to turn LEDs ON/OFF",
+      "Set 6 bit DAC" : "Set the onboard R2R DAC",
+      "setport": "Set the Value on a port",
+      "Switch Piano.xml": "Play the Piano with Switches",
+      "RGB LED with Accelerometer.xml": ""
+    }
+  },
+  "WiFi and Games":
+  {
+    "image": "WiFi and Games",
+    "directory": "WiFi and Games",
+    "description": "Add games such as birdy, pianos, and control them with sensors of your phone   ...",
+    "files": {
+      "Bird Game with Light Sensor": "The brighter the surroundings, the higher the bird flies. Take your phone near a light source to try ",
+      "Happy Birthday": "Play the Happy Birthday Song",
+      "Play Song" : "Play another song",
+      "Play Song Using Functions": "Write a function to play songs",
+      "Rotation Controlled Bird": "Control a game bird by rotating your phone",
+      "AI Bird Game.xml": "Control the bird with your fingers in air. no touching."
+    }
+  },
+  "Sensor Addons":
+  {
+    "image": "Sensor Addons",
+    "directory": "Sensor Addons",
+    "description": "Sensors which work with the KuttyPy hardware",
+    "files" : {
+      "Data Logger": "Plot data from sensors. Click on SCAN to automatically detect the sensor. Then execute the program",
+      "Measure Heart Rate (MAX30100)": "Use a MAX30100 sensor to see your heartbeat",
+      "Stepper Motor": "Contrll a stepper motor",
+      "Stepper Motor Dual": "control two stepper motors",
+      "Distance Sensor VL53L0X": "Use a distance sensor to measure height and plot the values",
+      "Phone Controlled Robot" : "Control a robot with your phone by rotating it around. uses the accelerometer and gyro sensors in the phone",
+      "Line Follower": "A line following robot"
+    }
+  },
+  "Vision Demos":
+  {
+    "image": "Vision Demos",
+    "directory": "Vision Demos",
+    "description": "Gesture controlled programs using AI based image and pattern recognition",
+    "files": {
+      "AI Gesture LEDs" : "Control LED patterns with your hand in the air",
+      "AI Piano" : "Play the piano without touching anything. hold up your hand, and fold fingers to play music",
+      "AI birdy" : "Control a game bird's movement by changing the distance between your thumb and index finger (pinching motion)",
+      "AI Hand Gestures": "Plot the distance from the tip of your thumb to the tip of your index finger",
+      "AI LED.xml" : "Turn an LED on/off using just your finger in air. no touching. :)"
+    }
+  },
+  "Plotting Datasets":
+  {
+    "image": "Plotting Datasets",
+    "directory": "Plotting Datasets",
+    "description": "Learn about graphs. Plot X vs Time, X vs Y , arrays etc..",
+    "files": {
+      "Plot List of Numbers" : "",
+      "Plot A Parabola" : "",
+      "Create a List" : "",
+      "Subtract Lists" : "",
+      "Polar Plot Flower" : ""
+    }
+  }
+}

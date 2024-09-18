@@ -1,0 +1,67 @@
+<xml xmlns="https://developers.google.com/blockly/xml">
+  <variables>
+    <variable id="~cJFb|TjMP}w2.Fn2KJ7">data</variable>
+  </variables>
+  <block type="set_reg" id="ZFe;(x=UB42ffqEO`I^D" x="6" y="128">
+    <field name="REGISTER">DDRB</field>
+    <comment pinned="false" h="80" w="160">Set the data direction register</comment>
+    <value name="VALUE">
+      <block type="math_number" id="M(_(ELoPFC(#XXnc[mX?">
+        <field name="NUM">255</field>
+      </block>
+    </value>
+    <next>
+      <block type="set_reg" id="h6aPPH}*T}.m`(cTnF=E">
+        <field name="REGISTER">DDRA</field>
+        <comment pinned="false" h="80" w="160">Set the data direction register</comment>
+        <value name="VALUE">
+          <block type="math_number" id="1Kj1g(Li1TMQia.^{SB+">
+            <field name="NUM">0</field>
+          </block>
+        </value>
+        <next>
+          <block type="set_reg" id="u@wPM*WFz*8aam:01C48">
+            <field name="REGISTER">PORTA</field>
+            <value name="VALUE">
+              <block type="math_number" id="kXIDI!}RulX:;JJUwU6R">
+                <field name="NUM">255</field>
+              </block>
+            </value>
+            <next>
+              <block type="variables_set" id=",?+,:GhEp~sHP5f[nvh5">
+                <field name="VAR" id="~cJFb|TjMP}w2.Fn2KJ7">data</field>
+                <value name="VALUE">
+                  <block type="get_reg" id="HReQ4?~X|+m1Sv{DfLEd">
+                    <field name="REGISTER">PINA</field>
+                  </block>
+                </value>
+                <next>
+                  <block type="cs_print" id="dZyV8j`9jTPN3*I/1=~m">
+                    <value name="TEXT">
+                      <shadow type="text" id="p|Pt9[:HFv[XrZpgsMQ}">
+                        <field name="TEXT">hello</field>
+                      </shadow>
+                      <block type="variables_get" id="k^Dn6HH$Lw^sMlm4Gkv6">
+                        <field name="VAR" id="~cJFb|TjMP}w2.Fn2KJ7">data</field>
+                      </block>
+                    </value>
+                    <next>
+                      <block type="set_reg" id="McY2zCQS}t;0F.G7VIvh">
+                        <field name="REGISTER">PORTB</field>
+                        <value name="VALUE">
+                          <block type="variables_get" id="j2}3X.[.nWB/h.0Ta5~D">
+                            <field name="VAR" id="~cJFb|TjMP}w2.Fn2KJ7">data</field>
+                          </block>
+                        </value>
+                      </block>
+                    </next>
+                  </block>
+                </next>
+              </block>
+            </next>
+          </block>
+        </next>
+      </block>
+    </next>
+  </block>
+</xml>

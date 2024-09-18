@@ -1,0 +1,113 @@
+<xml xmlns="https://developers.google.com/blockly/xml">
+  <variables>
+    <variable id="Zu^5WGw0OPN=sFD$y8+B">tankp</variable>
+  </variables>
+  <block type="set_reg_bits_string" id="QO5^h;arJPoq$[^$H}j}" x="25" y="121">
+    <field name="REGISTER">DDRB</field>
+    <field name="B7">TRUE</field>
+    <field name="B6">TRUE</field>
+    <field name="B5">TRUE</field>
+    <field name="B4">TRUE</field>
+    <field name="B3">TRUE</field>
+    <field name="B2">TRUE</field>
+    <field name="B1">TRUE</field>
+    <field name="B0">TRUE</field>
+    <next>
+      <block type="controls_whileUntil" id="Lk`Z2vknMnR.t)_znAY+">
+        <field name="MODE">WHILE</field>
+        <value name="BOOL">
+          <shadow type="logic_boolean" id="lA%HLTQB0LaE_X|$bVBZ">
+            <field name="BOOL">TRUE</field>
+          </shadow>
+        </value>
+        <statement name="DO">
+          <block type="variables_set" id="=NF,U8H]NQaNBl6$$swg">
+            <field name="VAR" id="Zu^5WGw0OPN=sFD$y8+B">tankp</field>
+            <value name="VALUE">
+              <block type="read_i2c_sensor_flexible_dynamic" id="o-SHPk)lbV%}?Pu{lB3U">
+                <field name="NAME">[118]BMP280</field>
+                <field name="PARAM">1</field>
+                <field name="CONFIG"></field>
+                <field name="SETTING"></field>
+              </block>
+            </value>
+            <next>
+              <block type="controls_if" id="%$D9z%k7R.;LmxIgZ49a">
+                <comment pinned="false" h="80" w="160">TANK IS EMPTY. TURN ON MOTOR</comment>
+                <value name="IF0">
+                  <block type="logic_compare" id="w%k_{P#B?kYLpOO9hg-i">
+                    <field name="OP">LT</field>
+                    <value name="A">
+                      <block type="variables_get" id="q4!ooq*(6|WGUI2`t;_)">
+                        <field name="VAR" id="Zu^5WGw0OPN=sFD$y8+B">tankp</field>
+                      </block>
+                    </value>
+                    <value name="B">
+                      <block type="math_number" id="Vy#Kt1WWQc2TQ(e*Z@J^">
+                        <field name="NUM">1.002</field>
+                      </block>
+                    </value>
+                  </block>
+                </value>
+                <statement name="DO0">
+                  <block type="set_reg_bits_string" id="NoH:J3UTJok?LyDql:z4">
+                    <field name="REGISTER">PORTB</field>
+                    <field name="B7">FALSE</field>
+                    <field name="B6">FALSE</field>
+                    <field name="B5">FALSE</field>
+                    <field name="B4">FALSE</field>
+                    <field name="B3">FALSE</field>
+                    <field name="B2">FALSE</field>
+                    <field name="B1">FALSE</field>
+                    <field name="B0">TRUE</field>
+                  </block>
+                </statement>
+                <next>
+                  <block type="controls_if" id="7us/yy(x2PxPdL_U.pa;">
+                    <comment pinned="false" h="80" w="160">TANK IS FULL. TURN OFF MOTOR</comment>
+                    <value name="IF0">
+                      <block type="logic_compare" id="|@0Hmzy*j%CrgG-olBh_">
+                        <field name="OP">GT</field>
+                        <value name="A">
+                          <block type="variables_get" id="EncqvoihCC{ALRv]UiQD">
+                            <field name="VAR" id="Zu^5WGw0OPN=sFD$y8+B">tankp</field>
+                          </block>
+                        </value>
+                        <value name="B">
+                          <block type="math_number" id="+~wk{utrL6^hKq1Nl:*^">
+                            <field name="NUM">1.008</field>
+                          </block>
+                        </value>
+                      </block>
+                    </value>
+                    <statement name="DO0">
+                      <block type="set_reg_bits_string" id="qz*?=jTpe@W/v,~s$n/r">
+                        <field name="REGISTER">PORTB</field>
+                        <field name="B7">FALSE</field>
+                        <field name="B6">FALSE</field>
+                        <field name="B5">FALSE</field>
+                        <field name="B4">FALSE</field>
+                        <field name="B3">FALSE</field>
+                        <field name="B2">FALSE</field>
+                        <field name="B1">FALSE</field>
+                        <field name="B0">FALSE</field>
+                      </block>
+                    </statement>
+                    <next>
+                      <block type="wait_seconds" id="%ooh,C.,+@xCXy9nW.!e">
+                        <field name="SECONDS">0.1</field>
+                      </block>
+                    </next>
+                  </block>
+                </next>
+              </block>
+            </next>
+          </block>
+        </statement>
+      </block>
+    </next>
+  </block>
+<description>
+<![CDATA[<h1>Water level sensing and automatic pump operation</h1><p><br></p><p><br></p><p>This program monitors pressure from a Bmp280 pressure sensor to control a water pump via PB0</p>]]>
+</description>
+</xml>

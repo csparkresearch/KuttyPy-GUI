@@ -3,6 +3,8 @@
 #!/usr/bin/python3
 
 import os,sys,time,re,traceback,platform
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
 from PyQt5 import QtGui, QtCore, QtWidgets
 import KuttyPyLib
 

@@ -1,0 +1,1726 @@
+<!DOCTYPE html>
+<!-- HTML file to host Blockly in a mobile WebView. -->
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,height=device-width, initial-scale=0.9, maximum-scale=1">
+  <script src="jquery.min.js"></script>
+  <script src="Markdown.Converter.min.js"></script>
+  <script src="semantic.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="semantic.min.css">
+
+
+  
+  <script src="blockly_compressed.js"></script>
+  <script src="blocks_compressed.js"></script>
+  <script src="javascript_compressed.js"></script>
+  <script src="python_compressed.js"></script>
+  <link rel="stylesheet" type="text/css" href="webviewstyle.css">
+  <link rel="stylesheet" type="text/css" href="gauge.min.css">
+  <link rel="stylesheet" type="text/css" href="gauge-glossy.min.css">
+  <script src="msg/js/en.js"></script>
+  <link rel="stylesheet" type="text/css" href="piano.css">
+
+  <script src="blocks/blockHelp.js"></script>
+  <script src="blocks/api.js"></script>
+  <script src="blocks/FlotPlots.js"></script>
+  <script src="blocks/Lists.js"></script>
+  <script src="blocks/IO.js"></script>
+  <script src="blocks/Games.js"></script>
+  <script src="blocks/Sounds.js"></script>
+  <script src="blocks/KuttyPy.js"></script>
+  <script src="blocks/Sensors.js"></script>
+
+
+  <script src="blocks/acorn_interpreter.js"></script>
+
+
+  <script src="quill/quill.min.js"></script>
+  <script src="quill/myquill.js"></script>
+  <link rel="stylesheet" type="text/css" href="quill/quill.snow.css" />
+  <script src="quill/katex.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="quill/katex.min.css" />
+
+  <script src="jspdf.min.js"></script>
+  <script src="html2canvas.min.js"></script>
+
+  <script language="javascript" type="text/javascript" src="flot/jquery.canvaswrapper.js"></script>
+  <script language="javascript" type="text/javascript" src="flot/jquery.colorhelpers.js"></script>
+  <script language="javascript" type="text/javascript" src="flot/jquery.flot.js"></script>
+  <script language="javascript" type="text/javascript" src="flot/jquery.flot.saturated.js"></script>
+  <script language="javascript" type="text/javascript" src="flot/jquery.flot.browser.js"></script>
+  <script language="javascript" type="text/javascript" src="flot/jquery.flot.drawSeries.js"></script>
+  <script language="javascript" type="text/javascript" src="flot/jquery.flot.uiConstants.js"></script>
+  <script language="javascript" type="text/javascript" src="flot/jquery.flot.legend.js"></script>
+  <script language="javascript" type="text/javascript" src="flot/jquery.flot.symbol.js"></script>
+  <script language="javascript" type="text/javascript" src="flot/jquery.flot.axislabels.js"></script>
+
+
+
+
+
+</head>
+
+<body>
+
+
+<xml xmlns="https://developers.google.com/blockly/xml" id="samplexml" style="display:none;">
+  <block type="controls_repeat_ext" id="CaRiJ`PO7(C~_]{a,s,=" x="97" y="102">
+    <value name="TIMES">
+      <shadow type="math_number" id="s6Pd)]!)5ZCMLqGt8P2l">
+        <field name="NUM">200</field>
+      </shadow>
+    </value>
+    <statement name="DO">
+      <block type="plot_datapoint" id="e6[G1FD]j8VV#-FRt$WP">
+        <field name="PLOTNAME">myplot</field>
+        <value name="VALUE">
+          <block type="get_voltage" id="#DtrcKI*rtD9?WHDu)5_">
+            <field name="CHANNEL">1</field>
+          </block>
+        </value>
+      </block>
+    </statement>
+  </block>
+</xml>
+
+
+<xml xmlns="https://developers.google.com/blockly/xml" id="mytoolbox" style="display: none">
+  <category name="Minimize" colour="#f55" onClick="alert('asd');">
+  </category>
+  <sep></sep>
+
+
+  <category name="Variables" colour="#a55b80" custom="VARIABLE">
+  </category>
+  <category name="Values" colour="#a55b80">
+    <block type="math_number">
+      <field name="NUM">0</field>
+    </block>
+    <block type="math_number">
+      <field name="NUM">1000</field>
+    </block>
+    <block type="math_number">
+      <field name="NUM">1</field>
+    </block>
+    <block type="math_number">
+      <field name="NUM">15</field>
+    </block>
+    <block type="math_number">
+      <field name="NUM">255</field>
+    </block>
+    <block type="binary_value">
+    </block>
+    <block type="reg">
+    </block>
+
+    <block type="text">
+      <field name="TEXT"></field>
+    </block>
+    <block type="logic_boolean">
+      <field name="BOOL">TRUE</field>
+    </block>
+
+    <block type="math_constant">
+      <field name="CONSTANT">PI</field>
+    </block>
+
+  </category>
+
+  <category name="Operators" colour="#5b80a5">
+
+
+    <block type="math_arithmetic">
+      <field name="OP">ADD</field>
+      <value name="A">
+        <shadow type="math_number">
+          <field name="NUM">1</field>
+        </shadow>
+      </value>
+      <value name="B">
+        <shadow type="math_number">
+          <field name="NUM">1</field>
+        </shadow>
+      </value>
+    </block>
+
+    <block type="text_join" >
+      <mutation items="2"></mutation>
+      <value name="ADD0">
+        <shadow type="text">
+          <field name="TEXT"></field>
+        </shadow>
+      </value>
+      <value name="ADD1">
+        <shadow type="text">
+          <field name="TEXT"></field>
+        </shadow>
+      </value>
+    </block>
+
+    <block type="lists_subtract_return">
+    </block>
+
+    <block type="shift_bits">
+      <value name="VALUE">
+        <shadow type="math_number">
+          <field name="NUM">1</field>
+        </shadow>
+      </value>
+    </block>
+
+    <block type="clear_bit">
+      <value name="VALUE">
+        <shadow type="math_number">
+          <field name="NUM">255</field>
+        </shadow>
+      </value>
+    </block>
+
+    <block type="and_or">
+      <value name="VALUE">
+        <shadow type="math_number">
+          <field name="NUM">255</field>
+        </shadow>
+      </value>
+      <value name="VALUE2">
+        <shadow type="math_number">
+          <field name="NUM">1</field>
+        </shadow>
+      </value>
+    </block>
+
+    <block type="logic_operation">
+      <field name="OP">AND</field>
+    </block>
+
+    <block type="logic_negate"></block>
+    <sep></sep>
+  </category>
+
+  <category name="Logic" colour="#5b80a5">
+    <block type="logic_boolean">
+      <field name="BOOL">TRUE</field>
+    </block>
+
+    <block type="logic_compare">
+      <field name="OP">EQ</field>
+    </block>
+
+    <block type="controls_if"></block>
+
+    <block type="logic_ternary"></block>
+
+  </category>
+
+
+  <category name="In / Out" colour="#5ba58c">
+
+    <block type="cs_print">
+      <value name="TEXT">
+        <shadow type="text">
+          <field name="TEXT">hello</field>
+        </shadow>
+      </value>
+    </block>
+
+    <block type="cs_sticker">
+      <value name="LABEL">
+        <shadow type="text">
+          <field name="TEXT">Parameter</field>
+        </shadow>
+      </value>
+      <value name="TEXT">
+        <shadow type="text">
+          <field name="TEXT">Reading</field>
+        </shadow>
+      </value>
+    </block>
+
+
+    <block type="text_prompt_ext">
+      <mutation type="TEXT"></mutation>
+      <field name="TYPE">TEXT</field>
+      <value name="TEXT">
+        <shadow type="text">
+          <field name="TEXT">Enter Input</field>
+        </shadow>
+      </value>
+    </block>
+
+
+    <block type="write_to_file">
+    </block>
+
+
+    <block type="save_lists">
+    </block>
+
+    <block type="cs_gauge">
+      <value name="VALUE">
+        <shadow type="math_number">
+          <field name="NUM">0</field>
+        </shadow>
+      </value>
+    </block>
+
+
+  </category>
+
+  <category name="Loops" colour="#5ba55b">
+    <block type="wait_seconds">
+      <field name="SECONDS">1</field>
+    </block>
+    <block type="controls_repeat_ext">
+      <value name="TIMES">
+        <shadow type="math_number">
+          <field name="NUM">20</field>
+        </shadow>
+      </value>
+    </block>
+
+    <block type="controls_whileUntil">
+      <field name="MODE">WHILE</field>
+      <value name="BOOL">
+        <shadow type="logic_boolean">
+          <field name="BOOL">TRUE</field>
+        </shadow>
+      </value>
+    </block>
+
+    <block type="controls_for">
+      <field name="VAR" id="LbE2%mV/CRs,w^fwYIZy">i</field>
+      <value name="FROM">
+        <shadow type="math_number">
+          <field name="NUM">1</field>
+        </shadow>
+      </value>
+      <value name="TO">
+        <shadow type="math_number">
+          <field name="NUM">10</field>
+        </shadow>
+      </value>
+      <value name="BY">
+        <shadow type="math_number">
+          <field name="NUM">1</field>
+        </shadow>
+      </value>
+    </block>
+    <block type="controls_forEach">
+      <field name="VAR" id="}KE@V7,)cpEQ-Df=Q3r(">j</field>
+    </block>
+    <block type="controls_flow_statements">
+      <field name="FLOW">BREAK</field>
+    </block>
+  </category>
+  <sep></sep>
+
+
+  <category name="Text" colour="%{BKY_TEXTS_HUE}">
+
+    <block type="text">
+      <field name="TEXT"></field>
+    </block>
+
+    <block type="text_join" >
+      <mutation items="2"></mutation>
+      <value name="ADD0">
+        <shadow type="text">
+          <field name="TEXT"></field>
+        </shadow>
+      </value>
+      <value name="ADD1">
+        <shadow type="text">
+          <field name="TEXT"></field>
+        </shadow>
+      </value>
+    </block>
+
+    <block type="text_append">
+      <field name="VAR" id="NA?/#Ojn#=$$1[^`/^Dd">item</field>
+      <value name="TEXT">
+        <shadow type="text">
+          <field name="TEXT"></field>
+        </shadow>
+      </value>
+    </block>
+
+    <block type="cs_search">
+      <value name="CHILD">
+        <shadow type="text">
+          <field name="TEXT">small string</field>
+        </shadow>
+      </value>
+      <value name="PARENT">
+        <shadow type="text">
+          <field name="TEXT">much longer string</field>
+        </shadow>
+      </value>
+    </block>
+
+
+  </category>
+
+
+
+  <category name="Math" colour="#5b67a5">
+    <block type="math_number">
+      <field name="NUM">0</field>
+    </block>
+
+    <block type="math_arithmetic">
+      <field name="OP">ADD</field>
+      <value name="A">
+        <shadow type="math_number">
+          <field name="NUM">1</field>
+        </shadow>
+      </value>
+      <value name="B">
+        <shadow type="math_number">
+          <field name="NUM">1</field>
+        </shadow>
+      </value>
+    </block>
+
+    <block type="math_single">
+      <field name="OP">ROOT</field>
+      <value name="NUM">
+        <shadow type="math_number">
+          <field name="NUM">9</field>
+        </shadow>
+      </value>
+    </block>
+    <block type="math_trig">
+      <field name="OP">SIN</field>
+      <value name="NUM">
+        <shadow type="math_number">
+          <field name="NUM">45</field>
+        </shadow>
+      </value>
+    </block>
+
+
+    <block type="math_number_property">
+      <mutation divisor_input="false"></mutation>
+      <field name="PROPERTY">EVEN</field>
+      <value name="NUMBER_TO_CHECK">
+        <shadow type="math_number">
+          <field name="NUM">0</field>
+        </shadow>
+      </value>
+    </block>
+    <block type="math_round">
+      <field name="OP">ROUND</field>
+      <value name="NUM">
+        <shadow type="math_number">
+          <field name="NUM">3.1</field>
+        </shadow>
+      </value>
+    </block>
+    <block type="math_on_list">
+      <mutation op="SUM"></mutation>
+      <field name="OP">SUM</field>
+    </block>
+    <block type="math_modulo">
+      <value name="DIVIDEND">
+        <shadow type="math_number">
+          <field name="NUM">64</field>
+        </shadow>
+      </value>
+      <value name="DIVISOR">
+        <shadow type="math_number">
+          <field name="NUM">10</field>
+        </shadow>
+      </value>
+    </block>
+    <block type="math_random_int">
+      <value name="FROM">
+        <shadow type="math_number">
+          <field name="NUM">1</field>
+        </shadow>
+      </value>
+      <value name="TO">
+        <shadow type="math_number">
+          <field name="NUM">100</field>
+        </shadow>
+      </value>
+    </block>
+
+
+
+  </category>
+  <category name="Lists" colour="#745ba5">
+    <block type="lists_new">
+    </block>
+
+    <block type="lists_split">
+      <mutation mode="SPLIT"></mutation>
+      <field name="MODE">SPLIT</field>
+      <value name="INPUT">
+        <shadow type="text">
+          <field name="TEXT"></field>
+        </shadow>
+      </value>
+      <value name="DELIM">
+        <shadow type="text">
+          <field name="TEXT">,</field>
+        </shadow>
+      </value>
+    </block>
+
+
+    <block type="lists_push">
+    </block>
+    <block type="lists_push_time">
+    </block>
+
+    <block type="lists_subtract">
+    </block>
+    <block type="lists_subtract_return">
+    </block>
+
+    <block type="lists_getIndex">
+      <mutation statement="false" at="true"></mutation>
+      <field name="MODE">GET</field>
+      <field name="WHERE">FROM_START</field>
+      <value name="VALUE">
+        <block type="variables_get">
+          <field name="VAR" id="ZHzR_1b9[t1=F!y{a.VT">list</field>
+        </block>
+      </value>
+    </block>
+    <block type="lists_setIndex">
+      <mutation at="true"></mutation>
+      <field name="MODE">SET</field>
+      <field name="WHERE">FROM_START</field>
+      <value name="LIST">
+        <block type="variables_get">
+          <field name="VAR" id="ZHzR_1b9[t1=F!y{a.VT">list</field>
+        </block>
+      </value>
+    </block>
+    <block type="lists_length"></block>
+    <block type="lists_isEmpty"></block>
+    <block type="lists_create_with">
+      <mutation items="0"></mutation>
+    </block>
+    <block type="lists_sort">
+      <field name="TYPE">NUMERIC</field>
+      <field name="DIRECTION">1</field>
+    </block>
+  </category>
+  <category name="PLOTS" colour="#995b95">
+
+    <block type="plot_scale">
+    </block>
+
+
+    <block type="plot_datapoint">
+    </block>
+    <block type="plot_xy">
+    </block>
+
+    <block type="plot_xyarray">
+    </block>
+
+    <block type="plot_xyyarray">
+    </block>
+
+    <block type="plot_xyyyarray">
+    </block>
+
+    <block type="plot_radar">
+      <value name="MAXRADIUS">
+        <shadow type="math_number">
+          <field name="NUM">30</field>
+        </shadow>
+      </value>
+    </block>
+
+  </category>
+  <category name="Functions" colour="#995ba5" custom="PROCEDURE"></category>
+
+
+
+  <sep></sep>
+
+  <category name="KuttyPy" colour="#995ba5">
+
+    <block type="get_voltage">
+      <field name="CHANNEL">1</field>
+    </block>
+
+    <block type="get_reg">
+    </block>
+    <block type="get_reg_from_string">
+      <field name="REGISTER">PINA</field>
+    </block>
+    <block type="set_reg">
+      <value name="VALUE">
+        <shadow type="math_number">
+          <field name="NUM">255</field>
+        </shadow>
+      </value>
+    </block>
+
+    <block type="set_reg_from_string">
+      <value name="REGISTER">
+        <block type="reg">
+          <field name="REGISTER">PORTB</field>
+        </block>
+      </value>
+
+      <value name="VALUE">
+        <block type="binary_value">
+          <field name="B3">TRUE</field>
+        </block>
+        <block type="binary_value">
+          <field name="B2">TRUE</field>
+        </block>
+        <block type="binary_value">
+          <field name="B1">TRUE</field>
+        </block>
+        <block type="binary_value">
+          <field name="B0">TRUE</field>
+        </block>
+      </value>
+    </block>
+
+    <block type="set_reg_bits_string">
+      <field name="REGISTER">DDRB</field>
+    </block>
+
+    <block type="set_reg_bits">
+    </block>
+
+
+    <block type="shift_bits">
+      <value name="VALUE">
+        <shadow type="math_number">
+          <field name="NUM">1</field>
+        </shadow>
+      </value>
+    </block>
+
+    <block type="bytes_to_int">
+    </block>
+
+    <block type="set_pwm">
+    </block>
+
+    <block type="read_i2c_sensor_flexible_dynamic">
+    </block>
+
+    <category name="Sensors" colour="#5b67a5">
+
+      <block type="read_i2c_sensor_flexible_dynamic">
+      </block>
+
+      <block type="read_i2c_sensor_flexible_dynamic_array">
+      </block>
+
+      <block type="scanI2Cselector">
+      </block>
+      <block type="read_i2c_sensor_flexible">
+        <value name="NAME">
+          <shadow type="text">
+            <field name="TEXT">[118]BMP280</field>
+          </shadow>
+        </value>
+      </block>
+      <block type="scanI2CString">
+      </block>
+      <block type="read_I2C_sensor">
+      </block>
+
+      <block type="read_BMP280">
+        <field name="CHANNEL">1</field>
+      </block>
+      <block type="read_MPU6050">
+        <field name="CHANNEL">0</field>
+      </block>
+      <block type="read_MAX6675">
+        <field name="CHANNEL">CS1</field>
+      </block>
+
+      <block type="read_VL53L0X">
+        <field name="CHANNEL">0</field>
+      </block>
+      <block type="read_HMC5883L">
+        <field name="CHANNEL">0</field>
+      </block>
+      <block type="read_ADS1115">
+        <field name="CHANNEL">0</field>
+      </block>
+      <block type="read_INA219">
+        <field name="CHANNEL">0</field>
+      </block>
+      <block type="read_TCS34725">
+      </block>
+      <block type="read_TSL2561">
+        <field name="CHANNEL">0</field>
+      </block>
+      <block type="read_TSL2591">
+        <field name="CHANNEL">0</field>
+      </block>
+      <block type="read_QMC5883L">
+        <field name="CHANNEL">0</field>
+      </block>
+      <block type="read_MAX30100">
+        <field name="CHANNEL">0</field>
+      </block>
+
+    </category>
+
+    <category name="Outputs" colour="#5b67a5">
+      <block type="set_PCA9685">
+        <field name="CHANNEL">1</field>
+      </block>
+      <block type="direction">
+      </block>
+
+      <block type="init_stepper">
+      </block>
+
+      <block type="move_stepper">
+        <value name="STEPS">
+          <shadow type="math_number">
+            <field name="NUM">10</field>
+          </shadow>
+        </value>
+
+        <value name="DELAY">
+          <shadow type="math_number">
+            <field name="NUM">10</field>
+          </shadow>
+        </value>
+
+      </block>
+
+      <block type="move_steppers">
+
+        <value name="STEPS1">
+          <shadow type="math_number">
+            <field name="NUM">10</field>
+          </shadow>
+        </value>
+
+
+        <value name="STEPS2">
+          <shadow type="math_number">
+            <field name="NUM">10</field>
+          </shadow>
+        </value>
+
+        <value name="DELAY">
+          <shadow type="math_number">
+            <field name="NUM">10</field>
+          </shadow>
+        </value>
+
+      </block>
+
+
+    </category>
+
+    <category name="Analysis" colour="#5b67a5">
+
+      <block type="sine_fit_arrays">
+      </block>
+
+      <block type="sine_fit_two_arrays">
+      </block>
+
+    </category>
+
+
+  </category>
+
+
+
+
+  <category name="Phone" colour="#5b67a5">
+    <block type="cs_start_timer">
+    </block>
+    <block type="cs_get_timer">
+    </block>
+
+  </category>
+
+
+  <category name="Games" colour="#995b95">
+
+    <block type="add_game">
+    </block>  
+    <block type="stop_game">
+    </block>  
+
+    <block type="set_bird_y">
+	<value name="Y">
+        <shadow type="math_number">
+          <field name="NUM">200</field>
+        </shadow>
+	</value>
+
+    </block>
+
+
+    <block type="add_piano">
+    </block>  
+
+    <block type="play_piano">
+	<value name="NOTE">
+        <shadow type="text">
+          <field name="TEXT">C</field>
+        </shadow>
+	</value>
+
+    </block>
+  </category>
+
+
+</xml>
+
+<div class="ui icon error mini hidden message missingdevice" style="padding: 3px !important;margin:0px;">
+<div class="content">
+  <p>Missing Hardware! Is a device Connected?</p>
+</div>
+</div>
+
+<div class="ui top help sidebar" >
+  <div id="quillheader">
+    <a onClick= "toggleHelpEdit()" class="ui mini primary button enablehelpedit">Instructions <i class="pencil icon"></i></a>
+
+    <a class="ui basic mini red button right floated" onclick="hideHelp()"><i class="ui angle double up icon"></i> Hide</a>
+    <div class = "ui mini buttons right floated helpediton" style="display:none">
+      <a onClick= "helpeditor.history.undo()" class="ui red basic button"><i class="undo icon"></i></a>
+      <a onClick= "helpeditor.history.redo()" class="ui green basic button" style="margin-right:40px"><i class="redo icon"></i></a>
+    </div>
+
+  </div>
+  <hr>
+  <div id="quilleditor"></div>
+</div>
+
+
+<div onclick="$(this).sidebar('hide');" class="ui inverted labeled icon right vertical settings sidebar menu" >
+
+  <input type="text" id="filename" onclick="event.stopPropagation();" name="fname" placeholder="Filename" style="font-size:12pt;width:150px" value="myfile"></input>
+  <div class="divider"></div>
+
+  <a onclick="saveXMLtoDisc()"  class="ui red item">
+    <i class="red block save icon"></i> Save
+  </a>
+  <a onclick="openFile()"  class="ui green item">
+    <i class="block green file outline icon"></i> Open
+  </a>
+
+  <a onclick="loadEditor()"  class="ui item">
+    <i class="block blue  pencil icon"></i> Edit JavaScript
+  </a>
+
+  <a onclick="showCode()"  class="ui item">
+    <i class="block yellow user secret icon"></i> Hmm
+  </a>
+
+</div>
+
+
+<div class="ui content mygrid pusher" style="padding:0.2rem ! important;">
+		  <div id="toolbar" class="ui secondary menu mini ">
+            <div class="item">
+                  <a onclick="toggleRun()" class="ui mini primary button runbutton"><i class="play icon"></i><span class="text">Run!</span></a>
+            </div>
+
+          <!-- Button to open the experiment list modal -->
+            <div class="item"><button class="ui basic red button" id="openMenuButton"><i class="red block file icon"></i>Samples</button></div>
+
+
+            <div class="right menu">
+
+                <div class="ui right aligned item">
+                      <a onclick="saveXML()" class="ui mini red button" ><i class="download icon"></i></a>
+                </div>
+                <div class="ui right aligned item">
+                      <a onclick="getCachedXML()" class="ui mini teal button" ><i class="upload icon"></i></a>
+                </div>
+
+                <div class="ui right aligned item">
+                  <a onclick="showHelp()" class="ui mini green button" ><i class="question icon"></i>Help </a>
+                </div>
+                <div class="ui right aligned item">
+                  <a onclick="showQuiz()" class="ui mini green button popquiz" style="display:none"><i class="question icon"></i>Quiz </a>
+                </div>
+
+                <div class="item">
+                  <div class="ui toggle checkbox bcast">
+                    <label><i class="wifi icon"></i></label>
+                    <input type="checkbox" name="public">
+                  </div>
+                </div>
+
+                <div class="ui right aligned item">
+                  <a onclick="showSettings()" class="ui mini pink button" >Menu<i class="ui angle double right icon"></i></a>
+                </div>
+
+            </div>
+		  </div>
+
+          <div id="blocklyArea">
+			  <div id="blocklyDiv">
+			  </div>
+			</div>
+</div>
+
+
+
+<!-- -------------results _-------------- -->
+<div class="ui very wide bottom results sidebar overlay" >
+  <div class="ui centered header">
+
+    <a onclick="savePDF()" class="ui right corner huge blue label" ><i class="download icon pdfdownloadicon"></i></a>
+    <a onclick="toggleResultSize(this);" class="ui top left attached label" ><i class="ui double angle down red icon"></i></a>
+    <div onclick="toggleFullscreen();" class="ui wide teal label" style="padding-left:20px;padding-right:20px;" ><i class="sliders horizontal icon" ></i> Output </div>
+
+
+  </div>
+
+  <div class="ui content mygrid" style="padding:0.2rem ! important;">
+    <div id="myresults" class="ui two column stackable top aligned grid ">
+      <div class="ui vertical divider"></div>
+      <div class="top aligned row">
+
+        <div class="column resplotarea"  style="background:#fffe;">
+          <div id="resplot" class="ui description resplot">
+          </div>
+        </div>
+
+        <div class="column">
+          <div class="top aligned row">
+            <div class="ui relaxed horizontal divided list gauges">
+            </div>
+          </div>
+
+          <div class="ui celled list registers" style="color:#a33;">
+          </div>
+          <div class="ui description cmdarea" style="color:darkgreen;">
+          </div>
+
+          <div class="ui scrolling content description printarea" style="color:black;scrollable:true;">
+          </div>
+        </div>
+
+
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+
+<div class="ui help modal">
+  <i class="close icon"></i>
+  <div id="helptitle" class="header">
+    Title
+  </div>
+  <div class="image content">
+    <div id="helpdescription" class="description">
+      Help
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="ui modal" id="experimentsModal">
+    <div class="header">Sample Programs Menu</div>
+    <div class="content">
+        <div id="menu"></div>
+    </div>
+    <div class="actions">
+        <button class="ui button red" id="closeMenuButton">Close</button>
+    </div>
+</div>
+
+  <script type="text/javascript">
+
+
+    function showSettings(){
+      $('.ui.settings.sidebar').sidebar('setting', {
+        dimPage             : true,
+        transition          : 'overlay',
+        mobileTransition    : 'overlay'})
+        .sidebar('show');
+    }
+
+	$('.ui.dropdown').dropdown();
+    $('.top.menu .item').tab({onVisible: function(a){switchHelp(a);}})
+
+	var workspaceHelp = '';
+	var workspaceMD = '';
+	var converter = new Markdown.Converter();
+	var results = $('.description.printarea');
+	var resultModal = 	  $('.modal.results');
+    var resplotarea = $('.resplotarea');
+    var resultplots = $('.description.resplot');
+    var mygrid = $('.content.mygrid');
+
+    var isRunning = false;
+
+
+	var registers = 	  $('.list.registers');
+	var gaugearea = 	  $('.list.gauges');
+	var regvals = [];
+	var command = $('.description.cmdarea');
+
+ // Fetch the experiments.json and populate the menu
+        fetch('/samples/experiments.json')
+        .then(response => response.json())
+        .then(data => {
+            const menuContainer = document.getElementById('menu');
+
+            for (const [section, details] of Object.entries(data)) {
+                // Create section container
+                const sectionDiv = document.createElement('div');
+                sectionDiv.className = 'menu-section';
+
+                // Add section title
+                const sectionTitle = document.createElement('h3');
+                sectionTitle.className = 'menu-title';
+                sectionTitle.textContent = section;
+                sectionDiv.appendChild(sectionTitle);
+
+                // Add section description
+                const sectionDescription = document.createElement('p');
+                sectionDescription.textContent = details.description;
+                sectionDiv.appendChild(sectionDescription);
+
+                // Add files as buttons
+                const fileList = document.createElement('div');
+                fileList.className = 'menu-items';
+                for (const [file, description] of Object.entries(details.files)) {
+                    const fileButton = document.createElement('button');
+                    fileButton.className = 'ui basic button primary';
+                    fileButton.textContent = file;
+                    fileButton.dataset.filename = `${details.directory}/${file}`; // Store filename in dataset
+
+                    // On button click, call the /loadxml endpoint
+                    fileButton.addEventListener('click', function() {
+                        const filename = this.dataset.filename;
+                        fetch(`/loadxml?file=${encodeURIComponent(filename)}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                console.log('Response from /loadxml:', data);
+                                loadRawXml(data.xml);
+                                $('#experimentsModal').modal('hide');
+                            })
+                            .catch(error => console.error('Error fetching /loadxml:', error));
+                    });
+
+                    fileList.appendChild(fileButton);
+                }
+
+                sectionDiv.appendChild(fileList);
+                menuContainer.appendChild(sectionDiv);
+            }
+        })
+        .catch(error => console.error('Error fetching the JSON:', error));
+
+        // Open modal
+        $('#openMenuButton').click(function() {
+            $('#experimentsModal').modal('show');
+        });
+
+        // Close modal
+        $('#closeMenuButton').click(function() {
+            $('#experimentsModal').modal('hide');
+        });
+
+
+    // Initialize Help Window sidebar
+    var helpeditor = loadquill();
+
+    // Initialize function helps (Block wise help)
+    var helptitle = $('#helptitle');
+    var helpdescription = $('#helpdescription');
+
+    function showBlockHelp(name){
+        helptitle.text(name);
+        helpdescription.html(Blockly.Msg[name]);
+        $('.ui.modal')
+          .modal({
+            blurring: true
+          })
+          .modal('show')
+        ;
+    }
+
+
+
+	var JSBridge;
+	var HWBridge;
+	var devState = false;
+
+    var isTeacher=false;
+    var roomname='none';
+
+	function showReg(reg, val){
+	    regclass = 'reg_'+reg.replace(/ /g,"_").replace(/-/g,"_");
+		if(regvals.indexOf(regclass)!=-1){ // Register is already shown in the results segment. update it.
+			registers.find('.'+regclass).text(reg+"="+val);
+		}else{
+			registers.append(`<div class="item ${regclass}">${reg}=${val}</div>`)
+			regvals.push(regclass);
+		}
+	}
+
+
+
+    var workspacePlayground = Blockly.inject('blocklyDiv', {
+          media: 'media/',
+          toolbox: mytoolbox,
+          toolboxPosition : 'start',
+          horizontal: true,
+          trashcan: true,
+
+          zoom: {
+                 startScale: 0.8,
+                 wheel: true,
+                 controls: false
+                 },
+          move:{
+                scrollbars: {
+                  horizontal: true,
+                  vertical: true
+                  },
+                drag: true,
+                wheel: true
+                },
+          drag: true,
+          css : true
+          }
+      );
+
+var blocklyArea = document.getElementById('blocklyArea');
+  var onresize = function(e) {
+    // Compute the absolute coordinates and dimensions of blocklyArea.
+    var element = blocklyArea;
+    var x = 0;
+    var y = 0;
+    do {
+      x += element.offsetLeft;
+      y += element.offsetTop+20;
+      element = element.offsetParent;
+    } while (element);
+    // Position blocklyDiv over blocklyArea.
+    //blocklyDiv.style.left = x + 'px';
+    //blocklyDiv.style.top = y + 'px';
+    //blocklyDiv.style.width = blocklyArea.offsetWidth + 'px';
+    //blocklyDiv.style.height = (blocklyArea.offsetHeight-20) + 'px';
+    Blockly.svgResize(workspacePlayground);
+  };
+  //window.addEventListener('resize', onresize, false);
+  //onresize();
+  Blockly.svgResize(workspacePlayground);
+
+
+	Blockly.Xml.clearWorkspaceAndLoadFromXml($('#samplexml')[0], workspacePlayground);
+
+    var toolboxButton = $("<a>", {id: "foo", "class": "ui tiny basic button teal","text":"Toolbox", "style":"display: none; position: absolute; z-index: 100;"});
+    toolboxButton.click(function(){ workspacePlayground.toolbox_.setVisible(true); toolboxButton.hide(); }).prependTo('.injectionDiv');
+    toolboxButton.hide();
+    var closeToolbox = function(){
+      workspacePlayground.toolbox_.setVisible(false);
+      toolboxButton.show();
+    }
+    workspacePlayground.scrollbar.vScroll.svgGroup_.style.display = 'none';
+    workspacePlayground.toolbox_.getToolboxItems()[0].getClickTarget().onclick = closeToolbox;
+
+    $('.ui.results.sidebar').sidebar('hide');
+
+    function toggleResultSize(e){
+      var sb = $('.ui.results.sidebar');
+      if($(e.firstChild).hasClass('down')){
+          $(e.firstChild).addClass('up').removeClass('down');
+          sb.attr('style','height:35% !important;');
+      }else{
+        $(e.firstChild).addClass('down').removeClass('up');
+        sb.attr('style','height:75% !important;');
+      }
+    }
+
+
+    function toggleFullscreen(){
+      var sb = $('.ui.results.sidebar');
+      if(fullscreen){
+          sb.attr('style','height:50% !important;');
+          fullscreen = false;
+      }else{
+        sb.attr('style','height:92% !important;');
+          fullscreen = true;
+      }
+      if(typeof JSBridge != 'undefined')
+        JSBridge.showMP(fullscreen);
+    }
+
+
+
+    function savePDF(){
+
+        $('.pdfdownloadicon').addClass('notched circle loading').removeClass('download');
+        setTimeout(()=>{
+
+              var element = $('#myresults');
+              var HTML_Width = element.width();
+              var HTML_Height = element.height();
+              var top_left_margin = 15;
+              var PDF_Width = HTML_Width + (top_left_margin * 2);
+              var PDF_Height = (PDF_Width * 1.5) + (top_left_margin * 2);
+              var canvas_image_width = HTML_Width;
+              var canvas_image_height = HTML_Height;
+
+              var totalPDFPages = Math.ceil(HTML_Height / PDF_Height) - 1;
+
+              html2canvas(element[0]).then(function (canvas) {
+                  var imgData = canvas.toDataURL("image/jpeg", 0.85);
+                  var pdf = new jsPDF('p', 'pt', [PDF_Width, PDF_Height]);
+                  pdf.addImage(imgData, 'JPG', top_left_margin, top_left_margin, canvas_image_width, canvas_image_height);
+                  for (var i = 1; i <= totalPDFPages; i++) {
+                      console.log(HTML_Width+','+HTML_Height+','+i);
+                      pdf.addPage(PDF_Width, PDF_Height);
+                      pdf.addImage(imgData, 'JPG', top_left_margin, -(PDF_Height*i)+(top_left_margin*4),canvas_image_width,canvas_image_height);
+                  }
+                  //pdf.save("results.pdf");
+                  $('.pdfdownloadicon').removeClass('notched circle loading').addClass('download');
+                  if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent))
+                  {
+                      JSBridge.savePDF("results", pdf.output('datauristring'));
+
+                  }
+                  else
+                  {
+                       pdf.save('filename.pdf');
+                  }
+              });
+        }, 50);
+
+    }
+
+
+
+
+
+
+    function on() {
+      isRunning = true;
+      $('.runbutton').removeClass('primary').addClass('red');
+      $('.runbutton > .text').text('Stop');
+      $('.runbutton > .icon').removeClass('play').addClass('stop');
+
+      registers.empty();
+      regvals = [];
+	  results.html("");
+
+      $('.ui.results.sidebar').sidebar('setting', {
+        dimPage             : false,
+        transition          : 'overlay',
+        closable            : false,
+        exclusive           : true,
+        mobileTransition    : 'overlay'})
+        .sidebar('show');
+	}
+
+    $('.blocklyToolboxContents').first().append(`
+    <div width="85%">
+      <div class = "ui fluid buttons" style="margin-top:30px;">
+        <a onClick= "workspacePlayground.undo(false)" class="ui mini red basic button"><i class="undo icon"></i></a>
+        <a onClick= "workspacePlayground.undo(true)" class="ui mini green basic button"><i class="redo icon"></i></a>
+      </div>
+    </div>
+    `);
+
+
+	function playButtonOff(){		
+      isRunning = false;
+      $('.runbutton').removeClass('red').removeClass('orange').addClass('primary');
+      $('.runbutton > .text').text('Run!');
+      $('.runbutton > .icon').removeClass('stop').removeClass('double angle down').addClass('play');
+
+	}
+	function off() {
+        if(typeof JSBridge != 'undefined')
+          if($('.checkbox.bcast').checkbox('is checked'))
+            JSBridge.offBroadcast();
+
+      $('.ui.results.sidebar').sidebar('hide');
+
+      playButtonOff();
+
+  	  resetStepUi();
+	  resetInterpreter();
+      if(typeof JSBridge != 'undefined')
+    	  JSBridge.closeFiles();
+	  stopGame();
+	}
+
+    function resetInterpreter() {
+      myInterpreter = null;
+      if (runner) {
+        clearTimeout(runner);
+        runner = null;
+      }
+    }
+
+    function showJSCode() {
+      // Generate JavaScript code and display it.
+      Blockly.JavaScript.INFINITE_LOOP_TRAP = null;
+      var code = Blockly.JavaScript.workspaceToCode(workspacePlayground);
+    }
+    var myInterpreter;
+    
+    var runner;
+    var highlightPause = false;
+    var latestCode = '';
+    var filehandlecodes_js={},filehandlecodes_py={};
+
+    var autoScalingX = true;
+    var autoScalingY = true;
+
+
+    function highlightBlock(id) {
+      workspacePlayground.highlightBlock(id);
+      highlightPause = true;
+    }
+
+    function resetStepUi() {
+      workspacePlayground.highlightBlock(null);
+      highlightPause = false;
+
+    }
+	
+	function deviceConnected(){
+		$('.message.missingdevice').closest('.message').transition('fade out','300mS');
+	}
+	function deviceDisconnected(){
+		$('.message.missingdevice').closest('.message').transition('fade in','1000mS').transition('glow');
+	}
+    var url = new URL(window.location.href);
+    var state = url.searchParams.get("connected");
+    if(typeof state != 'undefined' && state === "false")
+      deviceDisconnected()
+
+
+	function chatDisconnected(){
+		$('.chatstatus').transition('fade out','300mS');
+	}
+	function chatConnected(message,connect){
+		$('.chatstatus > .chatmsg').text(message);
+		if(connect)$('.chatstatus > .button').show();
+		else $('.chatstatus > .button').hide();
+		$('.chatstatus').transition('fade in','1000mS').transition('glow');
+	}
+
+
+    function toggleRun(){
+      if(isRunning){
+        off();
+      }else{
+        startStep();
+      }
+
+
+    }
+
+    function startStep() {
+        if(typeof JSBridge != 'undefined')
+          if($('.checkbox.bcast').checkbox('is checked'))
+            JSBridge.startStepBroadcast();
+
+
+      // Generate JavaScript code and parse it.
+      Blockly.JavaScript.STATEMENT_PREFIX = 'highlightBlock(%1);\n';
+      Blockly.JavaScript.addReservedWords('highlightBlock');
+      filehandlecodes_js={};
+      filehandlecodes_py={};
+      latestCode = Blockly.JavaScript.workspaceToCode(workspacePlayground);
+
+
+
+      resetStepUi();
+      on();
+      clearPlot();
+      createPlots(latestCode);
+	  resplotarea.show();
+
+
+
+      runCode();
+    }
+
+    function initAllApis(interpreter, scope){
+      console.log('Init all apis');
+
+      initApi(interpreter, scope);
+      initLists(interpreter, scope);
+      initIO(interpreter, scope);
+      initPlots(interpreter, scope);
+      initGames(interpreter, scope);
+      initKuttyPy(interpreter, scope);
+      initSensors(interpreter, scope);
+      initSounds(interpreter, scope);
+
+    }
+
+
+
+    function runCode() {
+      console.log('start running code');
+      if (!myInterpreter) {
+        // First statement of this code.
+        // Clear the program output.
+        resetStepUi();
+      console.log('step UI reset');
+
+        // And then show generated code in an alert.
+        // In a timeout to allow the outputArea.value to reset first.
+        setTimeout(function() {
+          // Begin execution
+          try{
+              highlightPause = false;
+              if(!latestCode.startsWith('programStarting')){
+                 var fileopenlines = '';
+                 for(l in filehandlecodes_js)
+                  fileopenlines+= filehandlecodes_js[l];
+                 //latestCode = 'programStarting();' + fileopenlines+latestCode;
+                 }
+
+              try{myInterpreter = new Interpreter(latestCode, initAllApis);}
+              catch(e){console.log(e.message+';'+e.stack);off();return;};
+
+              if(latestCode.search("alert") != -1) // -1 means not found
+                on();
+
+              runner = function() {
+                if (myInterpreter) {
+                  try{
+                    var hasMore = myInterpreter.run();
+                  }catch(e){
+                      console.log(e);
+                      var stack = ''
+                      var segments = e.stack.split('\n');
+                      for(var i=0;i<segments.length && i<10;i++){
+                          stack+=segments[segments.length-i-1].split('file:')[0]+',';
+                        }
+                      results.append(`<p style="color:red">${e.name}:${e.message}</p>`);
+                      $('#maincontent').prepend(`
+                            <div class="ui error program message">
+                              <i class="close icon"></i>
+                              <div class="header">
+                                ${e.name}. Check the Highlighted Block
+                              </div>
+                              <ul class="list">
+                                <li>
+                                ${e.message}
+                                </li>
+                                <li>
+                                ${stack}
+                                </li>
+                              </ul>
+                            </div>
+                      `);
+                      $(".close.icon").click(function(){
+                        $(this).parent().hide();
+                      });
+                      // Stop Program.
+                      console.log('Program ended');
+                      off();
+                      setTimeout(()=>{ $('.ui.results.sidebar').sidebar('setting',{closable:true,dimPage:true}).sidebar('show'); },50 );
+                      return;
+                  }
+
+                  if (hasMore) {
+                    // Execution is currently blocked by some async call.
+                    // Try again later.
+                    setTimeout(runner, 2); // TODO . Critical . can cause crashes.
+                    return;
+                  } else {
+                    console.log("we're done here");
+                    // Program is complete.
+                    $('.runbutton').removeClass('red').addClass('orange');
+                    $('.runbutton > .text').text('Done!');
+                    $('.runbutton > .icon').removeClass('stop').addClass('double angle down');
+                    resetInterpreter();
+                    resetStepUi();
+                    //off();
+                  }
+                }
+              };
+
+              runner();
+
+              }catch(e){
+                console.log(e);
+                var stack = ''
+                var segments = e.stack.split('\n');
+                for(var i=0;i<segments.length && i<5;i++){
+                    stack+=segments[segments.length-i-1].split('(file:')[0]+',';
+                  }
+                $('#maincontent').prepend(`
+                      <div class="ui error program message">
+                        <i class="close icon"></i>
+                        <div class="header">
+                          ${e.name} . Check the plots.
+                        </div>
+                        <div class="content">
+                        ${e.message}
+                        ${stack}
+
+                        </div>
+                      </div>
+                `);
+                $(".close.icon").click(function(){
+                  $(this).parent().hide();
+                });
+                // Stop Program.
+                off();
+                setTimeout(()=>{console.log('closing due to error');  $('.ui.results.sidebar').sidebar('hide');},50);
+                return;
+              }
+
+
+        }, 1);
+        return;
+      }
+    }
+
+
+
+
+
+    function saveXML(){
+        if(typeof JSBridge != 'undefined')
+  		  JSBridge.saveXML("kuttypy",injectHelp());
+		else
+		  localStorage.setItem('kuttypy', injectHelp());
+	}
+
+    function getCachedXML(){
+        if(typeof JSBridge != 'undefined')
+          JSBridge.loadLocalXML('kuttypy',loadRawXml)
+		else
+		  loadXML(localStorage.getItem('kuttypy'));
+    }
+
+	function loadXML(xml) {
+
+		if (typeof xml != "string" || xml.length < 5) {
+			return false;
+		}
+
+		try {
+			var dom = Blockly.Xml.textToDom(xml);
+			Blockly.mainWorkspace.clear();
+			Blockly.Xml.domToWorkspace(dom,Blockly.mainWorkspace);
+
+			parser = new DOMParser();
+			xmlDoc = parser.parseFromString(xml,"text/xml");
+			loadhelp(xmlDoc);
+			loadquiz(xmlDoc);
+			return true;
+		} catch (e) {
+			console.log("XML Load Error",e);
+			console.log(xml)
+			return false;
+		}
+	}
+	function loadRawXml(msg){
+            var parsedxml = Blockly.Xml.textToDom(msg);
+            loadhelp(parsedxml);
+            Blockly.Xml.clearWorkspaceAndLoadFromXml(parsedxml,workspacePlayground);
+            console.log('loaded new file');
+            }
+
+
+	function loadhelp(xml) {
+		try {
+		    workspaceMD = $(xml).find('description').text();
+			if(workspaceMD.startsWith('<')){
+              helpeditor.clipboard.dangerouslyPasteHTML(workspaceMD);
+			}else{ // Process markdown
+  			  helpeditor.clipboard.dangerouslyPasteHTML(converter.makeHtml(workspaceMD));
+            }
+			return true;
+		} catch (e) {
+			console.log("Invalid xml",e);
+			return false;
+		}
+	}
+
+	function showHelp(){
+        $('.ui.help.sidebar').sidebar('setting', {
+                dimPage             : false,
+                transition          : 'overlay',
+                mobileTransition    : 'overlay'})
+                .sidebar('show');
+	}
+
+	function loadquiz(xml) {
+		try {
+		    quizString = $(xml).find('quizzing').text();
+		    if(quizString.length>2) $('.popquiz').show();
+			return true;
+		} catch (e) {
+			console.log("Invalid xml",e);
+			return false;
+		}
+	}
+	function showQuiz(){
+	        if(typeof JSBridge != 'undefined' && quizString.length>2)
+              JSBridge.showQuizDialog(quizString);
+
+	}
+
+
+	function hideHelp(){
+	  disableHelpEdit();
+      $('.ui.help.sidebar').sidebar('hide');
+	}
+
+    function toggleHelpEdit(){
+       if($('.enablehelpedit').hasClass('red'))
+        disableHelpEdit();
+       else
+        enableHelpEdit();
+    }
+	function enableHelpEdit(){
+  	  $('.helpediton').show();
+  	  $('.ql-toolbar').show();
+  	  $('.enablehelpedit').addClass('red');
+  	  helpeditor.enable();
+	}
+	function disableHelpEdit(){
+  	  $('.helpediton').hide();
+  	  $('.ql-toolbar').hide();
+  	  helpeditor.disable();
+  	  $('.enablehelpedit').removeClass('red');
+	}
+
+
+
+    function injectHelp(){
+      var helpContent = workspaceMD;
+	  if(helpeditor.root.innerHTML.length>15)helpContent = helpeditor.root.innerHTML;
+      var xmlDom = Blockly.Xml.workspaceToDom(workspacePlayground);
+      var text =  Blockly.Xml.domToPrettyText(xmlDom);
+      if(helpContent.length)
+        text = text.split('</xml')[0] + "<description>\n<![CDATA[" + helpContent + "]]>" + "\n</description>\n</xml>";
+      console.log(text);
+      return text;
+    }
+
+
+
+
+    function showCode() {
+      // Generate Python code and display it.
+      Blockly.Python.INFINITE_LOOP_TRAP = null;
+       Blockly.Python.init(workspacePlayground)
+      var code = Blockly.Python.workspaceToCode(workspacePlayground);
+      alert(code);
+    }
+    
+
+	function myUpdateFunction(event) {
+
+		//resetInterpreter();
+		Blockly.Python.init(workspacePlayground)
+		Blockly.JavaScript.init(workspacePlayground)
+
+		var xmlDom = Blockly.Xml.workspaceToDom(Blockly.mainWorkspace);
+		var xmlText = Blockly.Xml.domToPrettyText(xmlDom);
+
+        if(typeof JSBridge != 'undefined'){
+          var pycode= Blockly.Python.workspaceToCode(workspacePlayground);
+
+           var fileopenlines = '';
+           for(l in filehandlecodes_py)
+            fileopenlines += filehandlecodes_py[l];
+           pycode = fileopenlines+pycode;
+		  JSBridge.updateCode(pycode);
+
+          JSBridge.xmlCode(xmlText, $('.checkbox.bcast').checkbox('is checked'));
+  	    }
+
+	}
+
+    $('.checkbox.listen')
+      .checkbox({
+        onChecked: function() {
+        $('.checkbox.bcast').checkbox('set unchecked')
+        if(typeof JSBridge != 'undefined')
+          JSBridge.listenBcast(true);
+        },
+        onUnchecked: function() {
+          JSBridge.listenBcast(false);
+        }
+      });
+
+    $('.checkbox.bcast')
+      .checkbox({
+        onChecked: function() {
+        $('.checkbox.listen').checkbox('set unchecked')
+        }
+      });
+
+	workspacePlayground.addChangeListener(myUpdateFunction);
+
+		
+	if(typeof JSBridge != 'undefined'){
+		var localxml = JSBridge.loadXMLFile("xml");
+		if(localxml.length>2)  //To prevent loading, JSBridge can return an empty string
+			loadXML(localxml);	
+		}
+	
+
+	function loadEditor(){ //Redirect to editor.html where the localstorage will return contents of the code.
+        Blockly.JavaScript.STATEMENT_PREFIX = '';
+        var mycode = Blockly.JavaScript.workspaceToCode(workspacePlayground)
+        localStorage.setItem('kuttypycode', mycode);
+		window.location = "/editor";
+	}
+
+    function saveXMLtoDisc(){
+        const textContent = injectHelp();
+
+        // Create a blob (file-like object) from the text content
+        const blob = new Blob([textContent], { type: 'text/xml' });
+
+        // Create a link element for download
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'myfile.xml'; // The filename for download
+
+        // Programmatically click the link to trigger the download
+        link.click();
+
+        // Clean up by revoking the object URL after download
+        URL.revokeObjectURL(link.href);
+	}
+	function openFile(){ // Launch file open dialog
+		JSBridge.openFileDialog();
+	}
+
+    document.addEventListener('keydown', function (event) {
+      // Check if 'Ctrl+S' (or 'Cmd+S' on macOS) is pressed
+      if ((event.ctrlKey || event.metaKey) && event.key === 's') {
+        event.preventDefault(); // Prevent the default Ctrl+S action
+        saveXML();
+      }
+    });
+
+  </script>
+
+</body>
+
+
+</html>

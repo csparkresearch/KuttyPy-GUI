@@ -10,24 +10,15 @@ import socket
 
 connections = {}
 
-def create_client(showStatusSignal, serverSignal,removeSignal,imageSignal,roomparams,url ,local_ip):
-    # Create an instance of the server
-    socketio_server = SocketIOClient(showStatusSignal, serverSignal,removeSignal,imageSignal, roomparams, url, local_ip)
-    # Start the server in a separate thread
-
-    socketio_server.start_client()
-
-    return socketio_server
-
-
 class SocketIOClient:
     finished = pyqtSignal()
     showStatusSignal = pyqtSignal()
+    memberSignal = pyqtSignal()
     serverSignal = None
     removeSignal = None
     imageSignal = None
 
-    def __init__(self, showstatsig, serversig,removesig,  imagesig, roomparams, url,local_ip):
+    def __init__(self, showstatsig, serversig,removesig,  imagesig, memSig, roomparams, url,local_ip):
         # Create a Socket.IO client instance
         self.sio = socketio.Client()
 
@@ -55,6 +46,7 @@ class SocketIOClient:
         self.serverSignal = serversig
         self.removeSignal = removesig
         self.imageSignal = imagesig
+        self.memberSignal = memSig
 
 
 
@@ -88,13 +80,13 @@ class SocketIOClient:
 
     # Event handler for messages from the server
     def on_response(self, data):
-        print(f"Received response from server: {data}")
-        self.showStatusSignal.emit(str(data), False)
+        #print(f"Received response from server: {data}")
+        #self.showStatusSignal.emit(str(data), False)
         name = data.get('name')
         sid = data.get('sid')
         response= data.get('response')
 
-        print('handle_client', name, response[:10])
+        #print('handle_client', name, response[:10])
         if response[:4] == b'ABCD':  #Screenshot
             getting_screenshot = True
             print(response)
@@ -105,7 +97,7 @@ class SocketIOClient:
             self.imageSignal.emit(name,image_data)
         else:  # Quiz Response
             print('quiz resp', response)
-            self.serverSignal.emit(name, response.decode('utf-8'))
+            self.serverSignal.emit(name, response)
 
 
 
@@ -121,14 +113,7 @@ class SocketIOClient:
     def on_member_list(self,data):
         print(f"latest members: {data}")
         self.showStatusSignal.emit(f"members: {data.get('members','')}", False)
-
-    def on_response(self,data):
-        print(f"latest members: {data}")
-        name =data.get('name')
-        sid =data.get('sid')
-        response =data.get('response')
-        self.serverSignal.emit(name, response)
-        self.showStatusSignal.emit(f"members: {data.get('members','')}", False)
+        self.memberSignal.emit(data.get('members',''))
 
     # Send a message to the server
     def send_message(self, message):
@@ -141,47 +126,3 @@ class SocketIOClient:
     # Stop the client thread (optional)
     def stop_client(self):
         self.sio.disconnect()
-
-class QuizResponseThread(QThread):
-    finished = pyqtSignal()
-    serverSignal = None
-    sio = socketio.AsyncClient()
-
-    def setServerSignal(self, sig):
-        self.serverSignal = sig
-
-    @sio.event
-    async def connect(self):
-        print("Teacher connected")
-        # Create and join the room
-        await self.sio.emit('create_quiz', {'room_id': 'newroom', 'password': 'newpass', 'owner_name': 'teacher'})
-
-    @sio.event
-    async def quiz_created(self, data):
-        print(f"Room created: {data['room_id']}")
-
-    #asyncio.create_task(send_questions_loop())
-
-    @sio.event
-    async def create_error(self, data):
-        print(f"Room creation failed: {data}")
-
-    @sio.event
-    async def member_list(self, data):
-        print(f"latest members: {data}")
-
-    @sio.event
-    async def disconnect(self):
-        print("Teacher disconnected")
-
-    def run(self):
-        socketio_path = 'socket.io'
-        self.serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.serversocket.bind(('0.0.0.0', 4000))
-        self.serversocket.listen(50)  # become a server socket, maximum 50 connections
-        while True:
-            connection, address = self.serversocket.accept()
-            buf = connection.recv(64)
-            if len(buf) > 0:
-                print(address, buf)
-                self.serverSignal.emit(str(address[0]), buf.decode('utf-8'))

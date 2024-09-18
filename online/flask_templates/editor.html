@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<!-- HTML file to host Blockly in a mobile WebView. -->
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,height=device-width, initial-scale=0.9, maximum-scale=1">
+  <script src="jquery.min.js"></script>
+  <script src="Markdown.Converter.min.js"></script>
+  <script src="semantic.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="semantic.min.css">
+
+  <link rel="stylesheet" type="text/css" href="webviewstyle.css">
+  <link rel="stylesheet" type="text/css" href="gauge.min.css">
+  <link rel="stylesheet" type="text/css" href="gauge-glossy.min.css">
+  <link rel="stylesheet" type="text/css" href="piano.css">
+
+  <script src="blocks/allApis.js"></script>
+  <script src="blocks/acorn_interpreter.js"></script>
+
+
+  <script src="jspdf.min.js"></script>
+  <script src="html2canvas.min.js"></script>
+
+  <script language="javascript" type="text/javascript" src="flot/jquery.canvaswrapper.js"></script>
+  <script language="javascript" type="text/javascript" src="flot/jquery.colorhelpers.js"></script>
+  <script language="javascript" type="text/javascript" src="flot/jquery.flot.js"></script>
+  <script language="javascript" type="text/javascript" src="flot/jquery.flot.saturated.js"></script>
+  <script language="javascript" type="text/javascript" src="flot/jquery.flot.browser.js"></script>
+  <script language="javascript" type="text/javascript" src="flot/jquery.flot.drawSeries.js"></script>
+  <script language="javascript" type="text/javascript" src="flot/jquery.flot.uiConstants.js"></script>
+  <script language="javascript" type="text/javascript" src="flot/jquery.flot.legend.js"></script>
+  <script language="javascript" type="text/javascript" src="flot/jquery.flot.symbol.js"></script>
+  <script language="javascript" type="text/javascript" src="flot/jquery.flot.axislabels.js"></script>
+
+</head>
+
+<body>
+
+<div class="ui icon error mini hidden message missingdevice" style="padding: 3px !important;margin:0px;">
+<div class="content">
+  <p>Missing Hardware! Is a device Connected?</p>
+</div>
+</div>
+
+
+<div onclick="$(this).sidebar('hide');" class="ui inverted labeled icon right vertical settings sidebar menu" >
+
+  <input type="text" id="filename" onclick="event.stopPropagation();" name="fname" placeholder="Filename" style="font-size:12pt;width:150px" value="myfile"></input>
+  <div class="divider"></div>
+
+  <a onclick="saveXMLtoDisc()"  class="ui red item">
+    <i class="red block save icon"></i> Save
+  </a>
+  <a onclick="openFile()"  class="ui green item">
+    <i class="block green file outline icon"></i> Open
+  </a>
+
+
+  <a onclick="showCode()"  class="ui item">
+    <i class="block yellow user secret icon"></i> Hmm
+  </a>
+
+</div>
+
+
+<div class="ui content mygrid pusher" style="padding:0.2rem ! important;">
+		  <div id="toolbar" class="ui secondary menu mini ">
+            <div class="item">
+                  <a onclick="toggleRun()" class="ui mini primary button runbutton"><i class="play icon"></i><span class="text">Run!</span></a>
+            </div>
+
+          <!-- Button to open the experiment list modal -->
+            <div class="item"><button class="ui basic red button" id="openMenuButton"><i class="red block file icon"></i>Samples</button></div>
+
+
+            <div class="right menu">
+
+                <div class="ui right aligned item">
+                      <a onclick="saveXML()" class="ui mini red button" ><i class="download icon"></i></a>
+                </div>
+                <div class="ui right aligned item">
+                      <a onclick="getCachedXML()" class="ui mini teal button" ><i class="upload icon"></i></a>
+                </div>
+
+                <div class="ui right aligned item">
+                  <a onclick="showHelp()" class="ui mini green button" ><i class="question icon"></i>Help </a>
+                </div>
+                <div class="ui right aligned item">
+                  <a onclick="showQuiz()" class="ui mini green button popquiz" style="display:none"><i class="question icon"></i>Quiz </a>
+                </div>
+
+                <div class="item">
+                  <div class="ui toggle checkbox bcast">
+                    <label><i class="wifi icon"></i></label>
+                    <input type="checkbox" name="public">
+                  </div>
+                </div>
+
+                <div class="ui right aligned item">
+                  <a onclick="showSettings()" class="ui mini pink button" >Menu<i class="ui angle double right icon"></i></a>
+                </div>
+
+            </div>
+		  </div>
+
+	<div class = "ui clearing green segment" style="height:60em;">
+		<div class="ui content" style="bottom:10%;top:10%;">
+		<pre id="editor">
+//Example code to plot a parabola
+var i;
+for (i = -20; i <= 20; i++) {
+	plot_xy(i,i*i);
+	sleep(0.01);
+}
+		</pre>
+		</div>
+	</div>
+
+</div>
+
+
+
+<!-- -------------results _-------------- -->
+<div class="ui very wide bottom results sidebar overlay" >
+  <div class="ui centered header">
+
+    <a onclick="savePDF()" class="ui right corner huge blue label" ><i class="download icon pdfdownloadicon"></i></a>
+    <a onclick="toggleResultSize(this);" class="ui top left attached label" ><i class="ui double angle down red icon"></i></a>
+    <div onclick="toggleFullscreen();" class="ui wide teal label" style="padding-left:20px;padding-right:20px;" ><i class="sliders horizontal icon" ></i> Output </div>
+
+
+  </div>
+
+  <div class="ui content mygrid" style="padding:0.2rem ! important;">
+    <div id="myresults" class="ui two column stackable top aligned grid ">
+      <div class="ui vertical divider"></div>
+      <div class="top aligned row">
+
+        <div class="column resplotarea"  style="background:#fffe;">
+          <div id="resplot" class="ui description resplot">
+          </div>
+        </div>
+
+        <div class="column">
+          <div class="top aligned row">
+            <div class="ui relaxed horizontal divided list gauges">
+            </div>
+          </div>
+
+          <div class="ui celled list registers" style="color:#a33;">
+          </div>
+          <div class="ui description cmdarea" style="color:darkgreen;">
+          </div>
+
+          <div class="ui scrolling content description printarea" style="color:black;scrollable:true;">
+          </div>
+        </div>
+
+
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+
+
+<script src="ace/ace.js" type="text/javascript" charset="utf-8"></script>
+<script>
+    var editor = ace.edit("editor");
+    editor.setTheme("ace/theme/github");
+    editor.session.setMode("ace/mode/javascript");
+</script>
+
+  <script type="text/javascript">
+
+
+    function showSettings(){
+      $('.ui.settings.sidebar').sidebar('setting', {
+        dimPage             : true,
+        transition          : 'overlay',
+        mobileTransition    : 'overlay'})
+        .sidebar('show');
+    }
+
+	$('.ui.dropdown').dropdown();
+    $('.top.menu .item').tab({onVisible: function(a){switchHelp(a);}})
+
+	var workspaceHelp = '';
+	var workspaceMD = '';
+	var converter = new Markdown.Converter();
+	var results = $('.description.printarea');
+	var resultModal = 	  $('.modal.results');
+    var resplotarea = $('.resplotarea');
+    var resultplots = $('.description.resplot');
+    var mygrid = $('.content.mygrid');
+
+    var isRunning = false;
+
+
+	var registers = 	  $('.list.registers');
+	var gaugearea = 	  $('.list.gauges');
+	var regvals = [];
+	var command = $('.description.cmdarea');
+
+    // Initialize function helps (Block wise help)
+    var helptitle = $('#helptitle');
+    var helpdescription = $('#helpdescription');
+
+	var devState = false;
+
+    var isTeacher=false;
+    var roomname='none';
+
+	function showReg(reg, val){
+	    regclass = 'reg_'+reg.replace(/ /g,"_").replace(/-/g,"_");
+		if(regvals.indexOf(regclass)!=-1){ // Register is already shown in the results segment. update it.
+			registers.find('.'+regclass).text(reg+"="+val);
+		}else{
+			registers.append(`<div class="item ${regclass}">${reg}=${val}</div>`)
+			regvals.push(regclass);
+		}
+	}
+
+
+    $('.ui.results.sidebar').sidebar('hide');
+
+    function toggleResultSize(e){
+      var sb = $('.ui.results.sidebar');
+      if($(e.firstChild).hasClass('down')){
+          $(e.firstChild).addClass('up').removeClass('down');
+          sb.attr('style','height:35% !important;');
+      }else{
+        $(e.firstChild).addClass('down').removeClass('up');
+        sb.attr('style','height:75% !important;');
+      }
+    }
+
+
+    function toggleFullscreen(){
+      var sb = $('.ui.results.sidebar');
+      if(fullscreen){
+          sb.attr('style','height:50% !important;');
+          fullscreen = false;
+      }else{
+        sb.attr('style','height:92% !important;');
+          fullscreen = true;
+      }
+      if(typeof JSBridge != 'undefined')
+        JSBridge.showMP(fullscreen);
+    }
+
+
+
+    function savePDF(){
+
+        $('.pdfdownloadicon').addClass('notched circle loading').removeClass('download');
+        setTimeout(()=>{
+
+              var element = $('#myresults');
+              var HTML_Width = element.width();
+              var HTML_Height = element.height();
+              var top_left_margin = 15;
+              var PDF_Width = HTML_Width + (top_left_margin * 2);
+              var PDF_Height = (PDF_Width * 1.5) + (top_left_margin * 2);
+              var canvas_image_width = HTML_Width;
+              var canvas_image_height = HTML_Height;
+
+              var totalPDFPages = Math.ceil(HTML_Height / PDF_Height) - 1;
+
+              html2canvas(element[0]).then(function (canvas) {
+                  var imgData = canvas.toDataURL("image/jpeg", 0.85);
+                  var pdf = new jsPDF('p', 'pt', [PDF_Width, PDF_Height]);
+                  pdf.addImage(imgData, 'JPG', top_left_margin, top_left_margin, canvas_image_width, canvas_image_height);
+                  for (var i = 1; i <= totalPDFPages; i++) {
+                      console.log(HTML_Width+','+HTML_Height+','+i);
+                      pdf.addPage(PDF_Width, PDF_Height);
+                      pdf.addImage(imgData, 'JPG', top_left_margin, -(PDF_Height*i)+(top_left_margin*4),canvas_image_width,canvas_image_height);
+                  }
+                  //pdf.save("results.pdf");
+                  $('.pdfdownloadicon').removeClass('notched circle loading').addClass('download');
+                  if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent))
+                  {
+                      JSBridge.savePDF("results", pdf.output('datauristring'));
+
+                  }
+                  else
+                  {
+                       pdf.save('filename.pdf');
+                  }
+              });
+        }, 50);
+
+    }
+
+
+
+
+
+
+    function on() {
+      isRunning = true;
+      $('.runbutton').removeClass('primary').addClass('red');
+      $('.runbutton > .text').text('Stop');
+      $('.runbutton > .icon').removeClass('play').addClass('stop');
+
+      registers.empty();
+      regvals = [];
+	  results.html("");
+
+      $('.ui.results.sidebar').sidebar('setting', {
+        dimPage             : false,
+        transition          : 'overlay',
+        closable            : false,
+        exclusive           : true,
+        mobileTransition    : 'overlay'})
+        .sidebar('show');
+	}
+
+
+	function playButtonOff(){		
+      isRunning = false;
+      $('.runbutton').removeClass('red').removeClass('orange').addClass('primary');
+      $('.runbutton > .text').text('Run!');
+      $('.runbutton > .icon').removeClass('stop').removeClass('double angle down').addClass('play');
+
+	}
+	function off() {
+        if(typeof JSBridge != 'undefined')
+          if($('.checkbox.bcast').checkbox('is checked'))
+            JSBridge.offBroadcast();
+
+      $('.ui.results.sidebar').sidebar('hide');
+
+      playButtonOff();
+
+	  resetInterpreter();
+      if(typeof JSBridge != 'undefined')
+    	  JSBridge.closeFiles();
+	  stopGame();
+	}
+
+    function resetInterpreter() {
+      myInterpreter = null;
+      if (runner) {
+        clearTimeout(runner);
+        runner = null;
+      }
+    }
+
+    var myInterpreter;
+    
+    var runner;
+    var highlightPause = false;
+    var latestCode = '';
+    var filehandlecodes_js={},filehandlecodes_py={};
+
+    var autoScalingX = true;
+    var autoScalingY = true;
+
+
+    function highlightBlock(id) {
+      workspacePlayground.highlightBlock(id);
+      highlightPause = true;
+    }
+
+
+	function deviceConnected(){
+		$('.message.missingdevice').closest('.message').transition('fade out','300mS');
+	}
+	function deviceDisconnected(){
+		$('.message.missingdevice').closest('.message').transition('fade in','1000mS').transition('glow');
+	}
+    var url = new URL(window.location.href);
+    var state = url.searchParams.get("connected");
+    if(typeof state != 'undefined' && state === "false")
+      deviceDisconnected()
+
+
+	function chatDisconnected(){
+		$('.chatstatus').transition('fade out','300mS');
+	}
+	function chatConnected(message,connect){
+		$('.chatstatus > .chatmsg').text(message);
+		if(connect)$('.chatstatus > .button').show();
+		else $('.chatstatus > .button').hide();
+		$('.chatstatus').transition('fade in','1000mS').transition('glow');
+	}
+
+
+    function toggleRun(){
+      if(isRunning){
+        off();
+      }else{
+        startStep();
+      }
+
+
+    }
+
+    function startStep() {
+	  latestCode = editor.getValue();
+
+      on();
+      clearPlot();
+      createPlots(latestCode);
+	  resplotarea.show();
+      runCode();
+    }
+
+
+
+    function runCode() {
+      if (!myInterpreter) {
+        // First statement of this code.
+        // Clear the program output.
+
+        // And then show generated code in an alert.
+        // In a timeout to allow the outputArea.value to reset first.
+        setTimeout(function() {
+          // Begin execution
+          try{
+              myInterpreter = new Interpreter(latestCode, initAllApis);
+              if(latestCode.search("alert") != -1) // -1 means not found
+                on();
+
+              runner = function() {
+                if (myInterpreter) {
+                  try{
+                    var hasMore = myInterpreter.run();
+                  }catch(e){
+                      console.log(e);
+                      var stack = ''
+                      var segments = e.stack.split('\n');
+                      for(var i=0;i<segments.length && i<10;i++){
+                          stack+=segments[segments.length-i-1].split('file:')[0]+',';
+                        }
+                      results.append(`<p style="color:red">${e.name}:${e.message}</p>`);
+                      $('#maincontent').prepend(`
+                            <div class="ui error program message">
+                              <i class="close icon"></i>
+                              <div class="header">
+                                ${e.name}. Check the Highlighted Block
+                              </div>
+                              <ul class="list">
+                                <li>
+                                ${e.message}
+                                </li>
+                                <li>
+                                ${stack}
+                                </li>
+                              </ul>
+                            </div>
+                      `);
+                      $(".close.icon").click(function(){
+                        $(this).parent().hide();
+                      });
+                      // Stop Program.
+                      off();
+                      setTimeout(()=>{ $('.ui.results.sidebar').sidebar('setting',{closable:true,dimPage:true}).sidebar('show'); },50 );
+                      return;
+                  }
+
+                  if (hasMore) {
+                    // Execution is currently blocked by some async call.
+                    // Try again later.
+                    setTimeout(runner, 10); // TODO . Critical . can cause crashes.
+                    return;
+                  } else {
+                    console.log("we're done here");
+                    // Program is complete.
+                    $('.runbutton').removeClass('red').addClass('orange');
+                    $('.runbutton > .text').text('Done!');
+                    $('.runbutton > .icon').removeClass('stop').addClass('double angle down');
+
+                    resetInterpreter();
+                  }
+                }
+              };
+
+              runner();
+
+              }catch(e){
+                console.log(e);
+                var stack = ''
+                var segments = e.stack.split('\n');
+                for(var i=0;i<segments.length && i<5;i++){
+                    stack+=segments[segments.length-i-1].split('(file:')[0]+',';
+                  }
+                $('#maincontent').prepend(`
+                      <div class="ui error program message">
+                        <i class="close icon"></i>
+                        <div class="header">
+                          ${e.name} . Check the plots.
+                        </div>
+                        <div class="content">
+                        ${e.message}
+                        ${stack}
+
+                        </div>
+                      </div>
+                `);
+                $(".close.icon").click(function(){
+                  $(this).parent().hide();
+                });
+                // Stop Program.
+                off();
+                setTimeout(()=>{console.log('closing due to error');  $('.ui.results.sidebar').sidebar('hide');},50);
+                return;
+              }
+
+
+        }, 1);
+        return;
+      }
+    }
+
+
+    function saveXML(){
+	  localStorage.setItem('kuttypycode', editor.getValue());
+	}
+
+    function getCachedXML(){
+		  loadXML(localStorage.getItem('kuttypycode'));
+    }
+
+	function loadXML(xml) {
+		editor.setValue(xml);
+	}
+
+    getCachedXML();
+
+
+    function saveXMLtoDisc(){
+	    const textContent = editor.getValue();
+
+        // Create a blob (file-like object) from the text content
+        const blob = new Blob([textContent], { type: 'text/xml' });
+
+        // Create a link element for download
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'myfile.js'; // The filename for download
+
+        // Programmatically click the link to trigger the download
+        link.click();
+
+        // Clean up by revoking the object URL after download
+        URL.revokeObjectURL(link.href);
+	}
+
+    document.addEventListener('keydown', function (event) {
+      // Check if 'Ctrl+S' (or 'Cmd+S' on macOS) is pressed
+      if ((event.ctrlKey || event.metaKey) && event.key === 's') {
+        event.preventDefault(); // Prevent the default Ctrl+S action
+        saveXML();
+      }
+    });
+
+  </script>
+
+</body>
+
+
+</html>

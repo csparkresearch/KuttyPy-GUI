@@ -66,7 +66,7 @@ class Uploader(object):
 			self.sock.write(codes)
 			time.sleep(tx_complete/1000.0)
 			reply = list(self.sock.read(size=bytesreply + 2)) #bytesreply + INSYNC + OK
-			print('reply', len(reply), reply)
+			#print('reply', len(reply), reply)
 			if not reply or ([reply[0], reply[-1]] != self.INSYNC):
 				if n < self.retry:
 					n += 1
