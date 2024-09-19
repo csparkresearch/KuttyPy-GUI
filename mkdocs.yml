@@ -104,6 +104,7 @@ nav:
       - 'Introduction': 'programming/intro.md'
       - 'Basic I/O': 'programming/basics.md'
       - 'I2C and Sensors': 'programming/i2c.md'
+  - Programming - Visual: 'programming/visual.md'
   - Programming - C:
       - 'Introduction': 'programming/c.md'
       - 'What is the IDE': 'IDE.md'

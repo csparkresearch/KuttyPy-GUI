@@ -1,0 +1,20 @@
+Which register is used to configure pins A0 to A7 as input or output?
+DDRA
+PORTB
+PORTA
+DDRB
+ANSWER: 1
+
+Which step sets PB0 and PB2 HIGH(ON)?
+PORTB = 5
+DDRB = 2
+PORTB = 7
+PORTB = 1
+ANSWER: 1
+
+Which step sets PB0,PB1,PB2,PB3 as outputs?
+PORTB = 5
+DDRB = 15
+PORTB = 7
+DDRB = 7
+ANSWER: 2

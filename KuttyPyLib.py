@@ -15,6 +15,12 @@ ShortInt = struct.Struct("H")  # size 2
 Integer = struct.Struct("I")  # size 4
 
 
+def signit(combined_value):
+    if combined_value >= 0x8000:  # 32768 in decimal, sign bit set
+        return combined_value - 0x10000  # Subtract 65536 to get the negative value
+    return combined_value
+
+
 def _bv(x):
     return 1 << x
 
@@ -1098,9 +1104,9 @@ class KUTTYPY:
         if tmt: return None
         if None not in b:
             if (not self.MPU6050_kalman) or disableKalman:
-                return [np.int16((b[x * 2] << 8) | b[x * 2 + 1]) for x in range(7)]  # Ax,Ay,Az, Temp, Gx, Gy,Gz
+                return [np.int32(signit((b[x * 2] << 8) | b[x * 2 + 1])) for x in range(7)]  # Ax,Ay,Az, Temp, Gx, Gy,Gz
             else:
-                self.MPU6050_kalman.input([np.int16((b[x * 2] << 8) | b[x * 2 + 1]) for x in range(7)])
+                self.MPU6050_kalman.input([np.int16(signit((b[x * 2] << 8) | b[x * 2 + 1])) for x in range(7)])
                 return self.MPU6050_kalman.output()
 
     ######## AK8963 magnetometer attacched to MPU925x #######
@@ -1184,7 +1190,7 @@ class KUTTYPY:
         self.BMP180_initPressure()
 
     def __readInt__(self, addr):
-        return np.int16(self.__readUInt__(addr))
+        return np.int16(signit(self.__readUInt__(addr)))
 
     def __readUInt__(self, addr):
         vals, tmt = self.I2CReadBulk(self.BMP180_ADDRESS, addr, 2)
@@ -1881,7 +1887,7 @@ class KUTTYPY:
         vals = self.HMC5883L_getVals(0x03, 6)
         if vals:
             if len(vals) == 6:
-                return [np.int16(vals[a * 2] << 8 | vals[a * 2 + 1]) / self.HMCGainScaling[self.HMCGainValue] for a in
+                return [np.int16(signit(vals[a * 2] << 8 | vals[a * 2 + 1])) / self.HMCGainScaling[self.HMCGainValue] for a in
                         range(3)]
             else:
                 return False
@@ -1919,7 +1925,7 @@ class KUTTYPY:
         vals = self.QMC5883L_getVals(0x00, 6)
         if vals:
             if len(vals) == 6:
-                v = [np.int16((vals[a * 2 + 1] << 8) | vals[a * 2]) / self.QMC_scaling for a in range(3)]
+                v = [np.int16(signit((vals[a * 2 + 1] << 8) | vals[a * 2])) / self.QMC_scaling for a in range(3)]
                 return v
             else:
                 return False

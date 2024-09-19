@@ -1,6 +1,7 @@
 import typing
 
 from flask import Flask, request
+import logging
 from flask_cors import CORS
 from PyQt5.QtCore import QThread, pyqtSignal, QObject
 from PyQt5.QtWidgets import QApplication
@@ -10,7 +11,7 @@ from .compile_routes import main as main_blueprint, local_ip
 from .compile_routes import setStatusSignal, setKpyPath
 from .blockly_routes import bly as blockly_blueprint
 from .blockly_routes import setBlocklyPath, setP
-from werkzeug.serving import make_server
+from werkzeug.serving import make_server, WSGIRequestHandler
 import threading, webbrowser
 
 from werkzeug.middleware.dispatcher import DispatcherMiddleware
@@ -41,6 +42,10 @@ def create_server(showStatusSignal, serverSignal, paths, local_ip, dev):
 	return flask_thread
 
 
+class QuietRequestHandler(WSGIRequestHandler):
+    def log(self, type, message, *args):
+        pass  # Disable the logging
+
 class FlaskThread(QThread):
 	finished = pyqtSignal()
 	serverSignal = None
@@ -67,6 +72,7 @@ class FlaskThread(QThread):
 		# Run the Flask app in a separate thread
 		print('starting the flask app...')
 		self.app = Flask(__name__, template_folder='flask_templates', static_folder='static', static_url_path='/')
+		self.app.logger.setLevel(logging.WARNING)
 		CORS(self.app)
 		self.app.register_blueprint(main_blueprint)
 		self.app.register_blueprint(blockly_blueprint)
@@ -75,7 +81,7 @@ class FlaskThread(QThread):
 			if self.server is None:
 				threading.Timer(1, self.open_browser).start()  # Wait a second before opening the browser
 			#self.app.run(host='0.0.0.0', port=5000)
-			self.server = make_server('0.0.0.0', 5000, self.app)
+			self.server = make_server('0.0.0.0', 5000, self.app)#, request_handler = QuietRequestHandler)
 			self.server.serve_forever()
 
 			#from gevent.pywsgi import WSGIServer

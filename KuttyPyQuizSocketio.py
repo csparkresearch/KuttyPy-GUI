@@ -132,6 +132,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
         global app
 
     def connectServer(self):
+        self.clear_layout(self.responsesLayout)
         self.showStatus('connecting to server...',False)
         app.processEvents()
 
@@ -222,19 +223,12 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
         name,res = msg.split(':')
         score, responses = res.split('\t')
         if clientname not in self.responses:
-            row = QUIZROW(self,name, score, responses)
-            self.responsesLayout.addWidget(row,self.response_row,self.response_column)
-            self.responses[clientname] = row
-            self.response_column+=1
-            if self.response_column>self.MAX_COLUMNS:
-                self.response_column = 0
-                self.response_row+=1
+            self.addmember(clientname)
 
-        else:
-            row = self.responses[clientname]
-            row.scoreLabel.setText(score)
-            row.resultLabel.setText(responses)
-            row.nameLabel.setText(name+'|'+clientname)
+        row = self.responses[clientname]
+        row.scoreLabel.setText(score)
+        row.resultLabel.setText(responses)
+        row.nameLabel.setText(clientname)
 
         if ' / ' in score:
             s,t = score.split(' / ')
@@ -244,11 +238,13 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 
 
     def addmembers(self, members):
-        self.clear_layout(self.responsesLayout)
+        #self.clear_layout(self.responsesLayout)
         for a in members:
             self.addmember(a)
 
     def addmember(self, name):
+        if name in self.responses:
+            return
         row = QUIZROW(self, name, '', '')
         self.responsesLayout.addWidget(row, self.response_row, self.response_column)
         self.responses[name] = row
@@ -550,7 +546,10 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
         if self.CFile is not None and len(self.CFile) > 1:
             self.sourceTabs[self.activeSourceTab][1] = self.CFile
             self.activeEditor.markAsSaved(True)
-            self.fs_watcher.removePath(self.CFile)
+            try:
+                self.fs_watcher.removePath(self.CFile)
+            except:
+                pass
             fn = open(self.CFile, 'w')
             fn.write(self.activeEditor.toPlainText())
             fn.close()

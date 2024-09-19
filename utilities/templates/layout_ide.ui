@@ -259,6 +259,17 @@
            </spacer>
           </item>
           <item>
+           <widget class="QPushButton" name="buildOptionsButton">
+            <property name="text">
+             <string>KPLIB</string>
+            </property>
+            <property name="icon">
+             <iconset resource="resplus.qrc">
+              <normaloff>:/control/settings.svg</normaloff>:/control/settings.svg</iconset>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QPushButton" name="compileButton">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Maximum">
@@ -272,17 +283,6 @@
             <property name="icon">
              <iconset resource="resplus.qrc">
               <normaloff>:/control/refresh.svg</normaloff>:/control/refresh.svg</iconset>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="buildOptionsButton">
-            <property name="text">
-             <string/>
-            </property>
-            <property name="icon">
-             <iconset resource="resplus.qrc">
-              <normaloff>:/control/settings.svg</normaloff>:/control/settings.svg</iconset>
             </property>
            </widget>
           </item>

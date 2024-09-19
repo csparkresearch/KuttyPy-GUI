@@ -45,14 +45,13 @@ def load_xml():
 
 @bly.route('/get_voltage/<int:chan>', methods=['GET'])
 def get_voltage(chan):
-    print('get_voltage',chan)
     return jsonify({'voltage': p.readADC(chan)})
 
 @bly.route('/set_reg', methods=['POST'])
 def set_reg():
     reg = request.json['reg']  # Get the 'reg' parameter from the JSON body
     data = request.json['data']  # Get the 'data' parameter from the JSON body
-    p.setReg(reg, int(data%255)&0xFF)
+    p.setReg(reg, int(data)&0xFF)
     return jsonify({'status': 'success'})
 
 @bly.route('/get_reg/<string:reg>', methods=['GET'])

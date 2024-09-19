@@ -39,14 +39,14 @@ Given the paucity of time, the fastest ways for [installing](https://csparkresea
 
 
 ??? abstract "Ubuntu"
-    * Download the [deb file from here](https://csparkresearch.in/assets/installers/KuttyPy-1.0.19.deb)
+    * Download the [deb file from here](https://csparkresearch.in/assets/installers/KuttyPy-1.0.25.deb)
     * Navigate to the Downloaded deb file location, and install it. This also fetches dependencies : scipy, qtconsole, avr-gcc etc
     ```
-    sudo apt install ./KuttyPy-1.0.19.deb 
+    sudo apt install ./KuttyPy-1.0.25.deb 
     ```
     * launch the kuttyPy GUI from the command prompt using the command
     ```
-    kuttypy
+    kuttypyplus
     ```
 
     It is also present in the applications menu as `KuttyPy GUI` .
@@ -104,11 +104,15 @@ Given the paucity of time, the fastest ways for [installing](https://csparkresea
 
 * You have already noticed that the User Interface(UI) resembles the kuttyPy board. 
 * It has four ports `PORTA, B , C, D` with 8 pins each, and each pin has a row representing it: ![](../images/PD5.png)
+
 ---
+
 * Each Pin is configured as an input by default, and the RED coloured box next to it indicates the input is `LOW` or near 0 Volts.
     * If the input is `HIGH`, which can be accomplished by connecting it to 5V, or enabling the `pull-up` checkbox, the RED box will turn to `GREEN`
     * Since the inputs are `floating`, merely touching the pins with your fingers will cause the inputs to fluctuate between `RED` and `GREEN` status. ![](../images/noise.gif)
+
 ---
+
 * Each pin can be reconfigured as an `OUTPUT` type by clicking on the `INPUT` button next to it.
     * Make any of the pins `PD5`, `PD7`, or `PB3` an output type, and click on its square RED button to set it to `HIGH`. These pins are connected to the RGB LED on the board, so the LED will glow!
 

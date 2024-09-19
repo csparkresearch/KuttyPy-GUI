@@ -56,6 +56,7 @@ class myTimer():
 
 
 LKP = True
+LKPLocal = False
 
 
 class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
@@ -72,6 +73,8 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
     def __init__(self, parent=None, **kwargs):
         super(AppWindow, self).__init__(parent)
 
+        self.toggleLKPActionl = None
+        self.toggleLKPAction = None
         self.local_ip = 'localhost'
         self.setupUi(self)
 
@@ -284,17 +287,38 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 
     def addBuildOptionsMenu(self):
         codeMenu = QtWidgets.QMenu()
-        toggleLKPAction = QtWidgets.QAction('Include KP Library', self)
-        toggleLKPAction.setCheckable(True)
-        toggleLKPAction.setChecked(True)
-        toggleLKPAction.triggered[bool].connect(self.setLKP)
-        codeMenu.addAction(toggleLKPAction)
+
+        # Create an action group to enforce the radio button behavior
+        actionGroup = QtWidgets.QActionGroup(codeMenu)
+        actionGroup.setExclusive(True)  # Ensure only one can be checked
+
+        self.toggleLKPAction = QtWidgets.QAction('Global<avr/kp.h>', self)
+        self.toggleLKPAction.setCheckable(True)
+        self.toggleLKPAction.setChecked(True)  # Set the initial state
+        actionGroup.addAction(self.toggleLKPAction)
+        codeMenu.addAction(self.toggleLKPAction)
+
+        self.toggleLKPActionl = QtWidgets.QAction('Local "kp.h"', self)
+        self.toggleLKPActionl.setCheckable(True)
+        self.toggleLKPActionl.setChecked(False)  # Only one can be checked at a time
+        actionGroup.addAction(self.toggleLKPActionl)
+        codeMenu.addAction(self.toggleLKPActionl)
+
+        # Connect the action group to a single slot
+        actionGroup.triggered.connect(self.handleLibrarySelection)
+
+
         self.buildOptionsButton.setMenu(codeMenu)
 
-    def setLKP(self, state):
-        global LKP
-        print('LKP linking', state)
-        LKP = state
+    # Slot to handle action group selection
+    def handleLibrarySelection(self, action):
+        global LKP, LKPLocal
+        LKPLocal=False; LKP = False;
+
+        if action == self.toggleLKPAction:
+            LKP = True
+        elif action == self.toggleLKPActionl:
+            LKPLocal = True
 
     def closeEvent(self, evnt):
         evnt.ignore()
@@ -674,7 +698,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
             self.mode = mode
 
         def execute(self):
-            global LKP
+            global LKP,LKPLocal
             if 'compile' in self.mode:
                 try:
                     import subprocess
@@ -685,8 +709,8 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
                     fname = '.'.join(self.fname.split('.')[:-1])
                     if self.p.version == REGISTERS.VERSION_ATMEGA32 or self.p.connected == False:  # by default, compile for ATMEGA32.
                         # cmd = 'avr-gcc -Wall -O2 -mmcu=%s -o "%s" -Map "%s" "%s"' %('atmega32',fname,fname+'.map',self.fname)
-                        cmd = 'avr-gcc -Wall -O2 -mmcu=%s -Wl,-Map="%s" -o "%s" "%s" %s' % (
-                            'atmega32', fname + '.map', fname, self.fname, "-lkp" if LKP else "")  # includes MAP
+                        cmd = 'avr-gcc -Wall -O2 -mmcu=%s -Wl,-Map="%s" -o "%s" "%s" %s %s' % (
+                            'atmega32', fname + '.map', fname, self.fname, "-lkp" if LKP else "", "-I%s -L%s -lkp"%(path["examples"],path["examples"]) if LKPLocal else "")  # includes MAP
                         self.logThis.emit('''<span style="color:#383;">%sing for Atmega32</span>''' % (action))
                     elif self.p.version == REGISTERS.VERSION_ATMEGA328P:
                         cmd = 'avr-gcc -Wall -O2 -mmcu=%s -o "%s" "%s"  %s' % (

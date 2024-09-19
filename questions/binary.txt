@@ -17,7 +17,7 @@ a) 38
 b) 44
 c) 50
 d) 52
-ANSWER: 2
+ANSWER: 3
 
 Convert the decimal number 92 to binary.
 a) 1011100
