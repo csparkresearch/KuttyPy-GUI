@@ -111,6 +111,7 @@ nav:
       - 'BMP180 temperature': 'programming/BMP180.md'
       - 'MPU6050 accelerometer': 'programming/MPU6050.md'
       - 'PCF8574 I2C LCD Display': 'programming/I2C_LCD_PCF8574.md'
+      - 'Time of Flight Measurement': 'programming/time_of_flight.md'
 
   - Projects:
       - 'R2R DAC Wavegen': 'programming/r2r_wavegen.md'
