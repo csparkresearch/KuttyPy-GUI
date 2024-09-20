@@ -1,5 +1,7 @@
 import os
 
+from IPython.lib import guisupport
+
 from .Qt import QtGui,QtCore,QtWidgets
 from .templates import ui_ipy as ipy_template
 import sys,string
@@ -16,8 +18,17 @@ class myConsole(RichJupyterWidget):
 		"""Start a kernel, connect to it, and create a RichJupyterWidget to use it
 		"""
 		super(myConsole, self).__init__()
-		if customBanner!=None: self.banner=customBanner
+		if customBanner is not None:
+			self.banner=customBanner
 		self.kernel_manager = QtInProcessKernelManager(kernel_name=USE_KERNEL)
+		#print(self.kernel_manager.get_connection_info())
+		#self.kernel_manager.set_trait('ip', '0.0.0.0')
+		#self.kernel_manager.set_trait('shell_port', 8888)
+		#self.kernel_manager.set_trait('control_port', 8889)
+		#self.kernel_manager.set_trait('iopub_port', 8890)
+		#self.kernel_manager.set_trait('stdin_port', 8891)
+		#print(self.kernel_manager.get_connection_info())
+
 		self.kernel_manager.start_kernel()
 		self.kernel = self.kernel_manager.kernel
 
@@ -28,9 +39,9 @@ class myConsole(RichJupyterWidget):
 		self.kernel_client.start_channels()
 
 		def stop():
-			kernel_client.stop_channels()
-			kernel_manager.shutdown_kernel()
-			guisupport.get_app_qt().exit()
+			self.kernel_client.stop_channels()
+			self.kernel_manager.shutdown_kernel()
+			#guisupport.get_app_qt().exit()
 
 		self.exit_requested.connect(stop)
 

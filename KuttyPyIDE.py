@@ -384,11 +384,12 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 
         menu.addAction('Save Window as Svg', self.exportSvg)
         menu.addAction('Upload Hex File', self.uploadHex)
+        menu.addAction('PIP install mediapipe', partial(self.showPipInstaller,'mediapipe'))
 
         # Theme
         self.themeAction = QtWidgets.QWidgetAction(menu)
         themes = [a.split('.qss')[0] for a in os.listdir(path["themes"]) if '.qss' in a]
-        self.themeBox = QtWidgets.QComboBox();
+        self.themeBox = QtWidgets.QComboBox()
         self.themeBox.addItems(themes)
         self.themeBox.currentIndexChanged['QString'].connect(self.setTheme)
         self.themeAction.setDefaultWidget(self.themeBox)
@@ -410,6 +411,11 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 
         # Menu button
         self.statusBar.addPermanentWidget(self.pushbutton)
+
+    def showPipInstaller(self,name):
+        from utilities.pipinstaller import PipInstallDialog
+        self.pipdialog = PipInstallDialog(name,self)
+        self.pipdialog.show()
 
     def closeCTab(self, index):
         print('Close Tab', index)
