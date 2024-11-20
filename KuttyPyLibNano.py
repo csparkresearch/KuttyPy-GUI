@@ -247,6 +247,10 @@ class KUTTYPY:
 						['Channel 2',0,180,90,functools.partial(self.PCA9685_set,2)],
 						['Channel 3',0,180,90,functools.partial(self.PCA9685_set,3)],
 						['Channel 4',0,180,90,functools.partial(self.PCA9685_set,4)],
+						['Channel 5',0,180,90,functools.partial(self.PCA9685_set,5)],
+						['Channel 6',0,180,90,functools.partial(self.PCA9685_set,6)],
+						['Channel 7',0,180,90,functools.partial(self.PCA9685_set,7)],
+						['Channel 8',0,180,90,functools.partial(self.PCA9685_set,8)],
 						],
 				}
 		}

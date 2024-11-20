@@ -30,6 +30,12 @@
   <script src="blocks/Sounds.js"></script>
   <script src="blocks/KuttyPy.js"></script>
   <script src="blocks/Sensors.js"></script>
+  <script src="blocks/MP.js"></script>
+
+    <!-- IoT and JSON -->
+  <script src="blocks/Mosquito.js"></script>
+
+
 
 
   <script src="blocks/acorn_interpreter.js"></script>
@@ -42,6 +48,7 @@
   <link rel="stylesheet" type="text/css" href="quill/katex.min.css" />
 
   <script src="jspdf.min.js"></script>
+  <script src="mqtt.min.js"></script>
   <script src="html2canvas.min.js"></script>
 
   <script language="javascript" type="text/javascript" src="flot/jquery.canvaswrapper.js"></script>
@@ -86,8 +93,6 @@
 
 
 <xml xmlns="https://developers.google.com/blockly/xml" id="mytoolbox" style="display: none">
-  <category name="Minimize" colour="#f55" onClick="alert('asd');">
-  </category>
   <sep></sep>
 
 
@@ -737,7 +742,11 @@
   </category>
 
 
-
+  <category name="AI" colour="#ff4">
+    <block type="add_mp_hands"></block>
+    <block type="del_mp_hands"></block>
+    <block type="ai_distance"></block>
+  </category>
 
   <category name="Phone" colour="#5b67a5">
     <block type="cs_start_timer">
@@ -776,6 +785,41 @@
 	</value>
 
     </block>
+
+
+
+
+  </category>
+
+  <category name="Internet of Things" colour="#c95bc5">
+    <block type="mqtt_connect">
+    </block>
+    <block type="mqtt_publish">
+	<value name="CHANNEL">
+        <shadow type="text">
+          <field name="TEXT">SENSOR</field>
+        </shadow>
+	</value>
+
+	<value name="DATA">
+        <shadow type="text">
+          <field name="TEXT">SAMPLE</field>
+        </shadow>
+	</value>
+
+    </block>
+
+    <block type="mqtt_subscribe">
+    </block>
+    <block type="mqtt_hasdata">
+    </block>
+    <block type="mqtt_fetchdata">
+    </block>
+    <sep></sep>
+    <block type="mqtt_json">
+    </block>
+
+
   </category>
 
 
@@ -828,6 +872,8 @@
 
 <div class="ui content mygrid pusher" style="padding:0.2rem ! important;">
 		  <div id="toolbar" class="ui secondary menu mini ">
+            <audio id="remoteAudio" autoplay></audio>
+
             <div class="item">
                   <a onclick="toggleRun()" class="ui mini primary button runbutton"><i class="play icon"></i><span class="text">Run!</span></a>
             </div>
@@ -885,7 +931,7 @@
 
   </div>
 
-  <div class="ui content mygrid" style="padding:0.2rem ! important;">
+  <div class="ui content mygrid" style="padding:0.2rem ! important; background-color:#fff5f5e3">
     <div id="myresults" class="ui two column stackable top aligned grid ">
       <div class="ui vertical divider"></div>
       <div class="top aligned row">
@@ -943,7 +989,6 @@
 </div>
 
   <script type="text/javascript">
-
 
     function showSettings(){
       $('.ui.settings.sidebar').sidebar('setting', {
@@ -1055,6 +1100,15 @@
         ;
     }
 
+    function updateJSONarea() {
+        //document.getElementById('json_area').value = Blockly.JSON.fromWorkspace( Blockly.getMainWorkspace() );
+        console.log(Blockly.JSON.fromWorkspace( Blockly.getMainWorkspace() ));
+    }
+
+    function interpretJSONarea() {
+        //Blockly.JSON.toWorkspace( document.getElementById('json_area').value, Blockly.getMainWorkspace() );
+        console.log(document.getElementById('json_area').value, Blockly.getMainWorkspace());
+    }
 
 
 	var JSBridge;
@@ -1126,15 +1180,6 @@ var blocklyArea = document.getElementById('blocklyArea');
 
 	Blockly.Xml.clearWorkspaceAndLoadFromXml($('#samplexml')[0], workspacePlayground);
 
-    var toolboxButton = $("<a>", {id: "foo", "class": "ui tiny basic button teal","text":"Toolbox", "style":"display: none; position: absolute; z-index: 100;"});
-    toolboxButton.click(function(){ workspacePlayground.toolbox_.setVisible(true); toolboxButton.hide(); }).prependTo('.injectionDiv');
-    toolboxButton.hide();
-    var closeToolbox = function(){
-      workspacePlayground.toolbox_.setVisible(false);
-      toolboxButton.show();
-    }
-    workspacePlayground.scrollbar.vScroll.svgGroup_.style.display = 'none';
-    workspacePlayground.toolbox_.getToolboxItems()[0].getClickTarget().onclick = closeToolbox;
 
     $('.ui.results.sidebar').sidebar('hide');
 
@@ -1261,6 +1306,7 @@ var blocklyArea = document.getElementById('blocklyArea');
       if(typeof JSBridge != 'undefined')
     	  JSBridge.closeFiles();
 	  stopGame();
+	  stopMQTT();
 	}
 
     function resetInterpreter() {
@@ -1368,6 +1414,9 @@ var blocklyArea = document.getElementById('blocklyArea');
       initKuttyPy(interpreter, scope);
       initSensors(interpreter, scope);
       initSounds(interpreter, scope);
+
+      initMP(interpreter, scope);
+      initMQTT(interpreter, scope);
 
     }
 

@@ -1,0 +1,27 @@
+What is the use of the luminosity sensor?
+a) Measure camera focus
+b) Measure gravity
+c) Measure light intensity
+d) Measure Rotational speed
+ANSWER: 3
+
+Which statement is true when the phone is placed flat on the table
+X is 9.8, Y is 9.8, Z is 0
+X is 0, Y is 0, Z is 0
+X is 9.8, Y is 0, Z is 0
+X is 0, Y is 0, Z is 9.8
+ANSWER: 4
+
+Which sensor is used to measure rotational velocity
+a) Gyroscope
+b) Accelerometer
+c) Barometer
+d) GPS
+ANSWER: 1
+
+Which statement is true when the phone is in free fall
+X is 9.8, Y is 9.8, Z is 0
+X is 0, Y is 0, Z is 0
+X is 9.8, Y is 0, Z is 0
+X is 0, Y is 0, Z is 9.8
+ANSWER: 2

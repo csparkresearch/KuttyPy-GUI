@@ -166,37 +166,6 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
         self.external.terminate()
         self.external.waitForFinished(1000)
 
-    def embedTerminal(self):
-        system = platform.system()
-        self.external = QtCore.QProcess(self)
-        if system == 'Linux':
-            self.external.start('gnome-terminal', ["--working-directory", self.defaultDirectory])
-        if system == 'Windows':
-            self.external.start('cmd')
-
-        '''
-        time.sleep(1)
-        self.external.write(b"hello")
-
-        p = subprocess.run(['xprop', '-root'], stdout=subprocess.PIPE)
-        for line in p.stdout.decode().splitlines():
-            m = re.fullmatch(r'^_NET_ACTIVE_WINDOW.*[)].*window id # (0x[0-9a-f]+)', line)
-            if m:
-                window = QtGui.QWindow.fromWinId(int(m.group(1), 16))
-                window.setFlag(QtCore.Qt.FramelessWindowHint, True)
-                widget = QtWidgets.QWidget.createWindowContainer(
-                    window, self.termFrame, QtCore.Qt.FramelessWindowHint)
-                widget.setFixedSize(600, 400)
-                self.termLayout.addWidget(widget)
-                # this is where the magic happens...
-                self.external.finished.connect(self.close_maybe)
-                break
-        else:
-            QtWidgets.QMessageBox.warning(self, 'Error', 'Could not find WID for curreent Window')
-        '''
-
-    def close_maybe(self):
-        print('terminal closed')
 
     def removeClient(self,addr):
         print(addr, ' left')
@@ -298,13 +267,6 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
         saveAsFileAction.setIcon(saveIcon)
         codeMenu.addAction(saveAsFileAction)
 
-        a = QtWidgets.QAction('Terminal', self)
-        a.setShortcut(QtGui.QKeySequence("Ctrl+Shift+T"))
-        a.triggered.connect(self.embedTerminal)
-        termIcon = QtGui.QIcon()
-        termIcon.addPixmap(QtGui.QPixmap(":/control/utilities-terminal.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        a.setIcon(termIcon)
-        codeMenu.addAction(a)
 
         exitAction = QtWidgets.QAction('Exit', self)
         exitAction.triggered.connect(QtWidgets.qApp.quit)
@@ -538,7 +500,14 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
                 pass
 
         dat = self.activeEditor.toPlainText()
-        self.quiz_thread.dispatch(('QUIZ'+chr(1)+dat.replace('\n',chr(1))+'\n').encode('utf-8'))
+        if self.CFile is None:
+            qname = '<mytitle>myquiz'+ '</mytitle>'
+        else:
+            qname = '<mytitle>'+self.CFile+ '</mytitle>'
+
+        print('sending quiz', qname)
+        #self.quiz_thread.dispatch( ('QUIZ'+ '<mybr>' + qname +dat.replace('\n', '<mybr>' )+'\n').encode('utf-8')) #replace \n with '\x1\x1\x1'
+        self.quiz_thread.dispatch( ('QUIZ'+chr(1)+dat.replace('\n',chr(1))+'\n').encode('utf-8') ) #old method
 
     def saveFile(self):
         if not self.CFile:

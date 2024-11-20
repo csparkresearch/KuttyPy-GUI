@@ -147,7 +147,7 @@ var makePlotIfUnavailable = function(plotname){
 
 
 var addDataPoint = function(plotname, x){
-    console.log(x);
+    //console.log(x);
 
     makePlotIfUnavailable(plotname);
     if(myplots[plotname]==0){

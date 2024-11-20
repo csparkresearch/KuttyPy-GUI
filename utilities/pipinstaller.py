@@ -70,9 +70,9 @@ class PipInstallDialog(QDialog):
         # Start pip install as a subprocess
         system = platform.system()
         if system == 'Linux' or system == 'Darwin':
-            self.process.start("pip", ["install", package_name])
+            self.process.start("pip", ["install"]+package_name.split(' '))
         elif system == 'Windows':
-            self.process.start("py", ["-3", "-m", "pip", "install", package_name])
+            self.process.start("py", ["-3", "-m", "pip", "install"]+package_name.split(' '))
 
 
         # Reset progress bar

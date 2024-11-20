@@ -178,9 +178,6 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
         self.serialGauge = dio.DIOSENSOR(self, serialgaugeoptions)
 
         self.startTime = time.time()
-        self.timer = QtCore.QTimer()
-        self.timer.timeout.connect(self.updateEverything)
-        self.timer.start(20)
 
         # Auto-Detector
         self.shortlist = KuttyPyLib.getFreePorts()

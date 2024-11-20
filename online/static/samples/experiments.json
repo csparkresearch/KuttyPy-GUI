@@ -106,5 +106,15 @@
       "Subtract Lists" : "",
       "Polar Plot Flower" : ""
     }
+  },
+  "Internet Of Things":
+  {
+    "image": "Internet Of Things",
+    "directory": "Internet Of Things",
+    "description": "Send and receive sensor data over the internet",
+    "files": {
+      "IoT Send Data" : "Send data over MQTT channels",
+      "IoT Receive Data" : "receive data via MQTT channels"
+    }
   }
 }

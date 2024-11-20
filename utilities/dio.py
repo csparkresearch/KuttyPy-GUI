@@ -698,6 +698,7 @@ class DIOROBOT(QtWidgets.QDialog,ui_dio_robot.Ui_Dialog):
 		self.lastPos = OrderedDict()
 		self.functions = OrderedDict()
 		self.positions = []
+		row = 1; col=1;
 
 		for a in sensor.get('write',[]): #Load configuration menus
 			l = QtWidgets.QSlider(self); l.setMinimum(a[1]); l.setMaximum(a[2]);l.setValue(a[3]);
@@ -711,10 +712,15 @@ class DIOROBOT(QtWidgets.QDialog,ui_dio_robot.Ui_Dialog):
 			gauge.set_MaxValue(a[2])
 			gauge.update_value(a[3])
 			self.lastPos[l] = a[3]
-			self.gaugeLayout.addWidget(gauge)
+			self.gaugeLayout.addWidget(gauge,row,col) #  qgridlayout.
+			#self.gaugeLayout.addWidget(gauge) #linear
 			self.gauges[l] = gauge #Name ,min, max value,default value, func
 			self.functions[l] = a[4]
-			
+			col+= 1
+			if col == 4:
+				row += 1
+				col = 1
+
 		self.setWindowTitle('Control : %s'%name)
 
 	def write(self,w,val):

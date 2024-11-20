@@ -18,6 +18,7 @@ from utilities.templates import ui_quiz_row
 from utilities.quiz_server import create_server, connections
 
 
+
 class ImageDialog(QtWidgets.QDialog):
     def __init__(self, image, parent=None):
         super(ImageDialog, self).__init__(parent)
@@ -657,6 +658,8 @@ def run():
     path = common_paths()
     print('QT Version', QtWidgets.__file__)
     app = QtWidgets.QApplication(sys.argv)
+    print(app.style().metaObject().className())
+
     myapp = AppWindow(app=app, path=path)
     myapp.show()
     r = app.exec_()

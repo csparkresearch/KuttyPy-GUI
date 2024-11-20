@@ -3,7 +3,12 @@
 # !/usr/bin/python3
 
 import os, sys, time, re, traceback, platform
+from typing import List
+
 from PyQt5 import QtGui, QtCore, QtWidgets
+from PyQt5.QtCore import QThread
+from PyQt5.QtGui import QPixmap
+
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 import KuttyPyLib
@@ -64,6 +69,11 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
     logThis = QtCore.pyqtSignal(str)
     showStatusSignal = QtCore.pyqtSignal(str, bool)
     serverSignal = QtCore.pyqtSignal(str)
+    addMPSignal = QtCore.pyqtSignal()
+    delMPSignal = QtCore.pyqtSignal()
+    queryMPSignal = QtCore.pyqtSignal()
+    cameraReadySignal = QtCore.pyqtSignal()
+
     logThisPlain = QtCore.pyqtSignal(bytes)
     codeOutput = QtCore.pyqtSignal(str, str)
     serialGaugeSignal = QtCore.pyqtSignal(bytes)
@@ -73,6 +83,8 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
     def __init__(self, parent=None, **kwargs):
         super(AppWindow, self).__init__(parent)
 
+        self.external = None
+        self.last_query_time = time.time()
         self.toggleLKPActionl = None
         self.toggleLKPAction = None
         self.local_ip = 'localhost'
@@ -82,6 +94,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
         self.reloadFrame.setVisible(False)
 
         self.compile_thread = None
+        self.mp_thread = None
 
         self.monitoring = True
         self.userHexRunning = False
@@ -169,9 +182,6 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
         # Auto-Detector
         self.shortlist = KuttyPyLib.getFreePorts()
 
-    def closeEvent(self, event):
-        self.external.terminate()
-        self.external.waitForFinished(1000)
 
     def embedTerminal(self):
         import subprocess
@@ -232,12 +242,70 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 
             from online.compile_server import create_server
             self.compile_thread = create_server(self.showStatusSignal, self.serverSignal, path, self.local_ip, self.p)
+            self.compile_thread.setAddMPSignal(self.addMPSignal)
+            self.compile_thread.setDelMPSignal(self.delMPSignal)
+            self.compile_thread.setQueryMPSignal(self.queryMPSignal)
+            self.compile_thread.setCameraReadySignal(self.cameraReadySignal)
+
             self.showStatusSignal.connect(self.showStatus)
             self.serverSignal.connect(self.showServerStatus)
+            self.addMPSignal.connect(self.addMP)
+            self.delMPSignal.connect(self.delMP)
+            self.queryMPSignal.connect(self.queryMP)
             s.close()
-            self.showStatus("Visual Coding and Compiler Active at " + self.local_ip+":5000", False)
+            self.showStatus("Visual Coding and Compiler Active at " + self.local_ip + ":8888", False)
             self.compile_thread_button.setText(self.local_ip)
             self.serverActive = True
+
+    def addMP(self):
+        from online.mp import HandLandmarkThread
+        self.mpLabel.setVisible(True)
+        self.mpLabel.resize(400, 300)
+
+        self.last_query_time = time.time()
+        if self.mp_thread is not None and self.mp_thread.isRunning():  #Available. ignore.
+            self.mp_thread.ping()  # nudge
+            pass
+        else:
+            self.mp_thread = HandLandmarkThread()
+        self.mp_thread.setPriority(QThread.HighestPriority)
+        self.mp_thread.change_pixmap_signal.connect(self.update_image)
+        self.mp_thread.coordinates_signal.connect(self.compile_thread.updateCoords)
+        self.mp_thread.dead_signal.connect(self.delMP)
+        self.mp_thread.setCameraReadySignal(self.cameraReadySignal)
+        self.mp_thread.start()
+
+    def update_image(self, qt_image):
+        """Update the QLabel with the new frame."""
+        pixmap = QPixmap.fromImage(qt_image)
+        self.mpLabel.setPixmap(pixmap)
+
+    def closeEvent(self, event):
+        """Ensure the thread is stopped when the dialog is closed."""
+        event.ignore()
+        print('closing...')
+        if self.external is not None:
+            print('terminating term...')
+            self.external.terminate()
+            self.external.waitForFinished(1000)
+
+        if self.mp_thread is not None and self.mp_thread.isRunning:
+            print('terminating camera...')
+            self.mp_thread.terminate()
+            self.mp_thread.wait()
+            print('terminated.')
+        event.accept()
+
+
+    def delMP(self):
+        print('closing MP window')
+        if self.mp_thread is not None:
+            self.mp_thread.running = False
+        self.mpLabel.setVisible(False)
+
+    def queryMP(self):
+        if self.mp_thread is not None:
+            self.mp_thread.ping()
 
     def addFileMenu(self):
         codeMenu = QtWidgets.QMenu()
@@ -307,22 +375,19 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
         # Connect the action group to a single slot
         actionGroup.triggered.connect(self.handleLibrarySelection)
 
-
         self.buildOptionsButton.setMenu(codeMenu)
 
     # Slot to handle action group selection
     def handleLibrarySelection(self, action):
         global LKP, LKPLocal
-        LKPLocal=False; LKP = False;
+        LKPLocal = False;
+        LKP = False;
 
         if action == self.toggleLKPAction:
             LKP = True
         elif action == self.toggleLKPActionl:
             LKPLocal = True
 
-    def closeEvent(self, evnt):
-        evnt.ignore()
-        self.askBeforeQuit()
 
     def askBeforeQuit(self):
         ask = False
@@ -384,7 +449,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 
         menu.addAction('Save Window as Svg', self.exportSvg)
         menu.addAction('Upload Hex File', self.uploadHex)
-        menu.addAction('PIP install mediapipe', partial(self.showPipInstaller,'mediapipe'))
+        menu.addAction('PIP install mediapipe & CV', partial(self.showPipInstaller, 'mediapipe opencv-python-headless'))
 
         # Theme
         self.themeAction = QtWidgets.QWidgetAction(menu)
@@ -412,9 +477,9 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
         # Menu button
         self.statusBar.addPermanentWidget(self.pushbutton)
 
-    def showPipInstaller(self,name):
+    def showPipInstaller(self, name):
         from utilities.pipinstaller import PipInstallDialog
-        self.pipdialog = PipInstallDialog(name,self)
+        self.pipdialog = PipInstallDialog(name, self)
         self.pipdialog.show()
 
     def closeCTab(self, index):
@@ -704,7 +769,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
             self.mode = mode
 
         def execute(self):
-            global LKP,LKPLocal
+            global LKP, LKPLocal
             if 'compile' in self.mode:
                 try:
                     import subprocess
@@ -716,7 +781,8 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
                     if self.p.version == REGISTERS.VERSION_ATMEGA32 or self.p.connected == False:  # by default, compile for ATMEGA32.
                         # cmd = 'avr-gcc -Wall -O2 -mmcu=%s -o "%s" -Map "%s" "%s"' %('atmega32',fname,fname+'.map',self.fname)
                         cmd = 'avr-gcc -Wall -O2 -mmcu=%s -Wl,-Map="%s" -o "%s" "%s" %s %s' % (
-                            'atmega32', fname + '.map', fname, self.fname, "-lkp" if LKP else "", "-I%s -L%s -lkp"%(path["examples"],path["examples"]) if LKPLocal else "")  # includes MAP
+                            'atmega32', fname + '.map', fname, self.fname, "-lkp" if LKP else "",
+                            "-I%s -L%s -lkp" % (path["examples"], path["examples"]) if LKPLocal else "")  # includes MAP
                         self.logThis.emit('''<span style="color:#383;">%sing for Atmega32</span>''' % (action))
                     elif self.p.version == REGISTERS.VERSION_ATMEGA328P:
                         cmd = 'avr-gcc -Wall -O2 -mmcu=%s -o "%s" "%s"  %s' % (
@@ -1043,6 +1109,10 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 
     def sendASCII(self):
         s = self.serialData.text()
+        if self.returnKey.isChecked():
+            s+='\r'
+        if self.newlineKey.isChecked():
+            s+='\n'
         self.p.fd.write(s.encode('utf-8'))
 
     def sendBinary(self):
@@ -1139,7 +1209,7 @@ def translators(langDir, lang=None):
 
     # path to the translation files (.qm files)
     sparkTranslator = QtCore.QTranslator()
-    sparkTranslator.load(lang, langDir);
+    sparkTranslator.load(lang, langDir)
     result.append(sparkTranslator)
     return result
 
@@ -1210,9 +1280,15 @@ def run():
     myapp = AppWindow(app=app, path=path)
     myapp.show()
     r = app.exec_()
+    if myapp.mp_thread is not None:
+        myapp.mp_thread.stopRunning()
+
     if myapp.compile_thread is not None:
+        myapp.compile_thread.stop_flask_app()
         myapp.compile_thread.terminate()
-        print('waiting to quit compile_thread')
+        if myapp.mp_thread is not None:
+            myapp.mp_thread.running = False
+            print('waiting to quit compile_thread')
         myapp.compile_thread.wait()
 
     app.deleteLater()
