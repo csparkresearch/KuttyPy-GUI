@@ -233,7 +233,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 
         if self.p.connected:
             self.VERSION = self.p.version
-            self.launchFirmwareButton.setChecked(False)
+            #self.launchFirmwareButton.setChecked(False)
             self.setWindowTitle('KuttyPy Integrated Development Environment [{0:s}]'.format(self.p.portname))
 
         else:

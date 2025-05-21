@@ -179,8 +179,16 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 
         self.startTime = time.time()
 
+        self.startTime = time.time()
+        self.timer = QtCore.QTimer()
+        self.timer.timeout.connect(self.updateEverything)
+        self.timer.start(20)
+
         # Auto-Detector
         self.shortlist = KuttyPyLib.getFreePorts()
+
+        if 'splash' in kwargs:
+            kwargs.get('splash').finish(self)
 
     def activateCompileServer(self):
         if self.serverActive:  #Stop it
@@ -1271,12 +1279,47 @@ def common_paths():
     return path
 
 
+def showSplash():
+    # Create and display the splash screen
+    splash = os.path.join(os.path.dirname(__file__),'docs/images/app-screens-1200.jpg')
+    splash_pix = QtGui.QPixmap(splash)
+    splash = QtWidgets.QSplashScreen(splash_pix, QtCore.Qt.WindowStaysOnTopHint)
+    splash.setMask(splash_pix.mask())
+
+    progressBar = QtWidgets.QProgressBar(splash)
+    progressBar.setStyleSheet('''
+
+    QProgressBar {
+        border: 2px solid grey;
+        border-radius: 5px;	
+        border: 2px solid grey;
+        border-radius: 5px;
+        text-align: center;
+    }
+    QProgressBar::chunk {
+        background-color: #012748;
+        width: 10px;
+        margin: 0.5px;
+    }
+    ''')
+    progressBar.setMaximum(20)
+    progressBar.setGeometry(0, splash_pix.height() - 50, splash_pix.width(), 20)
+    progressBar.setRange(0,20)
+
+    splash.show()
+    splash.pbar = progressBar
+    splash.show()
+    return splash
+
+
 def run():
     global path, app, myapp
     path = common_paths()
-    print('QT Version', QtWidgets.__file__)
     app = QtWidgets.QApplication(sys.argv)
-    myapp = AppWindow(app=app, path=path)
+    splash = showSplash()
+    splash.showMessage("<h2><font color='Black'>Initializing...</font></h2>", QtCore.Qt.AlignLeft, QtCore.Qt.black)
+    print('QT Version', QtWidgets.__file__)
+    myapp = AppWindow(app=app, path=path, splash= splash)
     myapp.show()
     r = app.exec_()
     if myapp.compile_thread is not None:
