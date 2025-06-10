@@ -770,9 +770,14 @@ class DIOSTEPPER(QtWidgets.QDialog,ui_dio_stepper.Ui_Dialog):
 		self.lastStep = 0
 		self.steps = [3,6,12,9]
 		self.mask = 0xF0
+		self.pinSet.blockSignals(True)
+		self.pinSet.addItems(['A+ : PB0, B + PB1, A- : PB2, B- : PB3','PB4,PB5,PB6,PB7','PC4,PC5,PC6,PC7'])
+		self.pinSet.blockSignals(False)
 
 		self.p = configuration.get('device',None)
 		self.p.setReg('DDRB',255)
+		self.p.setReg('DDRC',255)
+		self.controlRegister = 'DDRB'
 
 		self.gauge = Gauge(self)
 		self.gauge.setObjectName("motor")
@@ -783,36 +788,72 @@ class DIOSTEPPER(QtWidgets.QDialog,ui_dio_stepper.Ui_Dialog):
 		self.gauge.set_MaxValue(self.totalSteps)
 		self.gauge.update_value(0)
 		self.gaugeLayout.addWidget(self.gauge)
+
+		self.free = 0  #not free
 			
 		self.setWindowTitle('Stepper Motor Control')
 
 	def setPins(self,v):
-		self.steps = [[3,6,12,9],[3<<4,6<<4,12<<4,9<<4]][v]
-		self.mask = [0xF0,0x0F][v] #For ANDING 
+		self.steps = [[3,6,12,9],[3<<4,6<<4,12<<4,9<<4],[3<<4,6<<4,12<<4,9<<4]][v]
+		self.mask = [0xF0,0x0F,0x0F][v] #For ANDING
+		if v<2: #0,1
+			self.controlRegister = 'PORTB'
+		else:
+			self.controlRegister = 'PORTC'
+
+	def freeCoils(self,state):
+		print('freeing coils...',state)
+		if state:
+			self.free = 1 # proceed to free
+		else:
+			self.free = 0 # proceed to lock in
+
 
 	def initialize(self):
-		self.targetPosition = 0		
+		self.free = 0  #not free
+		self.targetPosition = 0
+
 	def stepLeft(self):
 		self.targetPosition -= 1
+		self.free=0
+
 	def stepRight(self):
 		self.targetPosition += 1
+		self.free = 0
+
 	def stepTo(self):
+		self.free = 0
 		self.targetPosition = int(self.currentPositionBox.value())
+		print('stepping to',self.targetPosition, self.free)
 
 	def read(self): #Read is not read. it actually updates the motor position.
+		if self.free == 1: #Proceed to free coils
+			print('freeing...')
+			self.coilFreeButton.setChecked(False)
+			self.free = 2
+			self.p.setReg(self.controlRegister,0x00)
+			return self.position
+
+
 		if self.position==self.targetPosition:
 			return None #Could return position, but that disables needle dragging functionality of the gauge
 
-		if self.position > self.targetPosition:
-			self.lastStep -= 1
-			if self.lastStep == -1: self.lastStep = 3
-			self.position-=1
-		elif self.position < self.targetPosition:
-			self.lastStep += 1
-			if self.lastStep == 4: self.lastStep = 0
-			self.position+=1
-		prev = self.p.REGSTATES['PORTB']
-		self.p.setReg('PORTB',prev&self.mask|self.steps[self.lastStep])
+		if 	self.free == 0: #Not free
+			if self.position > self.targetPosition:
+				self.lastStep -= 1
+				if self.lastStep == -1: self.lastStep = 3
+				self.position-=1
+			elif self.position < self.targetPosition:
+				self.lastStep += 1
+				if self.lastStep == 4: self.lastStep = 0
+				self.position+=1
+			prev = self.p.REGSTATES[self.controlRegister]
+			self.p.setReg(self.controlRegister,prev&self.mask|self.steps[self.lastStep])
+			return self.position
+
+		elif self.free ==2 : #free = 2 . is free
+			return self.position
+
 		return self.position
 
 	def setValue(self,val):

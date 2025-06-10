@@ -800,6 +800,41 @@ class KUTTYPY:
         hi = self.getReg(self.REGS['ADCH'])
         return (hi << 8) | low
 
+    def initServos(self):
+        self.setReg(self.REGS['DDRD'], (1<<5)|(1<<4)) # PD4 and PD5 are outputs
+        self.setReg(self.REGS['TCCR1A'], 0xA2) # 50hz timer
+        self.setReg(self.REGS['TCCR1B'], 0x1B) # 50hz timer
+        self.setReg(self.REGS['ICR1H'], 0x09) # 50hz timer
+        self.setReg(self.REGS['ICR1L'], 0xD3) # 50hz timer
+        self.setReg(self.REGS['OCR1AH'], 0x00) # 50hz timer
+        self.setReg(self.REGS['OCR1AL'], 0xBC) # 50hz timer
+        self.setReg(self.REGS['OCR1BH'], 0x00) # 50hz timer
+        self.setReg(self.REGS['OCR1BL'], 0xBC) # 50hz timer
+
+    def setServoD4(self,angle):
+        SERVO_MIN_PULSE_TICKS = 125  # Corresponds to ~1.0ms pulse (0 degrees)
+        SERVO_MAX_PULSE_TICKS =  250  # Corresponds to ~2.0ms pulse (180 degrees)
+        if angle<0:
+            angle=0
+        elif angle>180:
+            angle=180
+
+        ocr_value = int(SERVO_MIN_PULSE_TICKS + ((SERVO_MAX_PULSE_TICKS - SERVO_MIN_PULSE_TICKS) * angle / 180));
+        self.setReg(self.REGS['OCR1BL'], (ocr_value&0xFF) ) # 50hz timer
+        self.setReg(self.REGS['OCR1BH'], (ocr_value>>8)&0xFF ) # 50hz timer
+
+    def setServoD5(self,angle):
+        SERVO_MIN_PULSE_TICKS = 125  # Corresponds to ~1.0ms pulse (0 degrees)
+        SERVO_MAX_PULSE_TICKS =  250  # Corresponds to ~2.0ms pulse (180 degrees)
+        if angle<0:
+            angle=0
+        elif angle>180:
+            angle=180
+
+        ocr_value = int(SERVO_MIN_PULSE_TICKS + ((SERVO_MAX_PULSE_TICKS - SERVO_MIN_PULSE_TICKS) * angle / 180));
+        self.setReg(self.REGS['OCR1AL'], (ocr_value&0xFF) ) # 50hz timer
+        self.setReg(self.REGS['OCR1AH'], (ocr_value>>8)&0xFF ) # 50hz timer
+
     '''
 	def writeEEPROM(self,data):
 		addr=0

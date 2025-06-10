@@ -90,15 +90,18 @@ class Ui_Dialog(object):
         self.pushButton_4.setAutoDefault(False)
         self.pushButton_4.setObjectName("pushButton_4")
         self.verticalLayout_3.addWidget(self.pushButton_4)
+        self.coilFreeButton = QtWidgets.QCheckBox(self.frame)
+        self.coilFreeButton.setObjectName("coilFreeButton")
+        self.verticalLayout_3.addWidget(self.coilFreeButton)
         self.gridLayout.addWidget(self.frame, 0, 6, 6, 1)
         self.spinBox_2 = QtWidgets.QSpinBox(Dialog)
+        self.spinBox_2.setMaximum(20000)
+        self.spinBox_2.setProperty("value", 200)
         self.spinBox_2.setObjectName("spinBox_2")
         self.gridLayout.addWidget(self.spinBox_2, 4, 3, 1, 1)
         self.pinSet = QtWidgets.QComboBox(Dialog)
         self.pinSet.setFrame(True)
         self.pinSet.setObjectName("pinSet")
-        self.pinSet.addItem("")
-        self.pinSet.addItem("")
         self.gridLayout.addWidget(self.pinSet, 4, 0, 1, 3)
         self.label = QtWidgets.QLabel(Dialog)
         self.label.setObjectName("label")
@@ -116,7 +119,17 @@ class Ui_Dialog(object):
         self.pushButton_5.clicked.connect(Dialog.stepRight) # type: ignore
         self.currentPositionBox.editingFinished.connect(Dialog.stepTo) # type: ignore
         self.pinSet.currentIndexChanged['int'].connect(Dialog.setPins) # type: ignore
+        self.coilFreeButton.clicked['bool'].connect(Dialog.freeCoils) # type: ignore
         QtCore.QMetaObject.connectSlotsByName(Dialog)
+        Dialog.setTabOrder(self.pushButton_3, self.pushButton_2)
+        Dialog.setTabOrder(self.pushButton_2, self.pushButton)
+        Dialog.setTabOrder(self.pushButton, self.currentPositionBox)
+        Dialog.setTabOrder(self.currentPositionBox, self.spinBox_2)
+        Dialog.setTabOrder(self.spinBox_2, self.pinSet)
+        Dialog.setTabOrder(self.pinSet, self.pushButton_5)
+        Dialog.setTabOrder(self.pushButton_5, self.listWidget)
+        Dialog.setTabOrder(self.listWidget, self.pushButton_4)
+        Dialog.setTabOrder(self.pushButton_4, self.graph)
 
     def retranslateUi(self, Dialog):
         _translate = QtCore.QCoreApplication.translate
@@ -124,8 +137,7 @@ class Ui_Dialog(object):
         self.pushButton_5.setText(_translate("Dialog", ">"))
         self.pushButton_2.setText(_translate("Dialog", "<"))
         self.pushButton.setText(_translate("Dialog", "HOME"))
-        self.pinSet.setItemText(0, _translate("Dialog", "A+ : PB0, B + PB1, A- : PB2, B- : PB3"))
-        self.pinSet.setItemText(1, _translate("Dialog", "PB4,PB5,PB6,PB7"))
+        self.coilFreeButton.setText(_translate("Dialog", "Free Coils"))
         self.label.setText(_translate("Dialog", "Steps per full revolution"))
 from pyqtgraph import PlotWidget
 from . import res_rc
