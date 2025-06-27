@@ -471,10 +471,11 @@ class REGEDIT(QtWidgets.QFrame,ui_regedit.Ui_Frame):
 
 
 class DIOSENSOR(QtWidgets.QDialog,ui_dio_sensor.Ui_Dialog):
-	def __init__(self,parent,sensor):
+	def __init__(self,parent,sensor,addr=None):
 		super(DIOSENSOR, self).__init__(parent)
 		name = sensor['name']
 		self.initialize = sensor['init']
+		self.address = addr
 		self.read = sensor['read']
 		self.isPaused = False
 		self.setupUi(self)
@@ -509,12 +510,17 @@ class DIOSENSOR(QtWidgets.QDialog,ui_dio_sensor.Ui_Dialog):
 		self.T = 0
 		self.time = np.empty(300)
 		self.start_time = time.time()
-		row = 1; col=1;
+		row = 1; col=1; n=0;
 		for a,b,c in zip(self.fields,self.min,self.max):
 			gauge = Gauge(self)
 			gauge.setObjectName(a)
 			gauge.set_MinValue(b)
 			gauge.set_MaxValue(c)
+			if 'fullgauge' in sensor:
+				if sensor['fullgauge'][n]==1:
+					gauge.fullCircle()
+					gauge.set_enable_barGraph(False)
+					gauge.set_enable_barGraph(False)
 			#listItem = QtWidgets.QListWidgetItem()
 			#self.listWidget.addItem(listItem)
 			#self.listWidget.setItemWidget(listItem, gauge)
@@ -529,6 +535,7 @@ class DIOSENSOR(QtWidgets.QDialog,ui_dio_sensor.Ui_Dialog):
 			fitcurve = self.graph.plot(pen=colors[len(self.curves.keys())],width=2)
 			self.curves[curve] = np.empty(300)
 			self.fitCurves[curve] = fitcurve
+			n += 1
 
 		
 		self.setWindowTitle('Sensor : %s'%name)
@@ -644,7 +651,10 @@ class DIOSENSOR(QtWidgets.QDialog,ui_dio_sensor.Ui_Dialog):
 
 	def launch(self):
 		if self.initialize is not None:
-			self.initialize()
+			if self.address is not None:
+				self.initialize(address=self.address)
+			else:
+				self.initialize()
 		self.show()
 
 
@@ -777,7 +787,8 @@ class DIOSTEPPER(QtWidgets.QDialog,ui_dio_stepper.Ui_Dialog):
 		self.p = configuration.get('device',None)
 		self.p.setReg('DDRB',255)
 		self.p.setReg('DDRC',255)
-		self.controlRegister = 'DDRB'
+		self.pinSet.setCurrentIndex(2)
+		self.controlRegister = 'PORTC'
 
 		self.gauge = Gauge(self)
 		self.gauge.setObjectName("motor")
@@ -832,6 +843,7 @@ class DIOSTEPPER(QtWidgets.QDialog,ui_dio_stepper.Ui_Dialog):
 			self.coilFreeButton.setChecked(False)
 			self.free = 2
 			self.p.setReg(self.controlRegister,0x00)
+			self.p.setReg('PORTB',0x00)
 			return self.position
 
 
@@ -848,7 +860,9 @@ class DIOSTEPPER(QtWidgets.QDialog,ui_dio_stepper.Ui_Dialog):
 				if self.lastStep == 4: self.lastStep = 0
 				self.position+=1
 			prev = self.p.REGSTATES[self.controlRegister]
-			self.p.setReg(self.controlRegister,prev&self.mask|self.steps[self.lastStep])
+			self.p.setReg(self.controlRegister,(prev&self.mask)|self.steps[self.lastStep])
+			if self.controlRegister=='PORTC': #C mode. show it on B with LEDs
+				self.p.setReg('PORTB',(prev&self.mask)|self.steps[self.lastStep])
 			return self.position
 
 		elif self.free ==2 : #free = 2 . is free

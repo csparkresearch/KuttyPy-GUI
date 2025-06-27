@@ -238,6 +238,9 @@ class Gauge(QtWidgets.QWidget):
 		self.rescale_method()
 
 
+	def fullCircle(self):
+		self.scale_angle_start_value = 180
+		self.scale_angle_size = 360
 
 	def rescale_method(self):
 		# print("slotMethod")

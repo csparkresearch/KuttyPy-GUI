@@ -746,14 +746,16 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
                 a[1].setParent(None)
             self.controllerList = []
             for a in x:
-                s = self.p.sensors.get(a, None)
-                if s != None:
-                    btn = QtWidgets.QPushButton(s['name'] + ':' + hex(a))
-                    dialog = dio.DIOSENSOR(self, s)
-                    btn.clicked.connect(dialog.launch)
-                    self.sensorLayout.addWidget(btn)
-                    self.sensorList.append([dialog, btn])
-                    continue
+                if a in self.p.sensormap:
+                    for name in self.p.sensormap[a]:
+                        s = self.p.namedsensors[name]
+                        if s != None:
+                            btn = QtWidgets.QPushButton(s['name'] + ':' + hex(a))
+                            dialog = dio.DIOSENSOR(self, s, a)
+                            btn.clicked.connect(dialog.launch)
+                            self.sensorLayout.addWidget(btn)
+                            self.sensorList.append([dialog, btn])
+                            continue
 
                 s = self.p.controllers.get(a, None)
                 if s != None:

@@ -381,13 +381,14 @@ class KUTTYPY:
                 'max': [8, 8, 8]
             },
             'QMC3883': {
-                'address': [0x13],
+                'address': [13,0x13],
                 'name': 'QMC5883L 3 Axis Magnetometer ',
                 'init': self.QMC5883L_init,
                 'read': self.QMC5883L_all,
-                'fields': ['Mx', 'My', 'Mz'],
-                'min': [-8, -8, -8],
-                'max': [8, 8, 8],
+                'fields': ['Mx', 'My', 'Mz','A'],
+                'min': [-8, -8, -8,-180],
+                'max': [8, 8, 8,180],
+                'fullgauge':[0,0,0,1],
                 'config': [{
                     'name': 'range',
                     'options': ['2g', '8g'],
@@ -1968,7 +1969,13 @@ class KUTTYPY:
         vals = self.QMC5883L_getVals(0x00, 6)
         if vals:
             if len(vals) == 6:
+                orientation=0
                 v = [np.int16(signit((vals[a * 2 + 1] << 8) | vals[a * 2])) / self.QMC_scaling for a in range(3)]
+                try:
+    	            orientation= np.arctan2(v[1],v[0])*180/np.pi
+                except Exception as e:
+    	            print(e)
+                v.append(orientation)
                 return v
             else:
                 return False
