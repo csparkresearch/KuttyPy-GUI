@@ -7,6 +7,10 @@ ifeq ($(QT_VERSION),PyQt5)
   PYUIC = pyuic5
   PYRCC = pyrcc5
   PYLUPDATE = pylupdate5
+else ifeq ($(QT_VERSION),PyQt6)
+  PYUIC = pyuic6
+  PYRCC = rcc -g python
+  PYLUPDATE = pylupdate6
 else ifeq ($(QT_VERSION),PyQt4)
   PYUIC = pyuic4
   PYRCC = pyrcc4

@@ -2,9 +2,9 @@ from typing import List
 
 import cv2
 import mediapipe as mp
-from PyQt5.QtCore import QThread, pyqtSignal
-from PyQt5.QtWidgets import QApplication, QLabel, QDialog, QVBoxLayout
-from PyQt5.QtGui import QImage, QPixmap
+from pyqtgraph.Qt.QtCore import QThread, Signal
+from pyqtgraph.Qt.QtWidgets import QApplication, QLabel, QDialog, QVBoxLayout
+from pyqtgraph.Qt.QtGui import QImage, QPixmap
 import sys,time
 
 # Initialize MediaPipe
@@ -14,10 +14,10 @@ mp_hands = mp.solutions.hands
 
 
 class HandLandmarkThread(QThread):
-    change_pixmap_signal = pyqtSignal(QImage)
-    coordinates_signal = pyqtSignal(list)  # Signal to emit coordinates
+    change_pixmap_signal = Signal(QImage)
+    coordinates_signal = Signal(list)  # Signal to emit coordinates
     cameraReadySignal = None
-    dead_signal = pyqtSignal()  # Signal to emit coordinates
+    dead_signal = Signal()  # Signal to emit coordinates
     running = True
     last_query_time = time.time()
 

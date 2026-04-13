@@ -1,5 +1,5 @@
-from PyQt5.QtCore import QThread, pyqtSignal
-from PyQt5.QtWidgets import QApplication
+from pyqtgraph.Qt.QtCore import QThread, Signal
+from pyqtgraph.Qt.QtWidgets import QApplication
 
 # blueprint for socket comms parts of app
 flask_thread = None
@@ -28,7 +28,7 @@ connections = {}
 
 
 class QuizResponseThread(QThread):
-    finished = pyqtSignal()
+    finished = Signal()
     serverSignal = None
     removeSignal = None
     imageSignal = None

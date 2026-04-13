@@ -4,8 +4,8 @@ import numpy as np
 from flask import Flask, request, Blueprint, jsonify
 import logging
 from flask_cors import CORS
-from PyQt5.QtCore import QThread, pyqtSignal, QObject, QEventLoop
-from PyQt5.QtWidgets import QApplication
+from pyqtgraph.Qt.QtCore import QThread, Signal, QObject, QEventLoop
+from pyqtgraph.Qt.QtWidgets import QApplication
 
 # blueprint for socket comms parts of app
 from .compile_routes import main as main_blueprint, local_ip
@@ -49,7 +49,7 @@ class QuietRequestHandler(WSGIRequestHandler):
         pass  # Disable the logging
 
 class FlaskThread(QThread):
-	finished = pyqtSignal()
+	finished = Signal()
 	serverSignal = None
 	MPSlots= None
 
@@ -140,7 +140,7 @@ class FlaskThread(QThread):
 			self.cameraReadySignal.connect(on_camera_ready)
 			self.addMPSignal.emit()
 			print('connected camera ready signal...waiting..')
-			loop.exec_()
+			loop.exec()
 			print('camera is ready. responding.')
 
 			return jsonify({'response': 'ready'})

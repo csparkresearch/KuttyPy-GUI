@@ -1,10 +1,10 @@
 import platform
 import sys
-from PyQt5.QtWidgets import (
+from pyqtgraph.Qt.QtWidgets import (
     QApplication, QDialog, QVBoxLayout, QLabel, QLineEdit,
     QPushButton, QTextEdit, QProgressBar, QHBoxLayout
 )
-from PyQt5.QtCore import QProcess
+from pyqtgraph.Qt.QtCore import QProcess
 
 
 class PipInstallDialog(QDialog):

@@ -6,7 +6,7 @@ import os, sys, time, re, traceback, platform
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from PyQt5 import QtGui, QtCore, QtWidgets
+from pyqtgraph.Qt import QtGui, QtCore, QtWidgets
 import KuttyPyLib
 import socket
 
@@ -30,7 +30,7 @@ def translate(lang=None):
     app.installTranslator(t)
     t1 = QtCore.QTranslator()
     t1.load("qt_" + lang,
-            QtCore.QLibraryInfo.location(QtCore.QLibraryInfo.TranslationsPath))
+            (QtCore.QLibraryInfo.path if hasattr(QtCore.QLibraryInfo, 'path') else QtCore.QLibraryInfo.location)(QtCore.QLibraryInfo.TranslationsPath))
     app.installTranslator(t1)
 
 
@@ -59,12 +59,12 @@ class myTimer():
 class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
     p = None
     ports = ['A', 'B', 'C', 'D']
-    logThis = QtCore.pyqtSignal(str)
-    showStatusSignal = QtCore.pyqtSignal(str, bool)
-    serverSignal = QtCore.pyqtSignal(str)
-    logThisPlain = QtCore.pyqtSignal(bytes)
-    codeOutput = QtCore.pyqtSignal(str, str)
-    serialGaugeSignal = QtCore.pyqtSignal(bytes)
+    logThis = QtCore.Signal(str)
+    showStatusSignal = QtCore.Signal(str, bool)
+    serverSignal = QtCore.Signal(str)
+    logThisPlain = QtCore.Signal(bytes)
+    codeOutput = QtCore.Signal(str, str)
+    serialGaugeSignal = QtCore.Signal(bytes)
     serialGaugeConvert = 'bytes'
     serialStream = b''
 
@@ -436,8 +436,8 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
         self.codingTabs.addTab(self.hexTab, "")
 
     class codeObject(QtCore.QObject):
-        finished = QtCore.pyqtSignal()
-        logThis = QtCore.pyqtSignal(str)
+        finished = QtCore.Signal()
+        logThis = QtCore.Signal(str)
         code = ''
 
         def __init__(self, REGISTERS):
@@ -781,10 +781,10 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
     ########################### UPLOAD HEX FILE #######################
 
     class uploadObject(QtCore.QObject):
-        finished = QtCore.pyqtSignal()
-        logThis = QtCore.pyqtSignal(str)
-        resultSignal = QtCore.pyqtSignal(str, str)
-        logThisPlain = QtCore.pyqtSignal(bytes)
+        finished = QtCore.Signal()
+        logThis = QtCore.Signal(str)
+        resultSignal = QtCore.Signal(str, str)
+        logThisPlain = QtCore.Signal(bytes)
         fname = ''
         p = None
 
@@ -1177,7 +1177,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 
     ######## WINDOW EXPORT SVG
     def exportSvg(self):
-        from PyQt5 import QtSvg
+        from pyqtgraph.Qt import QtSvg
         path, _filter = QtWidgets.QFileDialog.getSaveFileName(self, 'Save File', '~/')
         if path:
             generator = QtSvg.QSvgGenerator()
@@ -1214,7 +1214,7 @@ def translators(langDir, lang=None):
     result = []
     qtTranslator = QtCore.QTranslator()
     qtTranslator.load("qt_" + lang,
-                      QtCore.QLibraryInfo.location(QtCore.QLibraryInfo.TranslationsPath))
+                      (QtCore.QLibraryInfo.path if hasattr(QtCore.QLibraryInfo, 'path') else QtCore.QLibraryInfo.location)(QtCore.QLibraryInfo.TranslationsPath))
     result.append(qtTranslator)
 
     # path to the translation files (.qm files)
@@ -1323,7 +1323,7 @@ def run():
     print('QT Version', QtWidgets.__file__)
     myapp = AppWindow(app=app, path=path, splash= splash)
     myapp.show()
-    r = app.exec_()
+    r = app.exec()
     if myapp.compile_thread is not None:
         myapp.compile_thread.terminate()
         print('waiting to quit compile_thread')

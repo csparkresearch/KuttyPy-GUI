@@ -7,7 +7,7 @@ import platform
 import socket
 import sys
 
-from PyQt5 import QtGui, QtCore, QtWidgets
+from pyqtgraph.Qt import QtGui, QtCore, QtWidgets
 
 from utilities import syntax
 from utilities import texteditor
@@ -63,14 +63,14 @@ class QUIZROW(QtWidgets.QWidget, ui_quiz_row.Ui_Form):
 
 class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
     p = None
-    logThis = QtCore.pyqtSignal(str)
-    showStatusSignal = QtCore.pyqtSignal(str, bool)
-    serverSignal = QtCore.pyqtSignal(str,str)
-    removeSignal = QtCore.pyqtSignal(str)
-    imageSignal = QtCore.pyqtSignal(str,bytes)
-    memSig = QtCore.pyqtSignal(list)
-    logThisPlain = QtCore.pyqtSignal(bytes)
-    codeOutput = QtCore.pyqtSignal(str, str)
+    logThis = QtCore.Signal(str)
+    showStatusSignal = QtCore.Signal(str, bool)
+    serverSignal = QtCore.Signal(str,str)
+    removeSignal = QtCore.Signal(str)
+    imageSignal = QtCore.Signal(str,bytes)
+    memSig = QtCore.Signal(list)
+    logThisPlain = QtCore.Signal(bytes)
+    codeOutput = QtCore.Signal(str, str)
 
     def __init__(self, parent=None, **kwargs):
         super(AppWindow, self).__init__(parent)
@@ -232,7 +232,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
             image.loadFromData(QtCore.QByteArray(msg))
             # Create and show the ImageDialog
             dialog = ImageDialog(image)
-            dialog.exec_()
+            dialog.exec()
 
     def addFileMenu(self):
         codeMenu = QtWidgets.QMenu()
@@ -548,7 +548,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 
     ######## WINDOW EXPORT SVG
     def exportSvg(self):
-        from PyQt5 import QtSvg
+        from pyqtgraph.Qt import QtSvg
         path, _filter = QtWidgets.QFileDialog.getSaveFileName(self, 'Save File', '~/')
         if path:
             generator = QtSvg.QSvgGenerator()
@@ -586,7 +586,7 @@ def translators(langDir, lang=None):
     result = []
     qtTranslator = QtCore.QTranslator()
     qtTranslator.load("qt_" + lang,
-                      QtCore.QLibraryInfo.location(QtCore.QLibraryInfo.TranslationsPath))
+                      (QtCore.QLibraryInfo.path if hasattr(QtCore.QLibraryInfo, 'path') else QtCore.QLibraryInfo.location)(QtCore.QLibraryInfo.TranslationsPath))
     result.append(qtTranslator)
 
     # path to the translation files (.qm files)
@@ -656,7 +656,7 @@ def run():
     app = QtWidgets.QApplication(sys.argv)
     myapp = AppWindow(app=app, path=path)
     myapp.show()
-    r = app.exec_()
+    r = app.exec()
     '''
     if myapp.compile_thread is not None:
         myapp.compile_thread.terminate()

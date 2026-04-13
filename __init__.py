@@ -1,7 +1,7 @@
 # seelab_examples/__init__.py
 
 import sys,os, json, time
-from PyQt5 import QtWidgets, QtGui, QtCore
+from pyqtgraph.Qt import QtWidgets, QtGui, QtCore
 import argparse  # Added import for argparse
 
 from .KuttyPyPlus import run  # Adjust the import based on your actual script structure
@@ -79,5 +79,5 @@ def main():
 
     window = run()
     window.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
 
