@@ -70,7 +70,7 @@ must be used.
 Go to file->preferences->additional boards manager of the Arduino IDE , and paste the following line
 
 ```python
-https://scischool.in/kuttypy_arduino.json
+https://csparkresearch.in/kuttypy_arduino.json
 ```
 
 Select Tools->board-> Kuttypyplus -> KuttypyPlus(ATMEGA32)
