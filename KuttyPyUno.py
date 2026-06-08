@@ -38,9 +38,9 @@ class myTimer():
 
 class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 	p=None
-	logThis = QtCore.pyqtSignal(str)
-	logThisPlain = QtCore.pyqtSignal(bytes)
-	serialGaugeSignal = QtCore.pyqtSignal(int)
+	logThis = QtCore.Signal(str)
+	logThisPlain = QtCore.Signal(bytes)
+	serialGaugeSignal = QtCore.Signal(int)
 	def __init__(self, parent=None,**kwargs):
 		super(AppWindow, self).__init__(parent)
 		self.setupUi(self)
@@ -184,8 +184,8 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 
 	################USER CODE SECTION####################
 	class codeObject(QtCore.QObject):
-		finished = QtCore.pyqtSignal()
-		logThis = QtCore.pyqtSignal(str)
+		finished = QtCore.Signal()
+		logThis = QtCore.Signal(str)
 		code = ''
 
 		def __init__(self,REGISTERS):
@@ -504,9 +504,9 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 	########################### UPLOAD HEX FILE #######################
 
 	class uploadObject(QtCore.QObject):
-		finished = QtCore.pyqtSignal()
-		logThis = QtCore.pyqtSignal(str)
-		logThisPlain = QtCore.pyqtSignal(bytes)
+		finished = QtCore.Signal()
+		logThis = QtCore.Signal(str)
+		logThisPlain = QtCore.Signal(bytes)
 		fname = ''
 		p = None
 		def __init__(self):
@@ -775,7 +775,7 @@ def translators(langDir, lang=None):
 	result=[]
 	qtTranslator=QtCore.QTranslator()
 	qtTranslator.load("qt_" + lang,
-			QtCore.QLibraryInfo.location(QtCore.QLibraryInfo.TranslationsPath))
+			(QtCore.QLibraryInfo.path if hasattr(QtCore.QLibraryInfo, 'path') else QtCore.QLibraryInfo.location)(QtCore.QLibraryInfo.TranslationsPath))
 	result.append(qtTranslator)
 
 	# path to the translation files (.qm files)
@@ -840,7 +840,7 @@ def run():
 
 	myapp = AppWindow(app=app, path=path)
 	myapp.show()
-	r = app.exec_()
+	r = app.exec()
 	'''
 	if myapp.p.connected:
 		myapp.p.fd.write(b'j')

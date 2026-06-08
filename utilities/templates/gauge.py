@@ -12,7 +12,7 @@
 import math
 import sys
 from ..Qt import QtGui, QtCore, QtWidgets
-from PyQt5.QtGui import QColor
+from pyqtgraph.Qt.QtGui import QColor
 
 
 
@@ -122,7 +122,7 @@ class Measurement:
 
 
 class Gauge(QtWidgets.QWidget):
-	valueChanged = QtCore.pyqtSignal(float)
+	valueChanged = QtCore.Signal(float)
 
 	def __init__(self, parent=None, name=''):
 		super(Gauge, self).__init__(parent)

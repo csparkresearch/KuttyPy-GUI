@@ -123,6 +123,6 @@ if __name__ == "__main__":
 	app = QtWidgets.QApplication(sys.argv)
 	myapp = AppWindow(kp=None)
 	myapp.show()
-	sys.exit(app.exec_())
+	sys.exit(app.exec())
 
 

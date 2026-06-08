@@ -2,7 +2,7 @@ from typing import List
 
 from flask import Blueprint, render_template, request, session, send_from_directory, current_app, jsonify
 import os, tempfile, subprocess, json, glob
-from PyQt5 import QtCore
+from pyqtgraph.Qt import QtCore
 
 from online.mp import HandTrackingDialog
 
