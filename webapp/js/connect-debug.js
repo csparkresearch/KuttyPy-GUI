@@ -64,3 +64,15 @@ export function hideConnectDebugPanel() {
   ensurePanel();
   if (panelEl) panelEl.hidden = true;
 }
+
+/** User dismissed the port/device picker without selecting (Web Serial / WebUSB). */
+export function isConnectUserCancelled(err) {
+  if (!err) return false;
+  if (err.userCancelled) return true;
+  if (err.name === 'NotFoundError') return true;
+  const msg = String(err.message || '').toLowerCase();
+  return msg.includes('no port selected')
+    || msg.includes('no device selected')
+    || msg.includes('user cancelled')
+    || msg.includes('user canceled');
+}

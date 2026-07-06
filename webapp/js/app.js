@@ -8,9 +8,11 @@ import { portPanelFromRegister } from './registers.js';
 import { buildRegisterDatalist, initRegisterTerminal } from './register-terminal.js';
 import { initSensorsPanel } from './sensors-panel.js';
 import { createSensorDriver } from './sensors.js';
-import { openSensorDialog } from './sensor-dialog.js?v=9';
+import { openSensorDialog } from './sensor-dialog.js?v=20';
 import { isAndroidChrome } from './platform.js';
 import { hideConnectDebugPanel } from './connect-debug.js';
+import { initViewRouter } from './view-router.js';
+import { initVisualView } from './view-visual.js?v=30';
 
 const POLL_MS = 20;
 
@@ -435,6 +437,11 @@ async function handleConnect() {
     startPolling();
     regTerminal?.log('Connected — register terminal ready', 'read');
   } catch (err) {
+    if (err?.userCancelled) {
+      setStatus('Not connected');
+      setControlsConnected(false);
+      return;
+    }
     console.error(err);
     setStatus(err.message || 'Connection failed');
     setControlsConnected(false);
@@ -486,3 +493,15 @@ sensorsPanel = initSensorsPanel(
     startPolling,
   },
 );
+
+initViewRouter({
+  onVisualEnter: () => stopPolling(),
+  onVisualLeave: () => {
+    if (device.connected) startPolling();
+  },
+});
+initVisualView({
+  getDevice: () => device,
+  isConnected: () => device.connected,
+  withPollingPaused,
+});

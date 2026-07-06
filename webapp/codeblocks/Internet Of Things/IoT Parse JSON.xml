@@ -1,0 +1,101 @@
+<xml xmlns="https://developers.google.com/blockly/xml">
+  <variables>
+    <variable id="T[a}Wm86rtSnOasqE0R}">data</variable>
+  </variables>
+  <block type="mqtt_connect" id="6EUFU7R5%[Uw[V|:zw,u" x="0" y="20">
+    <field name="NAME">BOB</field>
+    <next>
+      <block type="mqtt_subscribe" id="{d(WFm~*y%/nyMgEnBlv">
+        <field name="CHANNEL">envmon/in</field>
+        <next>
+          <block type="controls_whileUntil" id="Mb|08G(+jc:s[;X=LL+0">
+            <field name="MODE">WHILE</field>
+            <value name="BOOL">
+              <shadow type="logic_boolean" id="-k.J|yoO7U{j3~FJgpOs">
+                <field name="BOOL">TRUE</field>
+              </shadow>
+            </value>
+            <statement name="DO">
+              <block type="controls_if" id="LfHb`(D,SU_NW]F%v$4K">
+                <value name="IF0">
+                  <block type="mqtt_hasdata" id="(v1r2#.OpC1or9IFLXFn">
+                    <field name="CHANNEL">envmon/in</field>
+                  </block>
+                </value>
+                <statement name="DO0">
+                  <block type="variables_set" id="wjY~,%4a3]IDc7V{RD3!">
+                    <field name="VAR" id="T[a}Wm86rtSnOasqE0R}">data</field>
+                    <value name="VALUE">
+                      <block type="mqtt_fetchdata" id="@d5gAyv2)``y+.^(}E+N">
+                        <field name="CHANNEL">envmon/in</field>
+                      </block>
+                    </value>
+                    <next>
+                      <block type="controls_if" id="`A;_?*|+a$Z=5WYoYv]A">
+                        <value name="IF0">
+                          <block type="logic_compare" id="Of/lmXc]]j`5TbakqU3=">
+                            <field name="OP">EQ</field>
+                            <value name="A">
+                              <block type="mqtt_json" id="FBgDwvwu+L[~H`[2}TNK">
+                                <value name="RAWDATA">
+                                  <block type="variables_get" id="hICoPMq`izbPGZ;;V4pm">
+                                    <field name="VAR" id="T[a}Wm86rtSnOasqE0R}">data</field>
+                                  </block>
+                                </value>
+                                <value name="PARAMETER">
+                                  <block type="text" id="9k#f8keZ]EX$-oS-rKmx">
+                                    <field name="TEXT">parameter_name</field>
+                                  </block>
+                                </value>
+                              </block>
+                            </value>
+                            <value name="B">
+                              <block type="text" id="jq2!/v3(5%1Z%:C,=NvN">
+                                <field name="TEXT">humidity</field>
+                              </block>
+                            </value>
+                          </block>
+                        </value>
+                        <statement name="DO0">
+                          <block type="cs_sticker" id="T_6TfPk$X@xg4Z+3W$UR">
+                            <value name="LABEL">
+                              <shadow type="text" id="H38NY8s`.=)H1K|0/;sb">
+                                <field name="TEXT">Parameter</field>
+                              </shadow>
+                            </value>
+                            <value name="TEXT">
+                              <shadow type="text" id="D$lvEj/;SNBo|Hu.q6[4">
+                                <field name="TEXT">Reading</field>
+                              </shadow>
+                              <block type="mqtt_json" id="/q@/1#w6e|dY-C.*1)h|">
+                                <value name="RAWDATA">
+                                  <block type="variables_get" id="`.YF3Ov5KDa@kxTVMs`q">
+                                    <field name="VAR" id="T[a}Wm86rtSnOasqE0R}">data</field>
+                                  </block>
+                                </value>
+                                <value name="PARAMETER">
+                                  <block type="text" id="4MHWN]u,:nYW[LZPZPot">
+                                    <field name="TEXT">value</field>
+                                  </block>
+                                </value>
+                              </block>
+                            </value>
+                          </block>
+                        </statement>
+                      </block>
+                    </next>
+                  </block>
+                </statement>
+                <next>
+                  <block type="wait_seconds" id="v+Rd._/QQZ%?czqKqm8:">
+                    <field name="SECONDS">0.001</field>
+                  </block>
+                </next>
+              </block>
+            </statement>
+          </block>
+        </next>
+      </block>
+    </next>
+  </block>
+</xml>

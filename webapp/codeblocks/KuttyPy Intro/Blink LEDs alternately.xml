@@ -1,0 +1,62 @@
+<xml xmlns="https://developers.google.com/blockly/xml">
+  <block type="set_reg_bits_string" id="QO5^h;arJPoq$[^$H}j}" x="25" y="121">
+    <field name="REGISTER">DDRB</field>
+    <field name="B7">TRUE</field>
+    <field name="B6">TRUE</field>
+    <field name="B5">TRUE</field>
+    <field name="B4">TRUE</field>
+    <field name="B3">TRUE</field>
+    <field name="B2">TRUE</field>
+    <field name="B1">TRUE</field>
+    <field name="B0">TRUE</field>
+    <next>
+      <block type="controls_whileUntil" id="Lk`Z2vknMnR.t)_znAY+">
+        <field name="MODE">WHILE</field>
+        <value name="BOOL">
+          <shadow type="logic_boolean" id="lA%HLTQB0LaE_X|$bVBZ">
+            <field name="BOOL">TRUE</field>
+          </shadow>
+        </value>
+        <statement name="DO">
+          <block type="set_reg_bits_string" id="NoH:J3UTJok?LyDql:z4">
+            <field name="REGISTER">PORTB</field>
+            <field name="B7">FALSE</field>
+            <field name="B6">FALSE</field>
+            <field name="B5">FALSE</field>
+            <field name="B4">FALSE</field>
+            <field name="B3">TRUE</field>
+            <field name="B2">TRUE</field>
+            <field name="B1">TRUE</field>
+            <field name="B0">TRUE</field>
+            <next>
+              <block type="wait_seconds" id="%ooh,C.,+@xCXy9nW.!e">
+                <field name="SECONDS">1</field>
+                <next>
+                  <block type="set_reg_bits_string" id="!B;t3!tjm~o-V64cs!LA">
+                    <field name="REGISTER">PORTB</field>
+                    <field name="B7">TRUE</field>
+                    <field name="B6">TRUE</field>
+                    <field name="B5">TRUE</field>
+                    <field name="B4">TRUE</field>
+                    <field name="B3">FALSE</field>
+                    <field name="B2">FALSE</field>
+                    <field name="B1">FALSE</field>
+                    <field name="B0">FALSE</field>
+                    <next>
+                      <block type="wait_seconds" id="!1$bEpgt8_`-@QT65r-Y">
+                        <field name="SECONDS">1</field>
+                      </block>
+                    </next>
+                  </block>
+                </next>
+              </block>
+            </next>
+          </block>
+        </statement>
+      </block>
+    </next>
+  </block>
+<description>
+<![CDATA[<h1>Alternately Blink 4 LEDs </h1><p><br></p><h3>DDRB = 255 to set all PB pins as output type</h3><p><br></p><h3>Create a loop that repeats continuously.</h3><ol><li>Step 1 :Set PORTB = 15 ( 0b00001111) to light up first four LEDs </li><li>Wait a second so you can see it nicely </li><li>Set PORTB= 240 (0b11110000) to light up last 4, and turn off the first 4 LEDs </li><li>Wait another second.</li><li>Got back to step 1 inside the loop </li></ol>]]>
+</description>
+</xml>

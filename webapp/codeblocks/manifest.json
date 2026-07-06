@@ -1,0 +1,357 @@
+{
+  "categories": [
+    {
+      "name": "Explore Atmega32",
+      "samples": [
+        {
+          "title": "Copy INPUT A2-A7 to LED D2-D7",
+          "path": "Explore Atmega32/Copy INPUT A2-A7 to LED D2-D7.xml",
+          "preview": "Explore Atmega32/Copy INPUT A2-A7 to LED D2-D7.jpeg"
+        },
+        {
+          "title": "copyport",
+          "path": "Explore Atmega32/copyport.xml",
+          "preview": "Explore Atmega32/copyport.jpg"
+        },
+        {
+          "title": "copyport2",
+          "path": "Explore Atmega32/copyport2.xml",
+          "preview": "Explore Atmega32/copyport2.jpg"
+        },
+        {
+          "title": "LED BRIGHTNESS CONTROL simple",
+          "path": "Explore Atmega32/LED BRIGHTNESS CONTROL simple.xml",
+          "preview": "Explore Atmega32/LED BRIGHTNESS CONTROL simple.png"
+        },
+        {
+          "title": "PORTB LED WATERFALL",
+          "path": "Explore Atmega32/PORTB LED WATERFALL.xml",
+          "preview": "Explore Atmega32/PORTB LED WATERFALL.png"
+        },
+        {
+          "title": "Read ADC Registers",
+          "path": "Explore Atmega32/Read ADC Registers.xml",
+          "preview": "Explore Atmega32/Read ADC Registers.png"
+        },
+        {
+          "title": "Read N Voltages",
+          "path": "Explore Atmega32/Read N Voltages.xml",
+          "preview": "Explore Atmega32/Read N Voltages.png"
+        },
+        {
+          "title": "readport",
+          "path": "Explore Atmega32/readport.xml",
+          "preview": "Explore Atmega32/readport.jpg"
+        },
+        {
+          "title": "RGB LED with Accelerometer",
+          "path": "Explore Atmega32/RGB LED with Accelerometer.xml"
+        },
+        {
+          "title": "Set 6 bit DAC",
+          "path": "Explore Atmega32/Set 6 bit DAC.xml",
+          "preview": "Explore Atmega32/Set 6 bit DAC.jpg"
+        },
+        {
+          "title": "setport",
+          "path": "Explore Atmega32/setport.xml",
+          "preview": "Explore Atmega32/setport.jpg"
+        },
+        {
+          "title": "Switch Piano",
+          "path": "Explore Atmega32/Switch Piano.xml"
+        }
+      ]
+    },
+    {
+      "name": "Getting Started",
+      "samples": [
+        {
+          "title": "Calculate Area Of A Circle",
+          "path": "Getting Started/Calculate Area Of A Circle.xml",
+          "preview": "Getting Started/Calculate Area Of A Circle.jpeg"
+        },
+        {
+          "title": "Hello World",
+          "path": "Getting Started/Hello World.xml",
+          "preview": "Getting Started/Hello World.png"
+        },
+        {
+          "title": "If Condition",
+          "path": "Getting Started/If Condition.xml",
+          "preview": "Getting Started/If Condition.jpeg"
+        },
+        {
+          "title": "Input and Output Text",
+          "path": "Getting Started/Input and Output Text.xml",
+          "preview": "Getting Started/Input and Output Text.jpeg"
+        },
+        {
+          "title": "Plot Datapoints",
+          "path": "Getting Started/Plot Datapoints.xml",
+          "preview": "Getting Started/Plot Datapoints.jpeg"
+        },
+        {
+          "title": "Plot Using Loops",
+          "path": "Getting Started/Plot Using Loops.xml",
+          "preview": "Getting Started/Plot Using Loops.jpeg"
+        },
+        {
+          "title": "Print Multiplication Table",
+          "path": "Getting Started/Print Multiplication Table.xml",
+          "preview": "Getting Started/Print Multiplication Table.jpeg"
+        },
+        {
+          "title": "Print N Times",
+          "path": "Getting Started/Print N Times.xml",
+          "preview": "Getting Started/Print N Times.jpeg"
+        },
+        {
+          "title": "Read Text Input",
+          "path": "Getting Started/Read Text Input.xml",
+          "preview": "Getting Started/Read Text Input.jpg"
+        },
+        {
+          "title": "While Loops",
+          "path": "Getting Started/While Loops.xml",
+          "preview": "Getting Started/While Loops.jpeg"
+        },
+        {
+          "title": "Write Data To A File",
+          "path": "Getting Started/Write Data To A File.xml",
+          "preview": "Getting Started/Write Data To A File.png"
+        }
+      ]
+    },
+    {
+      "name": "Internet Of Things",
+      "samples": [
+        {
+          "title": "IoT Parse JSON",
+          "path": "Internet Of Things/IoT Parse JSON.xml"
+        },
+        {
+          "title": "IoT Receive Data",
+          "path": "Internet Of Things/IoT Receive Data.xml",
+          "preview": "Internet Of Things/IoT Receive Data.jpg"
+        },
+        {
+          "title": "IoT Send Data",
+          "path": "Internet Of Things/IoT Send Data.xml",
+          "preview": "Internet Of Things/IoT Send Data.jpg"
+        },
+        {
+          "title": "Transmit To ExpEYES Cloud",
+          "path": "Internet Of Things/Transmit To ExpEYES Cloud.xml",
+          "preview": "Internet Of Things/Transmit To ExpEYES Cloud.png"
+        }
+      ]
+    },
+    {
+      "name": "KuttyPy Intro",
+      "samples": [
+        {
+          "title": "Blink",
+          "path": "KuttyPy Intro/Blink.xml",
+          "preview": "KuttyPy Intro/Blink.jpeg"
+        },
+        {
+          "title": "Blink LEDs alternately",
+          "path": "KuttyPy Intro/Blink LEDs alternately.xml",
+          "preview": "KuttyPy Intro/Blink LEDs alternately.jpeg"
+        },
+        {
+          "title": "Copy Port Looped",
+          "path": "KuttyPy Intro/Copy Port Looped.xml",
+          "preview": "KuttyPy Intro/Copy Port Looped.jpg"
+        },
+        {
+          "title": "Copy Port Once",
+          "path": "KuttyPy Intro/Copy Port Once.xml",
+          "preview": "KuttyPy Intro/Copy Port Once.jpg"
+        },
+        {
+          "title": "I2C Data Logger",
+          "path": "KuttyPy Intro/I2C Data Logger.xml",
+          "preview": "KuttyPy Intro/I2C Data Logger.jpeg"
+        },
+        {
+          "title": "Read N Voltages",
+          "path": "KuttyPy Intro/Read N Voltages.xml",
+          "preview": "KuttyPy Intro/Read N Voltages.png"
+        },
+        {
+          "title": "Read Port",
+          "path": "KuttyPy Intro/Read Port.xml",
+          "preview": "KuttyPy Intro/Read Port.jpg"
+        },
+        {
+          "title": "Set Port",
+          "path": "KuttyPy Intro/Set Port.xml",
+          "preview": "KuttyPy Intro/Set Port.jpg"
+        }
+      ]
+    },
+    {
+      "name": "Plotting Datasets",
+      "samples": [
+        {
+          "title": "Create a List",
+          "path": "Plotting Datasets/Create a List.xml",
+          "preview": "Plotting Datasets/Create a List.jpeg"
+        },
+        {
+          "title": "Plot A Parabola",
+          "path": "Plotting Datasets/Plot A Parabola.xml",
+          "preview": "Plotting Datasets/Plot A Parabola.jpeg"
+        },
+        {
+          "title": "Plot List of Numbers",
+          "path": "Plotting Datasets/Plot List of Numbers.xml",
+          "preview": "Plotting Datasets/Plot List of Numbers.jpeg"
+        },
+        {
+          "title": "Plot Sine Wave",
+          "path": "Plotting Datasets/Plot Sine Wave.xml"
+        },
+        {
+          "title": "Plot Sine Wave points",
+          "path": "Plotting Datasets/Plot Sine Wave points.xml"
+        },
+        {
+          "title": "Plot Two Lists",
+          "path": "Plotting Datasets/Plot Two Lists.xml",
+          "preview": "Plotting Datasets/Plot Two Lists.png"
+        },
+        {
+          "title": "Polar Plot Flower",
+          "path": "Plotting Datasets/Polar Plot Flower.xml",
+          "preview": "Plotting Datasets/Polar Plot Flower.png"
+        },
+        {
+          "title": "Subtract Lists",
+          "path": "Plotting Datasets/Subtract Lists.xml",
+          "preview": "Plotting Datasets/Subtract Lists.jpeg"
+        }
+      ]
+    },
+    {
+      "name": "Sensor Addons",
+      "samples": [
+        {
+          "title": "Data Logger",
+          "path": "Sensor Addons/Data Logger.xml",
+          "preview": "Sensor Addons/Data Logger.jpeg"
+        },
+        {
+          "title": "Distance Sensor VL53L0X",
+          "path": "Sensor Addons/Distance Sensor VL53L0X.xml",
+          "preview": "Sensor Addons/Distance Sensor VL53L0X.png"
+        },
+        {
+          "title": "Line Follower",
+          "path": "Sensor Addons/Line Follower.xml",
+          "preview": "Sensor Addons/Line Follower.jpeg"
+        },
+        {
+          "title": "Measure Heart Rate (MAX30100)",
+          "path": "Sensor Addons/Measure Heart Rate (MAX30100).xml",
+          "preview": "Sensor Addons/Measure Heart Rate (MAX30100).png"
+        },
+        {
+          "title": "Phone Controlled Robot",
+          "path": "Sensor Addons/Phone Controlled Robot.xml",
+          "preview": "Sensor Addons/Phone Controlled Robot.png"
+        },
+        {
+          "title": "Robot Maintains Safe Distance",
+          "path": "Sensor Addons/Robot Maintains Safe Distance.xml",
+          "preview": "Sensor Addons/Robot Maintains Safe Distance.png"
+        },
+        {
+          "title": "Robot Obeys Hand",
+          "path": "Sensor Addons/Robot Obeys Hand.xml",
+          "preview": "Sensor Addons/Robot Obeys Hand.png"
+        },
+        {
+          "title": "Stepper Motor",
+          "path": "Sensor Addons/Stepper Motor.xml",
+          "preview": "Sensor Addons/Stepper Motor.jpeg"
+        },
+        {
+          "title": "Stepper Motor Dual",
+          "path": "Sensor Addons/Stepper Motor Dual.xml",
+          "preview": "Sensor Addons/Stepper Motor Dual.jpeg"
+        },
+        {
+          "title": "Water Level Monitor",
+          "path": "Sensor Addons/Water Level Monitor.xml",
+          "preview": "Sensor Addons/Water Level Monitor.jpeg"
+        }
+      ]
+    },
+    {
+      "name": "Vision Demos",
+      "samples": [
+        {
+          "title": "AI birdy",
+          "path": "Vision Demos/AI birdy.xml",
+          "preview": "Vision Demos/AI birdy.jpeg"
+        },
+        {
+          "title": "AI Gesture LEDs",
+          "path": "Vision Demos/AI Gesture LEDs.xml",
+          "preview": "Vision Demos/AI Gesture LEDs.jpeg"
+        },
+        {
+          "title": "AI Hand Gestures",
+          "path": "Vision Demos/AI Hand Gestures.xml",
+          "preview": "Vision Demos/AI Hand Gestures.jpeg"
+        },
+        {
+          "title": "AI LED",
+          "path": "Vision Demos/AI LED.xml"
+        },
+        {
+          "title": "AI Piano",
+          "path": "Vision Demos/AI Piano.xml",
+          "preview": "Vision Demos/AI Piano.jpeg"
+        }
+      ]
+    },
+    {
+      "name": "WiFi and Games",
+      "samples": [
+        {
+          "title": "AI Bird Game",
+          "path": "WiFi and Games/AI Bird Game.xml"
+        },
+        {
+          "title": "Bird Game with Light Sensor",
+          "path": "WiFi and Games/Bird Game with Light Sensor.xml",
+          "preview": "WiFi and Games/Bird Game with Light Sensor.png"
+        },
+        {
+          "title": "Happy Birthday",
+          "path": "WiFi and Games/Happy Birthday.xml",
+          "preview": "WiFi and Games/Happy Birthday.jpeg"
+        },
+        {
+          "title": "Play Song",
+          "path": "WiFi and Games/Play Song.xml",
+          "preview": "WiFi and Games/Play Song.jpeg"
+        },
+        {
+          "title": "Play Song Using Functions",
+          "path": "WiFi and Games/Play Song Using Functions.xml",
+          "preview": "WiFi and Games/Play Song Using Functions.jpeg"
+        },
+        {
+          "title": "Rotation Controlled Bird",
+          "path": "WiFi and Games/Rotation Controlled Bird.xml",
+          "preview": "WiFi and Games/Rotation Controlled Bird.jpeg"
+        }
+      ]
+    }
+  ]
+}

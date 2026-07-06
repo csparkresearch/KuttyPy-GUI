@@ -4,7 +4,8 @@
  */
 
 import { isAndroidChrome } from './platform.js';
-import { ConnectDebug, setLastConnectDebug, showConnectDebugPanel, hideConnectDebugPanel } from './connect-debug.js';
+import { resolveRegister } from './registers.js';
+import { ConnectDebug, setLastConnectDebug, showConnectDebugPanel, hideConnectDebugPanel, isConnectUserCancelled } from './connect-debug.js';
 
 export const BAUD = 38400;
 
@@ -80,6 +81,24 @@ function delay(ms) {
 /** Force 0–255 unsigned byte (avoids sign/extension issues). */
 function asByte(n) {
   return n & 0xff;
+}
+
+/** Resolve register name (PORTB) or numeric address to protocol byte. */
+function regAddress(reg) {
+  if (typeof reg === 'number' && Number.isFinite(reg)) return asByte(reg);
+  const resolved = resolveRegister(reg);
+  if (resolved) return resolved.addr;
+  const key = String(reg ?? '').trim().toUpperCase();
+  if (key in REGISTERS) return REGISTERS[key];
+  throw new Error(`Unknown register: ${reg}`);
+}
+
+export function regDisplayName(reg) {
+  if (typeof reg === 'number' && Number.isFinite(reg)) {
+    const resolved = Object.entries(REGISTERS).find(([, addr]) => addr === asByte(reg));
+    return resolved?.[0] ?? `0x${asByte(reg).toString(16).toUpperCase()}`;
+  }
+  return resolveRegister(reg)?.name ?? String(reg ?? '').trim().toUpperCase();
 }
 
 /**
@@ -232,10 +251,16 @@ export class KuttyPyDevice {
       return this.version;
     } catch (err) {
       debug.logErr('connect: exception', err);
-      if (this.lastConnectDebug) {
+      const cancelled = isConnectUserCancelled(err);
+      if (!cancelled && this.lastConnectDebug) {
         showConnectDebugPanel(err.message || 'Connection failed', this.lastConnectDebug);
       }
       await this.disconnect();
+      if (cancelled) {
+        const e = new Error('Connection cancelled');
+        e.userCancelled = true;
+        throw e;
+      }
       throw err;
     }
   }
@@ -362,16 +387,18 @@ export class KuttyPyDevice {
   }
 
   async _getRegUnlocked(reg) {
+    const addr = regAddress(reg);
     await this._writeByte(CMD.READB);
-    await this._writeByte(asByte(reg));
+    await this._writeByte(addr);
     const val = await this._getByte();
     if (val === null) throw new Error('No response from device');
     return val;
   }
 
   async _setRegUnlocked(reg, data) {
+    const addr = regAddress(reg);
     await this._writeByte(CMD.WRITEB);
-    await this._writeByte(asByte(reg));
+    await this._writeByte(addr);
     await this._writeByte(asByte(data));
   }
 

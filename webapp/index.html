@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>KuttyPy I/O Monitor</title>
   <link rel="icon" type="image/png" href="favicon.png">
-  <link rel="stylesheet" href="css/style.css?v=9">
+  <link rel="stylesheet" href="css/style.css?v=25">
+  <link rel="stylesheet" href="css/visual.css?v=30">
 </head>
 <body>
   <header>
@@ -34,15 +35,15 @@
     </div>
   </header>
 
-  <main>
+  <main id="view-monitor" class="app-view">
     <div class="layout">
       <div class="left-column">
         <section class="board-panel">
           <img src="images/kpy_components.webp" alt="KuttyPyPlus ATMEGA32 development board" width="380" height="auto">
-          <p>
-            Live register monitor for the KuttyPy ATMEGA32 board.
-            Connect via CH340 or MCP2200 USB serial. Green = logic high, red = logic low.
-          </p>
+          <button type="button" id="btn-open-visual" class="btn-visual-coding" title="Open visual programming">
+            <img src="images/VisualCoding.png" width="40" height="40" alt="">
+            <span>Visual Programming</span>
+          </button>
         </section>
 
         <section class="sensors-panel" aria-label="I2C sensors">
@@ -96,6 +97,81 @@
     </div>
   </main>
 
+  <section id="view-visual" class="app-view app-view--visual" hidden aria-label="Visual programming">
+    <div class="visual-toolbar">
+      <button type="button" id="btn-visual-back" class="btn-visual-back" title="Back to I/O Monitor">
+        <span aria-hidden="true">←</span>
+        <span class="btn-visual-back__label">I/O Monitor</span>
+      </button>
+      <button type="button" id="btn-visual-mode" class="btn-visual-mode" hidden aria-live="polite">
+        <span class="btn-visual-mode__label">Editing</span>
+      </button>
+      <div class="visual-toolbar-left">
+        <h2 class="visual-title">Visual Programming</h2>
+        <div class="visual-toolbar-actions visual-toolbar-actions--primary">
+          <button type="button" id="btn-visual-run" class="btn-visual-action btn-visual-action--run">
+            <svg class="btn-visual-run-icon btn-visual-run-icon--play" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M8 5v14l11-7z" fill="currentColor"/>
+            </svg>
+            <svg class="btn-visual-run-icon btn-visual-run-icon--stop" viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="6" y="6" width="12" height="12" fill="currentColor" rx="1"/>
+            </svg>
+            <span class="btn-visual-run-label">Run</span>
+          </button>
+          <button type="button" id="btn-visual-clear" class="btn-visual-action btn-visual-action--muted" title="Clear workspace">Clear</button>
+        </div>
+      </div>
+      <div class="visual-toolbar-files">
+        <button type="button" id="btn-visual-open" class="btn-visual-action btn-visual-action--file" title="Open workspace XML">
+          <img class="btn-visual-action__icon" src="images/upload.svg" width="16" height="16" alt="" aria-hidden="true">
+          <span class="btn-visual-action__label">Open</span>
+        </button>
+        <button type="button" id="btn-visual-save" class="btn-visual-action btn-visual-action--file" title="Save workspace XML">
+          <img class="btn-visual-action__icon" src="images/download.svg" width="16" height="16" alt="" aria-hidden="true">
+          <span class="btn-visual-action__label">Save</span>
+        </button>
+        <button type="button" id="btn-visual-samples" class="btn-visual-action btn-visual-action--samples" title="Load sample program">
+          <img class="btn-visual-action__icon btn-visual-action__icon--samples" src="images/VisualCoding.png" width="22" height="22" alt="" aria-hidden="true">
+          <span class="btn-visual-action__label">Samples</span>
+        </button>
+        <input type="file" id="visual-file-input" accept=".xml,text/xml,application/xml" hidden>
+      </div>
+    </div>
+    <div class="visual-body">
+      <div class="visual-workspace-pane" id="visual-workspace-pane">
+        <div id="visual-blockly-area" class="visual-blockly-area">
+          <div id="visual-blockly-div"></div>
+        </div>
+      </div>
+      <aside class="visual-side-pane" id="visual-side-pane" aria-label="Code and results">
+        <div class="visual-side-tabs" role="tablist">
+          <button type="button" class="visual-side-tab active" data-tab="code" role="tab">Code</button>
+          <button type="button" class="visual-side-tab" data-tab="output" role="tab">Output</button>
+        </div>
+        <div class="visual-tab-panel" data-panel="code">
+          <pre id="visual-codegen" class="visual-codegen">// Press Run to generate and execute</pre>
+        </div>
+        <div class="visual-tab-panel" data-panel="output" hidden>
+          <div id="visual-registers" class="visual-registers" aria-label="Register stickers"></div>
+          <div id="visual-plots-host" class="visual-plots-host" aria-label="Live plots"></div>
+          <div id="visual-output" class="visual-output" aria-label="Program output"></div>
+        </div>
+        <p id="visual-status" class="visual-status">Connect USB, build a program, then Run.</p>
+      </aside>
+    </div>
+  </section>
+
+  <div id="app-confirm-overlay" class="app-confirm-overlay" hidden>
+    <div class="app-confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="app-confirm-title">
+      <h2 id="app-confirm-title" class="app-confirm-title"></h2>
+      <p id="app-confirm-message" class="app-confirm-message"></p>
+      <div class="app-confirm-actions">
+        <button type="button" id="app-confirm-cancel" class="app-confirm-btn app-confirm-btn--cancel">Cancel</button>
+        <button type="button" id="app-confirm-ok" class="app-confirm-btn app-confirm-btn--ok">OK</button>
+      </div>
+    </div>
+  </div>
+
   <script src="vendor/hammer.min.js"></script>
   <script src="vendor/chart.umd.min.js"></script>
   <script src="vendor/chartjs-plugin-zoom.min.js"></script>
@@ -104,6 +180,6 @@
       Chart.register(ChartZoom);
     }
   </script>
-  <script type="module" src="js/app.js?v=9"></script>
+  <script type="module" src="js/app.js?v=30"></script>
 </body>
 </html>

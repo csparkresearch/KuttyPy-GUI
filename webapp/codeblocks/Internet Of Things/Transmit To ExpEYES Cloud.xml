@@ -1,0 +1,105 @@
+<xml xmlns="https://developers.google.com/blockly/xml">
+  <variables>
+    <variable id="`TP[#0}vXUrR[av*~5#P">h</variable>
+  </variables>
+  <block type="enable_gps" id="9vccHYDKK|(w^Ma!=u]a" x="-175" y="89">
+    <next>
+      <block type="mqtt_connect" id="g47FL$1jwRN%!o^vg%aZ">
+        <field name="SNAME">iot.expeyes.in</field>
+        <field name="NAME">name</field>
+        <next>
+          <block type="controls_whileUntil" id="(;n4Ao7qP$Xay^1h]2*{">
+            <field name="MODE">WHILE</field>
+            <value name="BOOL">
+              <shadow type="logic_boolean" id="38r#`Mfm_hgW.([k%~t!">
+                <field name="BOOL">TRUE</field>
+              </shadow>
+            </value>
+            <statement name="DO">
+              <block type="wait_seconds" id="AZ}-%A`]/*-Yt(P:Z0pV">
+                <field name="SECONDS">1</field>
+                <next>
+                  <block type="variables_set" id="t9ry_fJREA(QG]ph~-a?">
+                    <field name="VAR" id="`TP[#0}vXUrR[av*~5#P">h</field>
+                    <value name="VALUE">
+                      <block type="get_phone_light" id="c.lPqH?vR^[Zp[.}b~K{">
+                        <field name="CHANNEL">0</field>
+                      </block>
+                    </value>
+                    <next>
+                      <block type="mqtt_publish_gps" id="BuT$hHL,|*317Kcs#%mT">
+                        <value name="CHANNEL">
+                          <shadow type="text" id="8fTG^Ku%Qwtiw6ThT*Fi">
+                            <field name="TEXT">envmon/in</field>
+                          </shadow>
+                        </value>
+                        <value name="SENSOR">
+                          <shadow type="text" id="JT5Y`T+)/7{5A{#GU|0Q">
+                            <field name="TEXT">phone</field>
+                          </shadow>
+                        </value>
+                        <value name="PARAMETER">
+                          <shadow type="text" id="JT5Y`T+)/7{5A{#GU|01">
+                            <field name="TEXT">lux</field>
+                          </shadow>
+                        </value>
+                        <value name="DATA">
+                          <shadow type="math_number" id="RoXmm_!gK5Q6FfYJ/8Lm">
+                            <field name="NUM">20</field>
+                          </shadow>
+                          <block type="variables_get" id="h)(AVYYSWJdaMRA/YJvR">
+                            <field name="VAR" id="`TP[#0}vXUrR[av*~5#P">h</field>
+                          </block>
+                        </value>
+                        <value name="LAT">
+                          <block type="get_phone_gps" id="TjKP]=j6q{@Zg0HLh-yt">
+                            <field name="CHANNEL">0</field>
+                          </block>
+                        </value>
+                        <value name="LNG">
+                          <block type="get_phone_gps" id="nLIde]M5OgEVX.uD;,7b">
+                            <field name="CHANNEL">1</field>
+                          </block>
+                        </value>
+                        <next>
+                          <block type="plot_datapoint" id="NE1H^o:Ta(Kniv+76mV*">
+                            <field name="PLOTNAME">mypl</field>
+                            <value name="VALUE">
+                              <block type="variables_get" id="6*unG;uG@}sj%.94oj]z">
+                                <field name="VAR" id="`TP[#0}vXUrR[av*~5#P">h</field>
+                              </block>
+                            </value>
+                            <next>
+                              <block type="cs_sticker" id="eS6t|d.j{#tZtxrmC,p%">
+                                <value name="LABEL">
+                                  <shadow type="text" id="HM]/3l``5xkh}z477dTo">
+                                    <field name="TEXT">latitude</field>
+                                  </shadow>
+                                </value>
+                                <value name="TEXT">
+                                  <shadow type="text" id="7;.eoS#M={6$!vy$)hX2">
+                                    <field name="TEXT">Reading</field>
+                                  </shadow>
+                                  <block type="get_phone_gps" id="3]!o}M+).D7~V?4xb%Rx">
+                                    <field name="CHANNEL">0</field>
+                                  </block>
+                                </value>
+                              </block>
+                            </next>
+                          </block>
+                        </next>
+                      </block>
+                    </next>
+                  </block>
+                </next>
+              </block>
+            </statement>
+          </block>
+        </next>
+      </block>
+    </next>
+  </block>
+<description>
+<![CDATA[<h2>Transmit Data over the internet</h2><p><br></p><p>Sends data to the ExpEYES cloud server with GPS location tagged</p><p><br></p><p><a href="https://expeyes.scischool.in:4000/information" rel="noopener noreferrer" target="_blank"> Map view : expeyes.scischool.in </a></p><p><a href="https://expeyes.scischool.in:4000/admin" rel="noopener noreferrer" target="_blank">Admin view: expeyes.scischool.in </a></p><p><a href="https://expeyes.scischool.in:4000/statistics" rel="noopener noreferrer" target="_blank">Statistics</a></p>]]>
+</description>
+</xml>

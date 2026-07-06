@@ -2,6 +2,12 @@
  * Sensor data logger — Chart.js + chartjs-plugin-zoom (Y zoom/pan, X autoscroll).
  */
 
+import {
+  chartPointerInteraction,
+  mobileTooltipLifetimePlugin,
+  mobileTooltipOptions,
+} from './chart-mobile-tooltip.js';
+
 export const LOGGER_COLORS = ['#38bdf8', '#22c55e', '#f97316', '#a78bfa', '#f43f5e', '#eab308'];
 
 export const DEFAULT_WINDOW_SEC = 10;
@@ -47,16 +53,11 @@ function chartTheme() {
     responsive: true,
     maintainAspectRatio: false,
     animation: false,
-    interaction: { mode: 'nearest', axis: 'x', intersect: false },
+    interaction: chartPointerInteraction,
     plugins: {
       legend: { display: false },
       tooltip: {
-        backgroundColor: 'rgba(15, 20, 25, 0.92)',
-        titleColor: '#e2e8f0',
-        bodyColor: '#94a3b8',
-        borderColor: '#334155',
-        borderWidth: 1,
-        padding: 10,
+        ...mobileTooltipOptions,
         callbacks: {
           title(items) {
             return items.length ? `t = ${Number(items[0].parsed.x).toFixed(2)} s` : '';
@@ -116,6 +117,7 @@ export function createSensorLogger(canvas, fields, { windowSec = DEFAULT_WINDOW_
 
   const chart = new Chart(ctx, {
     type: 'line',
+    plugins: [mobileTooltipLifetimePlugin],
     data: {
       datasets: fields.map((f, i) => ({
         label: f.label,

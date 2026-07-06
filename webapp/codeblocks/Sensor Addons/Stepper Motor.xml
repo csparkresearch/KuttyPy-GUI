@@ -1,0 +1,46 @@
+<xml xmlns="https://developers.google.com/blockly/xml">
+  <block type="init_stepper" id="cV+-sycIk65#_?bh*Qry" x="17" y="109">
+    <field name="PINS">B1</field>
+    <next>
+      <block type="move_stepper" id="54HnkcL2=fTzrQIQ%[Qq">
+        <value name="DIR">
+          <block type="direction" id="feo@E$C8RRKAVjfH({(:">
+            <field name="DIR">CW</field>
+          </block>
+        </value>
+        <value name="STEPS">
+          <shadow type="math_number" id="~Yy9sdQ|h.zOxJDPCUD)">
+            <field name="NUM">90</field>
+          </shadow>
+        </value>
+        <value name="DELAY">
+          <shadow type="math_number" id="NoH#(XPVTrGfz:A8+)jT">
+            <field name="NUM">50</field>
+          </shadow>
+        </value>
+        <next>
+          <block type="move_stepper" id="fL|a]?R$y,l;GT+ieaV3">
+            <value name="DIR">
+              <block type="direction" id="4#J7:_F/eY]7()a#mM4L">
+                <field name="DIR">CCW</field>
+              </block>
+            </value>
+            <value name="STEPS">
+              <shadow type="math_number" id="ynlJ}9m0fe3bJP4y)f9H">
+                <field name="NUM">90</field>
+              </shadow>
+            </value>
+            <value name="DELAY">
+              <shadow type="math_number" id="B}_9NuzC:%#),Dp*+BeC">
+                <field name="NUM">50</field>
+              </shadow>
+            </value>
+          </block>
+        </next>
+      </block>
+    </next>
+  </block>
+<description>
+<![CDATA[<h1>Test stepper motor</h1><p><br></p><p>PB0 to PB3 pins are used.</p><p><br></p><p><br></p><h3>Connect to the motor in the following order</h3><p><br></p><p>PB0 A+</p><p>PB1 B+</p><p>PB2 A-</p><p>PB3 B-</p><p><br></p><p>The program will rotate few steps clockwise, and then return.</p>]]>
+</description>
+</xml>

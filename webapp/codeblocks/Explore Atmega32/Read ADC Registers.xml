@@ -1,0 +1,88 @@
+<xml xmlns="https://developers.google.com/blockly/xml">
+  <variables>
+    <variable id="FC2@yC,~!U55Qi9q[~Oj">adval</variable>
+  </variables>
+  <block type="set_reg_bits_string" id="m!3vb.z4rK5+,_)Ie@y:" x="14" y="0">
+    <field name="REGISTER">ADMUX</field>
+    <field name="B7">FALSE</field>
+    <field name="B6">TRUE</field>
+    <field name="B5">FALSE</field>
+    <field name="B4">FALSE</field>
+    <field name="B3">FALSE</field>
+    <field name="B2">FALSE</field>
+    <field name="B1">FALSE</field>
+    <field name="B0">FALSE</field>
+    <next>
+      <block type="controls_repeat_ext" id="8tZwCwwdtTmXt4{Ta_U5">
+        <value name="TIMES">
+          <shadow type="math_number" id="gra}Ax2HejE4O^7~$[5E">
+            <field name="NUM">50</field>
+          </shadow>
+        </value>
+        <statement name="DO">
+          <block type="set_reg_bits_string" id="-skR,MSO*$_D#lH5BY{@">
+            <field name="REGISTER">ADCSRA</field>
+            <field name="B7">TRUE</field>
+            <field name="B6">TRUE</field>
+            <field name="B5">FALSE</field>
+            <field name="B4">FALSE</field>
+            <field name="B3">FALSE</field>
+            <field name="B2">TRUE</field>
+            <field name="B1">FALSE</field>
+            <field name="B0">FALSE</field>
+            <next>
+              <block type="variables_set" id="TCF4:@/7,(Ds$j,()lj!">
+                <field name="VAR" id="FC2@yC,~!U55Qi9q[~Oj">adval</field>
+                <value name="VALUE">
+                  <block type="bytes_to_int" id=";E!@7qCOFA-*YzFsS6(_">
+                    <value name="HIGH">
+                      <shadow type="math_number" id="eVV=lSHB3aYH29Dhg4{s">
+                        <field name="NUM">255</field>
+                      </shadow>
+                      <block type="get_reg_from_string" id="~Xo8[q9{Rs,gV}4Vsq_E">
+                        <field name="REGISTER">ADCH</field>
+                      </block>
+                    </value>
+                    <value name="LOW">
+                      <shadow type="math_number" id="y}oAzp]@Hy2rsC@Zx;a(">
+                        <field name="NUM">255</field>
+                      </shadow>
+                      <block type="get_reg_from_string" id="V5c|kWu%T/J$.Ffqo2{=">
+                        <field name="REGISTER">ADCL</field>
+                      </block>
+                    </value>
+                  </block>
+                </value>
+                <next>
+                  <block type="cs_print" id="OvdOc).Qgs|:`SiWRgDA">
+                    <value name="TEXT">
+                      <shadow type="text" id="W#9%QeySd^mGaf5S3@at">
+                        <field name="TEXT">abc</field>
+                      </shadow>
+                      <block type="variables_get" id="clLHYB%cb)Kqri*1*3nR">
+                        <field name="VAR" id="FC2@yC,~!U55Qi9q[~Oj">adval</field>
+                      </block>
+                    </value>
+                    <next>
+                      <block type="plot_datapoint" id="[.$flX0Tmv!1:++Ss=/?">
+                        <field name="PLOTNAME">myplot</field>
+                        <value name="VALUE">
+                          <block type="variables_get" id="CqMR`~d}Ohr)x!3Pj{`_">
+                            <field name="VAR" id="FC2@yC,~!U55Qi9q[~Oj">adval</field>
+                          </block>
+                        </value>
+                      </block>
+                    </next>
+                  </block>
+                </next>
+              </block>
+            </next>
+          </block>
+        </statement>
+      </block>
+    </next>
+  </block>
+<description>
+<![CDATA[<p>Read ADC values from analog input 0, and plot them</p>]]>
+</description>
+</xml>

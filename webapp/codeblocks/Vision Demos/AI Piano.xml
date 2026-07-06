@@ -1,0 +1,140 @@
+<xml xmlns="https://developers.google.com/blockly/xml">
+  <variables>
+    <variable id="@XqEZCd@#c$150r$I3-0">gesture</variable>
+  </variables>
+  <block type="add_mp_hands" id="h0s4:(vHme.s$0T4y^pd" x="25" y="-56">
+    <next>
+      <block type="add_piano" id="[T[0ST1JB02}KVYBpzE{">
+        <next>
+          <block type="controls_whileUntil" id=".{Z)z=N#scEFP4Cd]#kB">
+            <field name="MODE">WHILE</field>
+            <value name="BOOL">
+              <block type="logic_boolean" id="T%vh,hWbmX`rmg(.]Gaw">
+                <field name="BOOL">TRUE</field>
+              </block>
+            </value>
+            <statement name="DO">
+              <block type="controls_whileUntil" id="LybzStw}@KHxE`ZoC]:i">
+                <field name="MODE">WHILE</field>
+                <value name="BOOL">
+                  <shadow type="logic_boolean" id="KY`gGNu|JG{hB/iAR+J$">
+                    <field name="BOOL">TRUE</field>
+                  </shadow>
+                  <block type="ai_gesture_available" id="U7}P?p%~}lNaNTT/p{T4"></block>
+                </value>
+                <statement name="DO">
+                  <block type="variables_set" id="SH#7EFUlxvul:[^|7q||">
+                    <field name="VAR" id="@XqEZCd@#c$150r$I3-0">gesture</field>
+                    <value name="VALUE">
+                      <block type="ai_get_gesture" id="rytiZiTQflOL9HLLDh_p"></block>
+                    </value>
+                    <next>
+                      <block type="controls_if" id="2;I.?M*_T6(TLAb(,Ypr">
+                        <value name="IF0">
+                          <block type="ai_check_gesture" id="]*S8qyPPtD@uJj7MjZzY">
+                            <field name="gesturetype">INDEXFOLDED</field>
+                            <value name="gesture">
+                              <block type="variables_get" id="]iyDAnDRGVvO*NzC_,R}">
+                                <field name="VAR" id="@XqEZCd@#c$150r$I3-0">gesture</field>
+                              </block>
+                            </value>
+                          </block>
+                        </value>
+                        <statement name="DO0">
+                          <block type="play_piano" id="OlU:,/f%JyKM-BWwIaq@">
+                            <value name="NOTE">
+                              <shadow type="text" id="%=ZblPD)G(T%%d-F(#ps">
+                                <field name="TEXT">C#</field>
+                              </shadow>
+                            </value>
+                          </block>
+                        </statement>
+                        <next>
+                          <block type="controls_if" id="73~cUA8,(,N/l/ZaNk!W">
+                            <value name="IF0">
+                              <block type="ai_check_gesture" id="wQO;.l|:QYdbt}X)9^+H">
+                                <field name="gesturetype">MIDDLEFOLDED</field>
+                                <value name="gesture">
+                                  <block type="variables_get" id="6fMk`kC(iSN=]0?;Mn4=">
+                                    <field name="VAR" id="@XqEZCd@#c$150r$I3-0">gesture</field>
+                                  </block>
+                                </value>
+                              </block>
+                            </value>
+                            <statement name="DO0">
+                              <block type="play_piano" id="#]3A-X3KrcM#8LIsIF]Y">
+                                <value name="NOTE">
+                                  <shadow type="text" id="Vk%zNI#Ea[{E7#`){Q}y">
+                                    <field name="TEXT">D#</field>
+                                  </shadow>
+                                </value>
+                              </block>
+                            </statement>
+                            <next>
+                              <block type="controls_if" id="pv;g{/-g.cNuTSHoWy;`">
+                                <value name="IF0">
+                                  <block type="ai_check_gesture" id="o4OpH5j`*m#Z))KllWS)">
+                                    <field name="gesturetype">RINGFOLDED</field>
+                                    <value name="gesture">
+                                      <block type="variables_get" id="!AefHJE]xJL8~mm7wSL}">
+                                        <field name="VAR" id="@XqEZCd@#c$150r$I3-0">gesture</field>
+                                      </block>
+                                    </value>
+                                  </block>
+                                </value>
+                                <statement name="DO0">
+                                  <block type="play_piano" id="lVv4VLeW+~n*O{${lK.a">
+                                    <value name="NOTE">
+                                      <shadow type="text" id="HMT~Y3AtU9{L=.|uxSHe">
+                                        <field name="TEXT">F</field>
+                                      </shadow>
+                                    </value>
+                                  </block>
+                                </statement>
+                                <next>
+                                  <block type="controls_if" id="x@y7Xt;//,2xE{y2nOU!">
+                                    <value name="IF0">
+                                      <block type="ai_check_gesture" id="/+EF4h{RX%2[TJp!9vb`">
+                                        <field name="gesturetype">LITTLEFOLDED</field>
+                                        <value name="gesture">
+                                          <block type="variables_get" id="hh?2Sz=I.(+Y;LUFQ(Qs">
+                                            <field name="VAR" id="@XqEZCd@#c$150r$I3-0">gesture</field>
+                                          </block>
+                                        </value>
+                                      </block>
+                                    </value>
+                                    <statement name="DO0">
+                                      <block type="play_piano" id="56i*/lj[Sa5L8lQ%LR]@">
+                                        <value name="NOTE">
+                                          <shadow type="text" id="7%;5~?xzid~)d5~))n1(">
+                                            <field name="TEXT">F#</field>
+                                          </shadow>
+                                        </value>
+                                      </block>
+                                    </statement>
+                                  </block>
+                                </next>
+                              </block>
+                            </next>
+                          </block>
+                        </next>
+                      </block>
+                    </next>
+                  </block>
+                </statement>
+                <next>
+                  <block type="wait_seconds" id="f*o+{~Od%}rD/R3RXOL$">
+                    <field name="SECONDS">0.1</field>
+                  </block>
+                </next>
+              </block>
+            </statement>
+          </block>
+        </next>
+      </block>
+    </next>
+  </block>
+<description>
+<![CDATA[<h2>Introduction</h2><p><br></p><p>AI is used to find positions of each finger, and determine whether they are folded or extended. Then each finger is used to simulate a piano key being played</p>]]>
+</description>
+</xml>

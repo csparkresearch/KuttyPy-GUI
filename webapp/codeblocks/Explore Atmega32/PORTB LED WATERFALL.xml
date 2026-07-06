@@ -1,0 +1,58 @@
+<xml xmlns="https://developers.google.com/blockly/xml">
+  <variables>
+    <variable id="LbE2%mV/CRs,w^fwYIZy">i</variable>
+  </variables>
+  <block type="set_reg_bits" id="|3waDCpz*X@8wo~J$=0i" x="11" y="27">
+    <field name="REGISTER">DDRB</field>
+    <field name="B7">TRUE</field>
+    <field name="B6">TRUE</field>
+    <field name="B5">TRUE</field>
+    <field name="B4">TRUE</field>
+    <field name="B3">TRUE</field>
+    <field name="B2">TRUE</field>
+    <field name="B1">TRUE</field>
+    <field name="B0">TRUE</field>
+    <next>
+      <block type="controls_for" id="ay[8YghR7$U%1FaqBKGK">
+        <field name="VAR" id="LbE2%mV/CRs,w^fwYIZy">i</field>
+        <value name="FROM">
+          <shadow type="math_number" id="eCPe#Op=W%SrY@[C-TMW">
+            <field name="NUM">1</field>
+          </shadow>
+        </value>
+        <value name="TO">
+          <shadow type="math_number" id="bRxZqpDSa7B7T-e?_yxR">
+            <field name="NUM">255</field>
+          </shadow>
+        </value>
+        <value name="BY">
+          <shadow type="math_number" id="xVWWU$K?^?p~GiehgW,J">
+            <field name="NUM">1</field>
+          </shadow>
+        </value>
+        <statement name="DO">
+          <block type="set_reg_from_string" id="MUs^k9KRmEqpZ%G%Lsjm">
+            <value name="REGISTER">
+              <block type="reg" id="N%cF1}Vu)c=rc0]^%itn">
+                <field name="REGISTER">PORTB</field>
+              </block>
+            </value>
+            <value name="VALUE">
+              <shadow type="math_number" id="D17{O4xk]JJoLP=mkZYu">
+                <field name="NUM">0</field>
+              </shadow>
+              <block type="variables_get" id="CVJft|N.SQm+BU9vkT#8">
+                <field name="VAR" id="LbE2%mV/CRs,w^fwYIZy">i</field>
+              </block>
+            </value>
+            <next>
+              <block type="wait_seconds" id="+D2sW#zYT^DB4m(J,s]v">
+                <field name="SECONDS">0.01</field>
+              </block>
+            </next>
+          </block>
+        </statement>
+      </block>
+    </next>
+  </block>
+</xml>

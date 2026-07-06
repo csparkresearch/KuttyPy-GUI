@@ -1,0 +1,86 @@
+<xml xmlns="https://developers.google.com/blockly/xml">
+  <variables>
+    <variable id="LbE2%mV/CRs,w^fwYIZy">switches</variable>
+  </variables>
+  <block type="set_reg_bits" id="|3waDCpz*X@8wo~J$=0i" x="0" y="0">
+    <field name="REGISTER">DDRA</field>
+    <field name="B7">FALSE</field>
+    <field name="B6">FALSE</field>
+    <field name="B5">FALSE</field>
+    <field name="B4">FALSE</field>
+    <field name="B3">FALSE</field>
+    <field name="B2">FALSE</field>
+    <field name="B1">FALSE</field>
+    <field name="B0">FALSE</field>
+    <next>
+      <block type="set_reg_bits_string" id="Cr|-y.+Yayrl/:Reg}ii">
+        <field name="REGISTER">PORTA</field>
+        <field name="B7">TRUE</field>
+        <field name="B6">TRUE</field>
+        <field name="B5">TRUE</field>
+        <field name="B4">TRUE</field>
+        <field name="B3">TRUE</field>
+        <field name="B2">TRUE</field>
+        <field name="B1">TRUE</field>
+        <field name="B0">TRUE</field>
+        <next>
+          <block type="set_reg_bits" id="LxL9*pOcz9p-N4de=Y|)">
+            <field name="REGISTER">DDRD</field>
+            <field name="B7">TRUE</field>
+            <field name="B6">TRUE</field>
+            <field name="B5">TRUE</field>
+            <field name="B4">TRUE</field>
+            <field name="B3">TRUE</field>
+            <field name="B2">TRUE</field>
+            <field name="B1">TRUE</field>
+            <field name="B0">TRUE</field>
+            <next>
+              <block type="controls_repeat_ext" id="%oI+O+xp08-zmsfzKoyk">
+                <value name="TIMES">
+                  <shadow type="math_number" id="Pb=`jTZVX`sMgtde:KX_">
+                    <field name="NUM">10000</field>
+                  </shadow>
+                </value>
+                <statement name="DO">
+                  <block type="variables_set" id="LfL+XY^=}JyNca24Oqdc">
+                    <field name="VAR" id="LbE2%mV/CRs,w^fwYIZy">switches</field>
+                    <value name="VALUE">
+                      <block type="get_reg_from_string" id="NBHFr]A@6%^5?wb.VlR+">
+                        <field name="REGISTER">PINA</field>
+                      </block>
+                    </value>
+                    <next>
+                      <block type="set_reg_from_string" id="MUs^k9KRmEqpZ%G%Lsjm">
+                        <value name="REGISTER">
+                          <block type="reg" id="@E+JO#o#~rJI?`oXF-dH">
+                            <field name="REGISTER">PORTD</field>
+                          </block>
+                        </value>
+                        <value name="VALUE">
+                          <shadow type="math_number" id="D17{O4xk]JJoLP=mkZYu">
+                            <field name="NUM">0</field>
+                          </shadow>
+                          <block type="variables_get" id="CVJft|N.SQm+BU9vkT#8">
+                            <field name="VAR" id="LbE2%mV/CRs,w^fwYIZy">switches</field>
+                          </block>
+                        </value>
+                        <next>
+                          <block type="wait_seconds" id="+D2sW#zYT^DB4m(J,s]v">
+                            <field name="SECONDS">0.01</field>
+                          </block>
+                        </next>
+                      </block>
+                    </next>
+                  </block>
+                </statement>
+              </block>
+            </next>
+          </block>
+        </next>
+      </block>
+    </next>
+  </block>
+<description>
+<![CDATA[<h1>Copy states of Switches on PA2-PA7(Switch 3 to 8) to the LEDs on PD2-PD7</h1><ul><li>DDRA = 0 to set all PA pins as input type</li><li>PORTA = 255 to set internal pullup on all PA pins. This connects each input to the supply voltage of 5V through a high value resistor, so that all inputs are in HIGH state. In order to set an input to the LOW state, simply connect it to 0V(Ground) using a low value resistor, or a switch. Internal pullups ensure that in the absence of a connection to 0V, the state of the input pin is fixed and not floating. If the pullup is not provided, the pin can collect or lose stray charges and end up randomly fluctuating between LOW and HIGH states.</li><li>DDRD = 255 to set all PD pins as outputs <em>IMPORTANT</em> - PD0, PD1 are used for communicating with your phone/laptop, and cannot be altered. they will always be on unless you write C code for this task and disconnect your phone/laptop.</li></ul><p>We now with to copy the switch states to the remaining 6 LEDs continuously in a loop.</p><p><br></p><ul><li>Create a loop that repeats 10000 times.</li><li>Read PINA which contains the state of the PA pins</li><li>Copy PINA to a variable, and copy that variable to PORTD which controls the LEDs on PD pins.</li></ul>]]>
+</description>
+</xml>

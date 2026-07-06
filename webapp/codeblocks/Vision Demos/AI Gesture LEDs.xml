@@ -1,0 +1,171 @@
+<xml xmlns="https://developers.google.com/blockly/xml">
+  <variables>
+    <variable id="@XqEZCd@#c$150r$I3-0">gesture</variable>
+  </variables>
+  <block type="add_mp_hands" id="h0s4:(vHme.s$0T4y^pd" x="25" y="-56">
+    <field name="CAM">front</field>
+    <next>
+      <block type="set_reg_from_string" id="cD},xeFTo5sQhY5ka`EX">
+        <value name="REGISTER">
+          <block type="reg" id="kEhMzo.B`Cgx[_(K^$_z">
+            <field name="REGISTER">DDRB</field>
+          </block>
+        </value>
+        <value name="VALUE">
+          <block type="binary_value" id="Wrm8`LhNZqd/Vrdw;yg(">
+            <field name="B7">TRUE</field>
+            <field name="B6">TRUE</field>
+            <field name="B5">TRUE</field>
+            <field name="B4">TRUE</field>
+            <field name="B3">TRUE</field>
+            <field name="B2">TRUE</field>
+            <field name="B1">TRUE</field>
+            <field name="B0">TRUE</field>
+          </block>
+        </value>
+        <next>
+          <block type="controls_whileUntil" id=".{Z)z=N#scEFP4Cd]#kB">
+            <field name="MODE">WHILE</field>
+            <value name="BOOL">
+              <block type="logic_boolean" id="T%vh,hWbmX`rmg(.]Gaw">
+                <field name="BOOL">TRUE</field>
+              </block>
+            </value>
+            <statement name="DO">
+              <block type="controls_whileUntil" id="LybzStw}@KHxE`ZoC]:i">
+                <field name="MODE">WHILE</field>
+                <value name="BOOL">
+                  <shadow type="logic_boolean" id="KY`gGNu|JG{hB/iAR+J$">
+                    <field name="BOOL">TRUE</field>
+                  </shadow>
+                  <block type="ai_gesture_available" id="U7}P?p%~}lNaNTT/p{T4"></block>
+                </value>
+                <statement name="DO">
+                  <block type="variables_set" id="SH#7EFUlxvul:[^|7q||">
+                    <field name="VAR" id="@XqEZCd@#c$150r$I3-0">gesture</field>
+                    <value name="VALUE">
+                      <block type="ai_get_gesture" id="rytiZiTQflOL9HLLDh_p"></block>
+                    </value>
+                    <next>
+                      <block type="controls_if" id="2;I.?M*_T6(TLAb(,Ypr">
+                        <value name="IF0">
+                          <block type="ai_check_gesture" id="]*S8qyPPtD@uJj7MjZzY">
+                            <field name="gesturetype">THUMB_UP</field>
+                            <value name="gesture">
+                              <block type="variables_get" id="]iyDAnDRGVvO*NzC_,R}">
+                                <field name="VAR" id="@XqEZCd@#c$150r$I3-0">gesture</field>
+                              </block>
+                            </value>
+                          </block>
+                        </value>
+                        <statement name="DO0">
+                          <block type="set_reg_from_string" id=",U1#E=KWjgc.3t,/HA_*">
+                            <value name="REGISTER">
+                              <block type="reg" id="~skBUB9ICysJJf]P`|lr">
+                                <field name="REGISTER">PORTB</field>
+                              </block>
+                            </value>
+                            <value name="VALUE">
+                              <block type="binary_value" id="`kc2FJS|%31g;L|eWVJM">
+                                <field name="B7">FALSE</field>
+                                <field name="B6">FALSE</field>
+                                <field name="B5">FALSE</field>
+                                <field name="B4">FALSE</field>
+                                <field name="B3">TRUE</field>
+                                <field name="B2">TRUE</field>
+                                <field name="B1">TRUE</field>
+                                <field name="B0">TRUE</field>
+                              </block>
+                            </value>
+                          </block>
+                        </statement>
+                        <next>
+                          <block type="controls_if" id="73~cUA8,(,N/l/ZaNk!W">
+                            <value name="IF0">
+                              <block type="ai_check_gesture" id="wQO;.l|:QYdbt}X)9^+H">
+                                <field name="gesturetype">THUMB_DOWN</field>
+                                <value name="gesture">
+                                  <block type="variables_get" id="6fMk`kC(iSN=]0?;Mn4=">
+                                    <field name="VAR" id="@XqEZCd@#c$150r$I3-0">gesture</field>
+                                  </block>
+                                </value>
+                              </block>
+                            </value>
+                            <statement name="DO0">
+                              <block type="set_reg_from_string" id="4Dt%Cj0^kON4LaVK^69}">
+                                <value name="REGISTER">
+                                  <block type="reg" id="?*CnwCNQPWLt#v?pF.z6">
+                                    <field name="REGISTER">PORTB</field>
+                                  </block>
+                                </value>
+                                <value name="VALUE">
+                                  <block type="binary_value" id="exY?9FCoK,~P{s!~gl{5">
+                                    <field name="B7">TRUE</field>
+                                    <field name="B6">TRUE</field>
+                                    <field name="B5">TRUE</field>
+                                    <field name="B4">TRUE</field>
+                                    <field name="B3">FALSE</field>
+                                    <field name="B2">FALSE</field>
+                                    <field name="B1">FALSE</field>
+                                    <field name="B0">FALSE</field>
+                                  </block>
+                                </value>
+                              </block>
+                            </statement>
+                            <next>
+                              <block type="controls_if" id="a@;8KZ*v|;$BBcFCaFgc">
+                                <value name="IF0">
+                                  <block type="ai_check_gesture" id="$sI6~jCs92$)-cG6s!6c">
+                                    <field name="gesturetype">OPEN_PALM</field>
+                                    <value name="gesture">
+                                      <block type="variables_get" id="J0P4.s_X6sG5u]GM]to;">
+                                        <field name="VAR" id="@XqEZCd@#c$150r$I3-0">gesture</field>
+                                      </block>
+                                    </value>
+                                  </block>
+                                </value>
+                                <statement name="DO0">
+                                  <block type="set_reg_from_string" id="@7s;n_m/GY{y]UA%co}/">
+                                    <value name="REGISTER">
+                                      <block type="reg" id="q5uW@*9niNDTJ_=ZIxe!">
+                                        <field name="REGISTER">PORTB</field>
+                                      </block>
+                                    </value>
+                                    <value name="VALUE">
+                                      <block type="binary_value" id="Hl(dGcl~%4jDGez*`F.*">
+                                        <field name="B7">TRUE</field>
+                                        <field name="B6">TRUE</field>
+                                        <field name="B5">TRUE</field>
+                                        <field name="B4">TRUE</field>
+                                        <field name="B3">TRUE</field>
+                                        <field name="B2">TRUE</field>
+                                        <field name="B1">TRUE</field>
+                                        <field name="B0">TRUE</field>
+                                      </block>
+                                    </value>
+                                  </block>
+                                </statement>
+                              </block>
+                            </next>
+                          </block>
+                        </next>
+                      </block>
+                    </next>
+                  </block>
+                </statement>
+                <next>
+                  <block type="wait_seconds" id="f*o+{~Od%}rD/R3RXOL$">
+                    <field name="SECONDS">0.1</field>
+                  </block>
+                </next>
+              </block>
+            </statement>
+          </block>
+        </next>
+      </block>
+    </next>
+  </block>
+<description>
+<![CDATA[<h2>Introduction</h2><p><br></p><p>AI is used to detect gestures such as 👍🏻 👎🏻 and 🖐🏻 , and LED pattern is set according to gesture shown</p>]]>
+</description>
+</xml>
