@@ -12,6 +12,10 @@ export function signit(v) {
   return v >= 0x8000 ? v - 0x10000 : v;
 }
 
+export function sign24(v) {
+  return v >= 0x800000 ? v - 0x1000000 : v;
+}
+
 export function bytesToUint16(hi, lo) {
   return (hi << 8) | lo;
 }
@@ -213,6 +217,11 @@ export class HMC5883LDriver {
     this.gainIndex = 7;
   }
 
+  async setGain(i) {
+    this.gainIndex = Math.max(0, Math.min(7, 7 - (i | 0)));
+    await i2cWrite(this.device, this.address, [0x01, this.gainIndex << 5]);
+  }
+
   async init() {
     await i2cWrite(this.device, this.address, [0x00, (6 << 2)]);
     await i2cWrite(this.device, this.address, [0x01, this.gainIndex << 5]);
@@ -253,7 +262,7 @@ export class QMC5883LDriver {
   async init() {
     await i2cWrite(this.device, this.address, [0x0a, 0x80]);
     await i2cWrite(this.device, this.address, [0x0b, 0x01]);
-    this.setRange(1);
+    await this.setRange(1);
   }
 
   async read() {
@@ -490,6 +499,381 @@ export class AS5600Driver {
     if (!b) return null;
     const raw = ((b[0] & 0x0f) << 8) | b[1];
     return { angle: (raw * 360) / 4096 };
+  }
+}
+
+// ── MTP10-A6F55 PIR thermometer ─────────────────────────────────────
+
+export class MTP10Driver {
+  constructor(device, address = 0x7f) {
+    this.device = device;
+    this.address = address;
+    this.currentGain = 0x05;
+    this.currentOsr = 0x07;
+  }
+
+  async _updateHardware() {
+    const chan1 = (0x00 << 7) | (this.currentGain << 3) | this.currentOsr;
+    await i2cWrite(this.device, this.address, [0x95, chan1]);
+    const cmdOff = (0x00 << 5) | (0x00 << 4) | (0x00 << 3) | 0x02;
+    const cmdOn = (0x00 << 5) | (0x00 << 4) | (0x01 << 3) | 0x02;
+    await i2cWrite(this.device, this.address, [0x30, cmdOff]);
+    await i2cWrite(this.device, this.address, [0x30, cmdOn]);
+  }
+
+  async setGain(val) {
+    if (val >= 0 && val <= 7) {
+      this.currentGain = val;
+      await this._updateHardware();
+    }
+  }
+
+  async setOsr(val) {
+    const osrLookup = [0x04, 0x05, 0x00, 0x01, 0x02, 0x03, 0x06, 0x07];
+    if (val >= 0 && val < osrLookup.length) {
+      this.currentOsr = osrLookup[val];
+      await this._updateHardware();
+    }
+  }
+
+  async init() {
+    await i2cWrite(this.device, this.address, [0x93, 0x07]);
+    await i2cWrite(this.device, this.address, [0x94, 0x80]);
+    await i2cWrite(this.device, this.address, [0x97, 0x0d]);
+    await this._updateHardware();
+  }
+
+  async read() {
+    const status = await i2cRead(this.device, this.address, 0x02, 1);
+    if (!status || (status[0] & 0x08) !== 0x08) return null;
+    const pVals = await i2cRead(this.device, this.address, 0x10, 9);
+    const rVals = await i2cRead(this.device, this.address, 0x22, 3);
+    if (!pVals || pVals.length < 9 || !rVals || rVals.length < 3) return null;
+    const toRaw = sign24((pVals[0] << 16) | (pVals[1] << 8) | pVals[2]);
+    const taRaw = sign24((pVals[6] << 16) | (pVals[7] << 8) | pVals[8]);
+    const irRaw = sign24((rVals[0] << 16) | (rVals[1] << 8) | rVals[2]);
+    await i2cWrite(this.device, this.address, [0x02, 0xff, 0xff]);
+    return {
+      objectTemp: toRaw / 16384.0,
+      ambientTemp: taRaw / 16384.0,
+      rawVoltage: irRaw / 10000.0,
+    };
+  }
+}
+
+// ── TSL2561 ─────────────────────────────────────────────────────────
+
+export class TSL2561Driver {
+  constructor(device, address = 0x39) {
+    this.device = device;
+    this.address = address;
+    this.gain = 0;
+    this.timing = 0;
+  }
+
+  async _config() {
+    await i2cWrite(this.device, this.address, [0x81, this.gain | this.timing]);
+  }
+
+  async setGain(i) {
+    this.gain = (i & 1) << 4;
+    await this._config();
+  }
+
+  async setTiming(i) {
+    this.timing = Math.max(0, Math.min(2, i | 0));
+    await this._config();
+  }
+
+  async init() {
+    await i2cWrite(this.device, this.address, [0x80, 0x03]);
+    await this._config();
+  }
+
+  async read() {
+    const b = await i2cRead(this.device, this.address, 0x8c, 4);
+    if (!b) return null;
+    return {
+      total: (b[1] << 8) | b[0],
+      ir: (b[3] << 8) | b[2],
+    };
+  }
+}
+
+// ── MLX90614 ────────────────────────────────────────────────────────
+
+export class MLX90614Driver {
+  constructor(device, address = 0x5a) {
+    this.device = device;
+    this.address = address;
+  }
+
+  async init() {}
+
+  async read() {
+    const vals = await i2cRead(this.device, this.address, 0x07, 3);
+    if (!vals || vals.length < 3) return null;
+    const temp = ((((vals[1] & 0x7f) << 8) + vals[0]) * 0.02) - 0.01 - 273.15;
+    return { temp };
+  }
+}
+
+// ── TCS34725 ────────────────────────────────────────────────────────
+
+const TCS34725_CMD = 0x80;
+const TCS34725_ENABLE = 0x00;
+const TCS34725_ATIME = 0x01;
+const TCS34725_APERS = 0x0c;
+const TCS34725_CONTROL = 0x0f;
+const TCS34725_RDATA = 0x16;
+const TCS34725_GDATA = 0x18;
+const TCS34725_BDATA = 0x1a;
+const TCS34725_PON = 0x01;
+const TCS34725_AEN = 0x02;
+const TCS34725_AIEN = 0x10;
+
+export class TCS34725Driver {
+  constructor(device, address = 0x29) {
+    this.device = device;
+    this.address = address;
+  }
+
+  async setGain(g) {
+    await i2cWrite(this.device, this.address, [TCS34725_CMD | TCS34725_CONTROL, g & 3]);
+  }
+
+  async init() {
+    const en = await i2cRead(this.device, this.address, TCS34725_CMD | TCS34725_ENABLE, 1);
+    const enable = en ? en[0] : 0;
+    await i2cWrite(this.device, this.address, [TCS34725_CMD | TCS34725_ENABLE, enable | TCS34725_PON]);
+    await delay(3);
+    await i2cWrite(this.device, this.address, [
+      TCS34725_CMD | TCS34725_ENABLE,
+      enable | TCS34725_PON | TCS34725_AEN | TCS34725_AIEN,
+    ]);
+    await i2cWrite(this.device, this.address, [TCS34725_CMD | TCS34725_APERS, 10]);
+    await i2cWrite(this.device, this.address, [TCS34725_CMD | TCS34725_ATIME, 256 - 40]);
+  }
+
+  async read() {
+    const r = await i2cRead(this.device, this.address, TCS34725_CMD | TCS34725_RDATA, 2);
+    const g = await i2cRead(this.device, this.address, TCS34725_CMD | TCS34725_GDATA, 2);
+    const b = await i2cRead(this.device, this.address, TCS34725_CMD | TCS34725_BDATA, 2);
+    if (!r || !g || !b) return null;
+    return {
+      red: r[0] | (r[1] << 8),
+      green: g[0] | (g[1] << 8),
+      blue: b[0] | (b[1] << 8),
+    };
+  }
+}
+
+// ── AHT10 / AHT21 ───────────────────────────────────────────────────
+
+export class AHT10Driver {
+  constructor(device, address = 0x38) {
+    this.device = device;
+    this.address = address;
+  }
+
+  async init() {
+    await i2cWrite(this.device, this.address, [0xbe, 0x08, 0x00]);
+    await delay(10);
+  }
+
+  async read() {
+    await i2cWrite(this.device, this.address, [0xac, 0x33, 0x00]);
+    await delay(80);
+    const buf = await i2cRead(this.device, this.address, 0x00, 6);
+    if (!buf || buf.length < 6) return null;
+    const hum = (buf[1] << 12) | (buf[2] << 4) | (buf[3] >> 4);
+    const humidity = (hum * 100.0) / 0x100000;
+    const tempRaw = ((buf[3] & 0x0f) << 16) | (buf[4] << 8) | buf[5];
+    const temp = (tempRaw * 200.0) / 0x100000 - 50;
+    return { humidity, temp };
+  }
+}
+
+// ── INA219 ──────────────────────────────────────────────────────────
+
+const INA219_PG_LSB = [0.00001, 0.00002, 0.00004, 0.00008];
+
+export class INA219Driver {
+  constructor(device, address = 0x40) {
+    this.device = device;
+    this.address = address;
+    this.gainIndex = 0;
+    this.bus32V = true;
+    this.shuntOhms = 0.1;
+    this.maxCurrent = 3.2;
+    this.calValue = 4096;
+    this.currentLSB = 0.0001;
+  }
+
+  async _writeReg(reg, value) {
+    await i2cWrite(this.device, this.address, [reg, (value >> 8) & 0xff, value & 0xff]);
+  }
+
+  async _calibrate() {
+    this.currentLSB = this.maxCurrent / 32768;
+    this.calValue = Math.trunc(0.04096 / (this.currentLSB * this.shuntOhms));
+    if (this.calValue < 1) this.calValue = 1;
+    await this._writeReg(0x05, this.calValue);
+  }
+
+  async _writeConfig() {
+    const brng = this.bus32V ? (1 << 13) : 0;
+    const pg = (3 - this.gainIndex) << 11;
+    const config = 0x399f | brng | pg;
+    await this._writeReg(0x00, config);
+  }
+
+  async setGain(i) {
+    this.gainIndex = Math.max(0, Math.min(3, i | 0));
+    await this._writeConfig();
+    await this._calibrate();
+  }
+
+  async setBusRange(i) {
+    this.bus32V = i === 1;
+    await this._writeConfig();
+  }
+
+  async init() {
+    await this._writeConfig();
+    await this._calibrate();
+  }
+
+  async read() {
+    const sv = await i2cRead(this.device, this.address, 0x01, 2);
+    const bv = await i2cRead(this.device, this.address, 0x02, 2);
+    const cur = await i2cRead(this.device, this.address, 0x04, 2);
+    if (!sv || !bv) return null;
+    let shunt = (sv[0] << 8) | sv[1];
+    if (shunt & 0x8000) shunt -= 65536;
+    let bus = (bv[0] << 8) | bv[1];
+    bus >>= 3;
+    if (bus & 0x2000) bus -= 8192;
+    const shuntV = shunt * INA219_PG_LSB[this.gainIndex];
+    const busV = bus * 0.004;
+    let current = shuntV / this.shuntOhms;
+    if (cur) {
+      let raw = (cur[0] << 8) | cur[1];
+      if (raw & 0x8000) raw -= 65536;
+      current = raw * this.currentLSB;
+    }
+    return { current, voltage: busV, power: busV * current };
+  }
+}
+
+// ── MAX30100 ────────────────────────────────────────────────────────
+
+export class MAX30100Driver {
+  constructor(device, address = 0x57) {
+    this.device = device;
+    this.address = address;
+    this.ledCurrent = 0x0f;
+  }
+
+  async setLedCurrent(i) {
+    this.ledCurrent = Math.max(0, Math.min(0x0f, i | 0));
+    await i2cWrite(this.device, this.address, [0x0c, this.ledCurrent << 4 | this.ledCurrent]);
+  }
+
+  async init() {
+    await i2cWrite(this.device, this.address, [0x09, 0x40]);
+    await delay(100);
+    await i2cWrite(this.device, this.address, [0x09, 0x03]);
+    await i2cWrite(this.device, this.address, [0x0a, 0x3f]);
+    await this.setLedCurrent(this.ledCurrent);
+  }
+
+  async read() {
+    const st = await i2cRead(this.device, this.address, 0x00, 1);
+    if (!st) return null;
+    const d = await i2cRead(this.device, this.address, 0x07, 6);
+    if (!d) return null;
+    const ir = ((d[0] & 0x03) << 16) | (d[1] << 8) | d[2];
+    const red = ((d[3] & 0x03) << 16) | (d[4] << 8) | d[5];
+    return { ir, red };
+  }
+}
+
+// ── ADXL345 ─────────────────────────────────────────────────────────
+
+const ADXL345_SCALE = [0.0039, 0.0078, 0.0156, 0.0312];
+
+export class ADXL345Driver {
+  constructor(device, address = 0x53) {
+    this.device = device;
+    this.address = address;
+    this.rangeIndex = 0;
+  }
+
+  async setRange(i) {
+    this.rangeIndex = Math.max(0, Math.min(3, i | 0));
+    await i2cWrite(this.device, this.address, [0x31, this.rangeIndex]);
+  }
+
+  async init() {
+    await i2cWrite(this.device, this.address, [0x2d, 0x08]);
+    await this.setRange(0);
+  }
+
+  async read() {
+    const b = await i2cRead(this.device, this.address, 0x32, 6);
+    if (!b) return null;
+    const scale = ADXL345_SCALE[this.rangeIndex];
+    return {
+      ax: signit((b[0] << 8) | b[1]) * scale,
+      ay: signit((b[2] << 8) | b[3]) * scale,
+      az: signit((b[4] << 8) | b[5]) * scale,
+    };
+  }
+}
+
+// ── Analog pin sensors (ML8511, AD8232) ─────────────────────────────
+
+export class AnalogPinDriver {
+  constructor(device, channel = 0, { vref = 5.0, scale = 1, offset = 0 } = {}) {
+    this.device = device;
+    this.channel = (Number(channel) | 0) & 0x07;
+    this.vref = vref;
+    this.scale = scale;
+    this.offset = offset;
+  }
+
+  setChannel(index) {
+    this.channel = (Number(index) | 0) & 0x07;
+  }
+
+  async init() {
+    return this.device.connected;
+  }
+
+  async read() {
+    const raw = await this.device.readADC(this.channel);
+    if (!Number.isFinite(raw)) return null;
+    const voltage = (raw / 1023) * this.vref;
+    return { value: voltage * this.scale + this.offset, raw };
+  }
+}
+
+export class ML8511Driver extends AnalogPinDriver {
+  constructor(device, channel = 0) {
+    super(device, channel, { scale: 10 });
+  }
+
+  async read() {
+    const r = await super.read();
+    if (!r) return null;
+    return { uv: Math.max(0, r.value), raw: r.raw };
+  }
+}
+
+export class AD8232Driver extends AnalogPinDriver {
+  constructor(device, channel = 0) {
+    super(device, channel);
   }
 }
 

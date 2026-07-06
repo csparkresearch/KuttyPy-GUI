@@ -10,10 +10,16 @@ export const DEFAULT_SAMPLE_INTERVAL_MS = 20;
 /** Suggested default sample interval (ms) per sensor type. */
 export function defaultSampleIntervalMs(typeId, driver) {
   const table = {
+    MTP10: 200,
     BMP180: 20,
     BMP280: 20,
     BME280: 20,
+    AHT10: 100,
+    TSL2561: 150,
+    TCS34725: 100,
+    MLX90614: 100,
     MPU6050: 50,
+    ADXL345: 50,
     HMC5883L: 100,
     QMC5883L: 100,
     TSL2591: 250,
@@ -21,7 +27,11 @@ export function defaultSampleIntervalMs(typeId, driver) {
     VL53L0X: 100,
     AS5600: 50,
     ADS1115: 20,
+    INA219: 100,
+    MAX30100: 50,
     ATMEGA32_ADC: 20,
+    ML8511: 50,
+    AD8232: 20,
   };
   if (table[typeId] != null) return table[typeId];
   if (driver?.dataRate) return Math.max(DEFAULT_SAMPLE_INTERVAL_MS, Math.ceil(1000 / driver.dataRate));

@@ -8,7 +8,7 @@ import { portPanelFromRegister } from './registers.js';
 import { buildRegisterDatalist, initRegisterTerminal } from './register-terminal.js';
 import { initSensorsPanel } from './sensors-panel.js';
 import { createSensorDriver } from './sensors.js';
-import { openSensorDialog } from './sensor-dialog.js?v=8';
+import { openSensorDialog } from './sensor-dialog.js?v=9';
 import { isAndroidChrome } from './platform.js';
 import { hideConnectDebugPanel } from './connect-debug.js';
 

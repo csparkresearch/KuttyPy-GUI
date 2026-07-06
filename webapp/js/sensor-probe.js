@@ -10,8 +10,16 @@ async function readByte(device, address, reg) {
   return data[0];
 }
 
+async function readWord(device, address, reg) {
+  const { data, ok } = await device.i2cReadBulk(address, reg, 2);
+  if (!ok || !data?.length) return null;
+  return (data[0] << 8) | data[1];
+}
+
 /** @type {Record<string, (device: object, address: number) => Promise<number>>} */
 const PROBES = {
+  MTP10: async () => 95,
+
   BMP180: async (device, address) => {
     const id = await readByte(device, address, 0xd0);
     if (id === 0x55) return 100;
@@ -30,9 +38,28 @@ const PROBES = {
     return 0;
   },
 
+  AHT10: async (device, address) => {
+    if (address !== 0x38 && address !== 0x39) return 0;
+    const st = await readByte(device, address, 0x00);
+    if (st === null) return 0;
+    return (st & 0x80) === 0 ? 85 : 70;
+  },
+
   TSL2591: async (device, address) => {
-    const id = await readByte(device, address, 0xb2); // CMD | ID_REG
+    const id = await readByte(device, address, 0xb2);
     if (id === 0x50) return 100;
+    return 0;
+  },
+
+  TSL2561: async (device, address) => {
+    const id = await readByte(device, address, 0x8a);
+    if (id === 0x39 || id === 0x49 || id === 0x29) return 90;
+    return 0;
+  },
+
+  TCS34725: async (device, address) => {
+    const id = await readByte(device, address, 0x92);
+    if (id === 0x44 || id === 0x4d) return 95;
     return 0;
   },
 
@@ -45,6 +72,12 @@ const PROBES = {
   MPU6050: async (device, address) => {
     const id = await readByte(device, address, 0x75);
     if (id === 0x68 || id === 0x70 || id === 0x71 || id === 0x73) return 100;
+    return 0;
+  },
+
+  ADXL345: async (device, address) => {
+    const id = await readByte(device, address, 0x00);
+    if (id === 0xe5) return 100;
     return 0;
   },
 
@@ -69,6 +102,28 @@ const PROBES = {
 
   BH1750: async () => 60,
 
+  MLX90614: async (device, address) => {
+    const vals = await device.i2cReadBulk(address, 0x07, 3);
+    if (!vals.ok || !vals.data || vals.data.length < 3) return 0;
+    const temp = ((((vals.data[1] & 0x7f) << 8) + vals.data[0]) * 0.02) - 273.15;
+    return temp > -50 && temp < 400 ? 80 : 0;
+  },
+
+  INA219: async (device, address) => {
+    const mfg = await readWord(device, address, 0xfe);
+    if (mfg === 0x5449) return 100;
+    if (address >= 0x40 && address <= 0x4f) return 55;
+    return 0;
+  },
+
+  MAX30100: async (device, address) => {
+    const id = await readByte(device, address, 0xff);
+    if (id === 0x11) return 100;
+    const rev = await readByte(device, address, 0xfe);
+    if (rev === 0x11) return 90;
+    return 0;
+  },
+
   ADS1115: async (device, address) => {
     if (address >= 0x48 && address <= 0x4b) return 70;
     return 0;
@@ -85,6 +140,19 @@ async function probeScore(device, typeId, address) {
   }
 }
 
+async function pickBest(device, typeIds, address) {
+  let bestId = null;
+  let bestScore = 0;
+  for (const typeId of typeIds) {
+    const score = await probeScore(device, typeId, address);
+    if (score > bestScore) {
+      bestScore = score;
+      bestId = typeId;
+    }
+  }
+  return bestScore > 0 ? bestId : null;
+}
+
 /**
  * Pick the best-matching sensor type at an I2C address (or null).
  * @returns {Promise<string|null>}
@@ -93,12 +161,31 @@ export async function identifySensorAtAddress(device, address) {
   const candidates = sensorsAtAddress(address);
   if (!candidates.length) return null;
 
+  if (address === 0x7f) return 'MTP10';
+
   if (address === 0x29) {
-    const vl53 = await probeScore(device, 'VL53L0X', address);
-    if (vl53 > 0) return 'VL53L0X';
-    const tsl = await probeScore(device, 'TSL2591', address);
-    if (tsl > 0) return 'TSL2591';
+    const order = ['VL53L0X', 'TSL2591', 'TCS34725', 'TSL2561'];
+    return pickBest(device, order, address);
+  }
+
+  if (address === 0x39 || address === 0x49) {
+    const order = ['TSL2561', 'TCS34725', 'AHT10'];
+    return pickBest(device, order, address);
+  }
+
+  if (address === 0x76 || address === 0x77) {
+    const bme = await probeScore(device, 'BME280', address);
+    if (bme > 0) return 'BME280';
+    const bmp = await probeScore(device, 'BMP280', address);
+    if (bmp > 0) return 'BMP280';
+    const bmp180 = await probeScore(device, 'BMP180', address);
+    if (bmp180 > 0) return 'BMP180';
     return null;
+  }
+
+  if (address === 0x40 || address === 0x41) {
+    const ina = await probeScore(device, 'INA219', address);
+    if (ina >= 90) return 'INA219';
   }
 
   if (candidates.length === 1) {
@@ -106,16 +193,7 @@ export async function identifySensorAtAddress(device, address) {
     return score > 0 ? candidates[0].id : null;
   }
 
-  let bestId = null;
-  let bestScore = 0;
-  for (const type of candidates) {
-    const score = await probeScore(device, type.id, address);
-    if (score > bestScore) {
-      bestScore = score;
-      bestId = type.id;
-    }
-  }
-  return bestScore > 0 ? bestId : null;
+  return pickBest(device, candidates.map((c) => c.id), address);
 }
 
 /**

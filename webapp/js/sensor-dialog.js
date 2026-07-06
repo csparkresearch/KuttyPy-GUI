@@ -2,10 +2,10 @@
  * Sensor monitor dialog — gauges on top, live chart below.
  */
 
-import { createAnalogGauge } from './analog-gauge.js?v=8';
-import { createSensorLogger, LOGGER_COLORS, DEFAULT_WINDOW_SEC, DEFAULT_SAMPLE_INTERVAL_MS, defaultSampleIntervalMs } from './sensor-logger.js?v=8';
-import { SENSOR_TYPES } from './sensors.js?v=8';
-import { ASSET_V } from './build.js?v=8';
+import { createAnalogGauge } from './analog-gauge.js?v=9';
+import { createSensorLogger, LOGGER_COLORS, DEFAULT_WINDOW_SEC, DEFAULT_SAMPLE_INTERVAL_MS, defaultSampleIntervalMs } from './sensor-logger.js?v=9';
+import { SENSOR_TYPES } from './sensors.js?v=9';
+import { ASSET_V } from './build.js?v=9';
 
 export function openSensorDialog({
   typeId,

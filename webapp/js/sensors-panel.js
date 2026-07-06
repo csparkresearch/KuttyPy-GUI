@@ -4,7 +4,7 @@
 
 import { createSensorDriver } from './sensors.js';
 import { identifyDetectedSensors, sensorMeta } from './sensor-probe.js';
-import { openSensorDialog } from './sensor-dialog.js?v=8';
+import { openSensorDialog } from './sensor-dialog.js?v=9';
 
 export function initSensorsPanel(root, device, {
   setStatus,
