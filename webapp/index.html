@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KuttyPy I/O Monitor</title>
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="stylesheet" href="css/style.css?v=8">
+</head>
+<body>
+  <header>
+    <div>
+      <h1>KuttyPy <span>I/O Monitor</span></h1>
+      <div id="status" class="status">Not connected</div>
+      <div id="connect-debug-panel" class="connect-debug-panel" hidden>
+        <div class="connect-debug-header">
+          <span class="connect-debug-title">Connection failed</span>
+          <button type="button" class="connect-debug-close" aria-label="Close debug trace">×</button>
+        </div>
+        <pre class="connect-debug-body"></pre>
+      </div>
+    </div>
+    <div class="toolbar">
+      <button id="btn-connect" type="button" class="btn-usb btn-usb--connect" aria-label="Connect USB">
+        <span class="btn-usb__left">
+          <span class="btn-usb__pulse" aria-hidden="true"></span>
+          <img class="btn-usb__icon" src="images/usb.png" width="24" height="24" alt="">
+        </span>
+        <span class="btn-usb__label">Connect</span>
+      </button>
+      <button id="btn-disconnect" type="button" class="btn-usb btn-usb--disconnect" disabled aria-label="Disconnect">
+        <img class="btn-usb__icon" src="images/usbdc.png" width="24" height="24" alt="">
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <div class="layout">
+      <div class="left-column">
+        <section class="board-panel">
+          <img src="images/kpy_components.webp" alt="KuttyPyPlus ATMEGA32 development board" width="380" height="auto">
+          <p>
+            Live register monitor for the KuttyPy ATMEGA32 board.
+            Connect via CH340 or MCP2200 USB serial. Green = logic high, red = logic low.
+          </p>
+        </section>
+
+        <section class="sensors-panel" aria-label="I2C sensors">
+          <div class="sensors-header">
+            <img class="sensors-icon" src="images/gauge.gif" alt="" width="22" height="22">
+            <span class="sensors-title">Sensors</span>
+            <button type="button" class="btn-i2c-scan" disabled>I2C Scan</button>
+          </div>
+          <div class="sensor-buttons" aria-label="Detected sensors"></div>
+        </section>
+
+        <section class="reg-terminal" aria-label="Register playground">
+          <div class="bit-converter">
+            <span class="converter-label">Register Playground</span>
+            <div class="bit-leds" aria-label="8-bit binary"></div>
+            <label class="conv-field">
+              <span>DEC</span>
+              <input class="conv-dec" type="text" inputmode="numeric" value="0" aria-label="Decimal value">
+            </label>
+            <label class="conv-field">
+              <span>HEX</span>
+              <input class="conv-hex" type="text" spellcheck="false" value="00" aria-label="Hex value" maxlength="2">
+            </label>
+          </div>
+
+          <div class="reg-row">
+            <input class="reg-name" type="text" list="reg-name-list" spellcheck="false" autocomplete="off"
+                   placeholder="Register" aria-label="Register name">
+            <input class="reg-value" type="text" inputmode="numeric" spellcheck="false"
+                   placeholder="0" aria-label="Register value">
+            <button type="button" class="reg-btn read" title="Read register">↑</button>
+            <button type="button" class="reg-btn write" title="Write register">↓</button>
+            <span class="reg-warn" hidden title="">⚠</span>
+          </div>
+
+          <textarea class="reg-history" readonly spellcheck="false"
+                    aria-label="Register history" placeholder="History…"></textarea>
+        </section>
+      </div>
+
+      <section class="ports-grid" id="ports-grid" aria-label="Port I/O panels"></section>
+    </div>
+
+    <div class="hint">
+      <strong>Usage:</strong> Click <em>Connect USB</em> and select your KuttyPy device (CH340 / MCP2200).
+      Toggle each pin: <strong>IN</strong> / <strong>OUT</strong> on ports B–D;
+      Port A also offers <strong>ADC</strong> (10-bit analog read on PA0–PA7).
+      Writing DDRx in the register playground updates the switches below.
+      Input pins are polled continuously; output pins toggle when you click the LED.
+      Requires Chrome or Edge (desktop) or Chrome on Android with a USB OTG adapter.
+    </div>
+  </main>
+
+  <script src="vendor/hammer.min.js"></script>
+  <script src="vendor/chart.umd.min.js"></script>
+  <script src="vendor/chartjs-plugin-zoom.min.js"></script>
+  <script>
+    if (window.Chart && window.ChartZoom) {
+      Chart.register(ChartZoom);
+    }
+  </script>
+  <script type="module" src="js/app.js?v=8"></script>
+</body>
+</html>

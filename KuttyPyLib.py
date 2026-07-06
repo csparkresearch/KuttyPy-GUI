@@ -972,7 +972,7 @@ class KUTTYPY:
         else:
             print('completed')
 
-        self.setReg('TWBR',0xFF) #I2C speed minimal. testing purposes
+        #self.setReg('TWBR',0xFF) #I2C speed minimal. testing purposes
 
         return addrs
 

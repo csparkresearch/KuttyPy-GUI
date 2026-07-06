@@ -1,0 +1,1264 @@
+:root {
+  --bg: #0f1419;
+  --surface: #1a2332;
+  --surface2: #243044;
+  --border: #334155;
+  --text: #e2e8f0;
+  --muted: #94a3b8;
+  --accent: #38bdf8;
+  --led-on: #22c55e;
+  --led-off: #ef4444;
+  --led-glow-on: rgba(34, 197, 94, 0.55);
+  --led-glow-off: rgba(239, 68, 68, 0.45);
+  --output-hover: #fbbf24;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  background: radial-gradient(ellipse at top, #1e293b 0%, var(--bg) 55%);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  background: rgba(15, 20, 25, 0.85);
+  backdrop-filter: blur(8px);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+header h1 span {
+  color: var(--accent);
+  font-weight: 400;
+}
+
+.status {
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.status.connected {
+  color: var(--led-on);
+}
+
+.connect-debug-panel {
+  margin-top: 0.5rem;
+  border: 1px solid #c44;
+  border-radius: 8px;
+  background: rgba(200, 68, 68, 0.08);
+  max-width: 42rem;
+}
+
+.connect-debug-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.4rem 0.6rem;
+  border-bottom: 1px solid rgba(200, 68, 68, 0.35);
+  font-size: 0.85rem;
+  color: #f88;
+}
+
+.connect-debug-title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.connect-debug-close {
+  flex-shrink: 0;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-size: 1.25rem;
+  line-height: 1;
+  padding: 0.1rem 0.35rem;
+  cursor: pointer;
+}
+
+.connect-debug-close:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.connect-debug-body {
+  margin: 0;
+  padding: 0.5rem 0.65rem;
+  max-height: 12rem;
+  overflow: auto;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.72rem;
+  line-height: 1.35;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--text);
+}
+
+.toolbar {
+  display: flex;
+  gap: 0.35rem;
+  align-items: center;
+}
+
+/* USB connect / disconnect — transparent, minimal chrome */
+.toolbar .btn-usb {
+  display: inline-flex;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  line-height: 1;
+  transition: background 0.15s, border-color 0.15s, opacity 0.15s;
+}
+
+.toolbar .btn-usb:hover:not(:disabled) {
+  background: rgba(56, 189, 248, 0.08);
+  border-color: rgba(56, 189, 248, 0.35);
+}
+
+.toolbar .btn-usb:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.toolbar .btn-usb__icon {
+  display: block;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  margin: 0;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.btn-usb--connect {
+  align-items: center;
+  min-height: 38px;
+}
+
+.btn-usb--connect .btn-usb__left {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+}
+
+.btn-usb--connect .btn-usb__icon {
+  position: relative;
+  z-index: 1;
+}
+
+.btn-usb--connect .btn-usb__pulse {
+  position: absolute;
+  inset: 4px 2px 4px 4px;
+  border-radius: 6px;
+  background: var(--led-on);
+  opacity: 0.35;
+  animation: btn-usb-pulse 1.6s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.btn-usb--connect:disabled .btn-usb__pulse,
+.btn-usb--connect.is-connected .btn-usb__pulse {
+  display: none;
+}
+
+.btn-usb--connect .btn-usb__label {
+  display: block;
+  padding: 0.45rem 0.75rem 0.45rem 0.15rem;
+  white-space: nowrap;
+  font-size: 0.9rem;
+  line-height: 1.2;
+}
+
+.btn-usb--disconnect {
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+}
+
+@keyframes btn-usb-pulse {
+  0%, 100% {
+    opacity: 0.18;
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+  }
+  50% {
+    opacity: 0.55;
+    box-shadow: 0 0 12px 2px rgba(34, 197, 94, 0.45);
+  }
+}
+
+button {
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--text);
+  padding: 0.55rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+button:hover:not(:disabled) {
+  background: #2f3f56;
+  border-color: var(--accent);
+}
+
+button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+button.primary {
+  background: #0369a1;
+  border-color: #0284c7;
+}
+
+button.primary:hover:not(:disabled) {
+  background: #0284c7;
+}
+
+main {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 1.25rem;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(300px, 440px) 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.left-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 0;
+}
+
+@media (max-width: 960px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.board-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 0.3rem;
+  text-align: center;
+}
+
+.board-panel img {
+  width: 100%;
+  max-width: 480px;
+}
+
+.board-panel p {
+  margin: 0.75rem 0 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
+/* ── Sensors (I2C) ── */
+
+.sensors-panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  padding: 0.5rem 0.65rem 0.65rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.sensors-panel.sensors-panel--empty {
+  cursor: pointer;
+}
+
+.sensors-panel.sensors-panel--empty .sensor-buttons-empty {
+  cursor: pointer;
+}
+
+.sensors-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url("../images/sensors.png") right top / auto 72px no-repeat;
+  background-size: cover;
+  opacity: 0.1;
+  pointer-events: none;
+}
+
+.sensors-header {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.sensors-icon {
+  flex-shrink: 0;
+  border-radius: 4px;
+}
+
+.sensors-title {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  flex-shrink: 0;
+}
+
+.btn-i2c-scan {
+  margin-left: auto;
+  padding: 0.3rem 0.55rem;
+  font-size: 0.72rem;
+  font-family: ui-monospace, monospace;
+  min-width: 5.5rem;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.sensor-buttons {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  min-height: 0;
+}
+
+.sensor-buttons-empty {
+  margin: 0;
+  width: 100%;
+  font-size: 0.72rem;
+  color: var(--muted);
+  text-align: center;
+  padding: 0.35rem 0;
+}
+
+.sensor-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.45rem 0.55rem 0.4rem;
+  min-width: 5.5rem;
+  max-width: 6.5rem;
+  font-size: 0.68rem;
+  border-radius: 10px;
+  background: rgba(15, 20, 25, 0.82);
+  border: 1px solid var(--border);
+  text-align: center;
+  line-height: 1.2;
+}
+
+.sensor-chip-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 8px;
+  object-fit: cover;
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.sensor-chip-name {
+  font-weight: 600;
+  color: var(--text);
+  font-size: 0.7rem;
+  word-break: break-word;
+}
+
+.sensor-chip-addr {
+  font-family: ui-monospace, monospace;
+  font-size: 0.62rem;
+  color: var(--muted);
+}
+
+.sensor-chip:hover:not(:disabled) {
+  border-color: var(--accent);
+  background: rgba(56, 189, 248, 0.12);
+  transform: translateY(-1px);
+}
+
+.sensor-chip:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+/* ── Sensor dialog ── */
+
+.sensor-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(0, 0, 0, 0.62);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem;
+}
+
+.sensor-dialog {
+  width: min(1120px, 96vw);
+  height: min(88vh, 860px);
+  min-height: 520px;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.55);
+}
+
+.sensor-dialog-header {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 1rem 1.25rem;
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.sensor-dialog-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.sensor-dialog-header h2 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.sensor-dialog-addr {
+  margin: 0.15rem 0 0;
+  font-size: 0.75rem;
+  color: var(--muted);
+  font-family: ui-monospace, monospace;
+}
+
+.sensor-close {
+  margin-left: auto;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  font-size: 1.4rem;
+  line-height: 1;
+  border-radius: 8px;
+}
+
+.sensor-config {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.75rem;
+  padding: 0.65rem 1rem;
+  border-bottom: 1px solid rgba(51, 65, 85, 0.5);
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.sensor-config-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  font-size: 0.68rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.sensor-config-item select {
+  padding: 0.3rem 0.45rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 0.78rem;
+  min-width: 7rem;
+}
+
+.sensor-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  padding: 0.65rem 1.25rem 1rem;
+  overflow: hidden;
+}
+
+.sensor-gauges-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem 0.65rem;
+  align-items: start;
+  flex-shrink: 0;
+}
+
+.sensor-gauges-row .analog-gauge {
+  min-width: 0;
+  max-width: none;
+  cursor: pointer;
+  user-select: none;
+  transition: opacity 0.15s, border-color 0.15s, box-shadow 0.15s;
+}
+
+.sensor-gauges-row .analog-gauge.gauge-trace-off {
+  opacity: 0.38;
+}
+
+.sensor-gauges-row .analog-gauge.gauge-trace-off .gauge-face {
+  opacity: 0.55;
+}
+
+.sensor-gauges-row .gauge-face {
+  max-width: 100%;
+}
+
+.sensor-gauges-row .analog-gauge:only-child {
+  grid-column: 1 / -1;
+  max-width: min(240px, 100%);
+  justify-self: center;
+}
+
+.sensor-logger-panel {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.sensor-logger-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.sensor-logger-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.sensor-timing-fields {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  margin-right: 0.35rem;
+}
+
+.sensor-num-field {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.68rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.sensor-num-field input {
+  width: 3.5rem;
+  padding: 0.28rem 0.4rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  font-family: ui-monospace, monospace;
+  font-size: 0.78rem;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.sensor-num-field input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.sensor-num-unit {
+  text-transform: none;
+  font-family: ui-monospace, monospace;
+  font-size: 0.72rem;
+}
+
+.sensor-logger-pause,
+.sensor-logger-clear,
+.sensor-logger-download,
+.sensor-logger-reset {
+  padding: 0.3rem 0.6rem;
+  font-size: 0.72rem;
+}
+
+.sensor-chart-wrap {
+  position: relative;
+  flex: 1;
+  min-height: 180px;
+  width: 100%;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: #0b1018;
+}
+
+.sensor-chart {
+  position: absolute;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
+  touch-action: none;
+}
+
+.sensor-dialog-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 1.25rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.75rem;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+.sensor-ui-version {
+  font-family: ui-monospace, monospace;
+  font-size: 0.65rem;
+  opacity: 0.55;
+  flex-shrink: 0;
+}
+
+/* ── Analog gauge ── */
+
+.analog-gauge {
+  text-align: center;
+  padding: 0.5rem 0.35rem 0.25rem;
+  background: linear-gradient(180deg, rgba(30, 41, 59, 0.45) 0%, rgba(15, 20, 25, 0.2) 100%);
+  border: 1px solid rgba(51, 65, 85, 0.6);
+  border-radius: 12px;
+}
+
+.gauge-face {
+  max-width: 260px;
+  margin: 0 auto;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.35));
+}
+
+.gauge-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.gauge-track {
+  fill: none;
+  stroke-width: 12;
+  stroke-linecap: round;
+}
+
+.gauge-value-arc {
+  fill: none;
+  stroke-width: 8;
+  stroke-linecap: round;
+  transition: d 0.35s ease-out;
+}
+
+.gauge-tick-major {
+  stroke: #64748b;
+  stroke-width: 1.5;
+}
+
+.gauge-tick-minor {
+  stroke: #475569;
+  stroke-width: 1;
+}
+
+.gauge-tick-label {
+  fill: #94a3b8;
+  font-size: 9px;
+  font-family: ui-monospace, monospace;
+}
+
+.gauge-hub-outer {
+  fill: #1e293b;
+  stroke: #475569;
+  stroke-width: 1;
+}
+
+.gauge-hub {
+  fill: #0f172a;
+  stroke: #38bdf8;
+  stroke-width: 1.5;
+}
+
+.gauge-needle {
+  stroke: #e2e8f0;
+  stroke-width: 2.8;
+  stroke-linecap: round;
+  transition: x2 0.35s cubic-bezier(0.34, 1.2, 0.64, 1),
+              y2 0.35s cubic-bezier(0.34, 1.2, 0.64, 1);
+}
+
+.gauge-readout {
+  margin-top: 0.15rem;
+}
+
+.gauge-label {
+  display: block;
+  font-size: 0.7rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.gauge-value-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0.25rem;
+}
+
+.gauge-value {
+  font-family: ui-monospace, monospace;
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: #38bdf8;
+  line-height: 1.2;
+}
+
+.gauge-unit {
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.gauge-range {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.62rem;
+  color: #64748b;
+  font-family: ui-monospace, monospace;
+}
+
+.ports-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+@media (max-width: 700px) {
+  .ports-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .port-header {
+    padding: 0.4rem 0.6rem;
+  }
+
+  .port-regs {
+    font-size: 0.62rem;
+    gap: 0.1rem 0.4rem;
+  }
+
+  .pin-list {
+    padding: 0.25rem 0.5rem 0.4rem;
+  }
+
+  .pin-row {
+    padding: 0.12rem 0;
+    gap: 0.3rem;
+  }
+
+  .led {
+    width: 30px;
+    height: 30px;
+  }
+
+  .sensor-dialog {
+    min-height: 0;
+    height: min(92vh, 860px);
+  }
+
+  .sensor-body {
+    padding: 0.5rem 0.65rem 0.65rem;
+    gap: 0.45rem;
+  }
+
+  .sensor-gauges-row {
+    gap: 0.35rem 0.45rem;
+  }
+
+  .sensor-gauges-row .analog-gauge {
+    padding: 0.3rem 0.2rem 0.15rem;
+  }
+
+  .gauge-readout {
+    margin-top: -0.15rem;
+  }
+
+  .gauge-value {
+    font-size: 1rem;
+  }
+}
+
+.port-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.port-header {
+  padding: 0.5rem 0.75rem;
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.35rem 0.5rem;
+}
+
+.port-header h2 {
+  margin: 0;
+  font-size: 1.05rem;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.port-regs {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.15rem 0.55rem;
+  flex: 1;
+  min-width: 0;
+  font-family: ui-monospace, "Cascadia Code", monospace;
+  font-size: 0.68rem;
+  color: var(--muted);
+  line-height: 1.2;
+}
+
+.port-reg {
+  white-space: nowrap;
+}
+
+.pin-list {
+  padding: 0.35rem 0.65rem 0.5rem;
+}
+
+.pin-row {
+  display: grid;
+  grid-template-columns: 44px 1fr 88px;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.2rem 0;
+  border-bottom: 1px solid rgba(51, 65, 85, 0.45);
+}
+
+.pin-row:last-child {
+  border-bottom: none;
+}
+
+.pin-label {
+  font-family: ui-monospace, monospace;
+  font-size: 0.82rem;
+}
+
+.pin-label small {
+  display: block;
+  color: var(--muted);
+  font-size: 0.68rem;
+}
+
+.pin-row--tristate .pin-label.pin-label--adc {
+  cursor: pointer;
+}
+
+.pin-row--tristate .pin-label.pin-label--adc:hover .pin-name {
+  color: #38bdf8;
+}
+
+.led {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 2px solid rgba(255, 255, 255, 0.12);
+  transition: background 0.12s, box-shadow 0.12s, transform 0.1s;
+  justify-self: center;
+}
+
+.led.high {
+  background: var(--led-on);
+  box-shadow: 0 0 14px var(--led-glow-on);
+}
+
+.led.low {
+  background: var(--led-off);
+  box-shadow: 0 0 10px var(--led-glow-off);
+}
+
+.led.output {
+  cursor: pointer;
+}
+
+.led.output:hover {
+  outline: 2px solid var(--output-hover);
+  transform: scale(1.06);
+}
+
+.led.output:active {
+  transform: scale(0.96);
+}
+
+.led.input {
+  cursor: default;
+}
+
+.io-switch {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.35rem;
+  font-size: 0.72rem;
+  color: var(--muted);
+  user-select: none;
+}
+
+.io-switch input {
+  appearance: none;
+  width: 42px;
+  height: 22px;
+  background: #475569;
+  border-radius: 999px;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+
+.io-switch input::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  background: white;
+  border-radius: 50%;
+  transition: transform 0.15s;
+}
+
+.io-switch input:checked {
+  background: #0ea5e9;
+}
+
+.io-switch input:checked::after {
+  transform: translateX(20px);
+}
+
+.io-switch input:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pin-row--tristate {
+  grid-template-columns: 44px 1fr 132px;
+}
+
+.pin-adc-val {
+  font-family: ui-monospace, monospace;
+  font-size: 0.78rem;
+  color: #38bdf8;
+  font-weight: 600;
+}
+
+.io-tristate {
+  display: flex;
+  border-radius: 999px;
+  overflow: hidden;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: #334155;
+}
+
+.io-tristate .io-pos {
+  flex: 1;
+  min-width: 0;
+  padding: 0.28rem 0.15rem;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+}
+
+.io-tristate .io-pos:not(:last-child) {
+  border-right: 1px solid rgba(148, 163, 184, 0.25);
+}
+
+.io-tristate .io-pos.active {
+  color: #0f172a;
+}
+
+.io-tristate[data-mode="input"] .io-pos[data-mode="input"] {
+  background: #94a3b8;
+}
+
+.io-tristate[data-mode="adc"] .io-pos[data-mode="adc"] {
+  background: #a78bfa;
+}
+
+.io-tristate[data-mode="output"] .io-pos[data-mode="output"] {
+  background: #0ea5e9;
+}
+
+.io-tristate .io-pos:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.hint {
+  margin-top: 1rem;
+  padding: 0.85rem 1rem;
+  background: rgba(56, 189, 248, 0.08);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  border-radius: 10px;
+  color: var(--muted);
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.hint strong {
+  color: var(--accent);
+}
+
+/* ── Register terminal ── */
+
+.reg-terminal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.bit-converter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem 0.85rem;
+  padding: 0.65rem 0.85rem;
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+}
+
+.converter-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+  width: 100%;
+  margin-bottom: -0.25rem;
+}
+
+.bit-leds {
+  display: flex;
+  gap: 4px;
+  flex: 1;
+  min-width: 200px;
+}
+
+.bit-led {
+  flex: 1;
+  min-width: 28px;
+  height: 36px;
+  border-radius: 6px;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.1s, transform 0.1s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: ui-monospace, monospace;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+}
+
+.bit-led:hover {
+  transform: scale(1.05);
+  outline: 1px solid var(--accent);
+}
+
+.bit-led.high {
+  background: var(--led-on);
+  box-shadow: 0 0 10px var(--led-glow-on);
+}
+
+.bit-led.low {
+  background: var(--led-off);
+  box-shadow: 0 0 8px var(--led-glow-off);
+}
+
+.conv-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  font-size: 0.68rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.conv-field input {
+  width: 4.5rem;
+  padding: 0.35rem 0.45rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  font-family: ui-monospace, monospace;
+  font-size: 0.9rem;
+}
+
+.conv-field input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.reg-row {
+  display: grid;
+  grid-template-columns: 1fr 4.5rem 36px 36px 22px;
+  gap: 0.45rem;
+  align-items: center;
+  padding: 0.55rem 0.75rem;
+  border-bottom: 1px solid rgba(51, 65, 85, 0.5);
+}
+
+.reg-warn {
+  color: #fbbf24;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: help;
+  text-align: center;
+  justify-self: end;
+}
+
+.reg-name,
+.reg-value {
+  padding: 0.35rem 0.45rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  font-family: ui-monospace, monospace;
+  font-size: 0.82rem;
+  width: 100%;
+  min-width: 0;
+}
+
+.reg-name:focus,
+.reg-value:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.reg-btn {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border-radius: 6px;
+  font-size: 1.1rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.reg-btn.read {
+  color: var(--led-on);
+  border-color: rgba(34, 197, 94, 0.35);
+}
+
+.reg-btn.write {
+  color: #f97316;
+  border-color: rgba(249, 115, 22, 0.35);
+}
+
+.reg-history {
+  width: 100%;
+  min-height: 110px;
+  max-height: 160px;
+  resize: vertical;
+  padding: 0.55rem 0.75rem;
+  border: none;
+  border-top: 1px solid var(--border);
+  background: rgba(0, 0, 0, 0.22);
+  color: var(--text);
+  font-family: ui-monospace, monospace;
+  font-size: 0.75rem;
+  line-height: 1.45;
+}
+
+.reg-history:focus {
+  outline: none;
+}
