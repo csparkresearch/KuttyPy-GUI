@@ -12,7 +12,7 @@ import { openSensorDialog } from './sensor-dialog.js?v=20';
 import { isAndroidChrome } from './platform.js';
 import { hideConnectDebugPanel } from './connect-debug.js';
 import { initViewRouter } from './view-router.js';
-import { initVisualView } from './view-visual.js?v=30';
+import { initVisualView } from './view-visual.js?v=37';
 
 const POLL_MS = 20;
 

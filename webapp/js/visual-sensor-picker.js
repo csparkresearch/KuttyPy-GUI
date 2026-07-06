@@ -14,6 +14,38 @@ function formatAddr(addr) {
   return `0x${addr.toString(16).toUpperCase().padStart(2, '0')}`;
 }
 
+function bindBackdropDismiss(overlay, onDismiss) {
+  let backdropDown = false;
+  overlay.addEventListener('pointerdown', (ev) => {
+    backdropDown = ev.target === overlay;
+  });
+  overlay.addEventListener('click', (ev) => {
+    if (ev.target === overlay && backdropDown) onDismiss();
+    backdropDown = false;
+  });
+}
+
+/** Block accidental taps from the gesture that opened the modal (mobile ghost clicks). */
+function armInteractionGuard(overlay, { minMs = 420 } = {}) {
+  overlay.classList.add('visual-picker-locked');
+  const openedAt = performance.now();
+  let unlocked = false;
+
+  function unlock() {
+    if (unlocked) return;
+    const remaining = Math.max(60, minMs - (performance.now() - openedAt));
+    setTimeout(() => {
+      if (unlocked) return;
+      unlocked = true;
+      overlay.classList.remove('visual-picker-locked');
+    }, remaining);
+  }
+
+  document.addEventListener('pointerup', unlock, { capture: true, once: true });
+  document.addEventListener('touchend', unlock, { capture: true, once: true });
+  setTimeout(unlock, minMs);
+}
+
 /**
  * @param {{ device: object, isConnected: () => boolean, withPollingPaused?: (fn: () => Promise<void>) => Promise<void> }} opts
  * @returns {Promise<{ typeId: string, address: number }|null>}
@@ -40,6 +72,8 @@ export function openSensorPicker({ device, isConnected, withPollingPaused }) {
       </div>
     `;
     document.body.appendChild(overlay);
+    document.body.classList.add('visual-modal-open');
+    armInteractionGuard(overlay);
 
     const grid = overlay.querySelector('.visual-sensor-picker-grid');
     const manualGrid = overlay.querySelector('.visual-sensor-picker-grid--manual');
@@ -50,6 +84,7 @@ export function openSensorPicker({ device, isConnected, withPollingPaused }) {
     function finish(result) {
       if (closed) return;
       closed = true;
+      document.body.classList.remove('visual-modal-open');
       overlay.remove();
       resolve(result);
     }
@@ -65,7 +100,14 @@ export function openSensorPicker({ device, isConnected, withPollingPaused }) {
         <span class="visual-sensor-picker-card-name">${meta.name}</span>
         <span class="visual-sensor-picker-card-addr">${formatAddr(address)}</span>
       `;
-      btn.addEventListener('click', () => finish({ typeId, address }));
+      btn.addEventListener('click', (ev) => {
+        if (overlay.classList.contains('visual-picker-locked')) {
+          ev.preventDefault();
+          ev.stopPropagation();
+          return;
+        }
+        finish({ typeId, address });
+      });
       parent.appendChild(btn);
     }
 
@@ -106,9 +148,7 @@ export function openSensorPicker({ device, isConnected, withPollingPaused }) {
 
     overlay.querySelector('.visual-sensor-picker-close')
       ?.addEventListener('click', () => finish(null));
-    overlay.addEventListener('click', (ev) => {
-      if (ev.target === overlay) finish(null);
-    });
+    bindBackdropDismiss(overlay, () => finish(null));
     btnScan.addEventListener('click', () => runScan());
 
     document.addEventListener('keydown', function onKey(ev) {

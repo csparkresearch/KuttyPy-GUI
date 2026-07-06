@@ -115,6 +115,17 @@ function createSamplePreview() {
   return { show, hide, destroy };
 }
 
+function bindBackdropDismiss(overlay, onDismiss) {
+  let backdropDown = false;
+  overlay.addEventListener('pointerdown', (ev) => {
+    backdropDown = ev.target === overlay;
+  });
+  overlay.addEventListener('click', (ev) => {
+    if (ev.target === overlay && backdropDown) onDismiss();
+    backdropDown = false;
+  });
+}
+
 /**
  * @param {{ onPick: (path: string) => void|Promise<void> }} opts
  */
@@ -138,17 +149,27 @@ export function openSamplesDialog({ onPick }) {
   const preview = createSamplePreview();
   let closed = false;
 
+  const canHoverPreview = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
   function close() {
     if (closed) return;
     closed = true;
+    document.body.classList.remove('visual-modal-open');
     preview.destroy();
     overlay.remove();
   }
 
   overlay.querySelector('.visual-samples-close')?.addEventListener('click', close);
-  overlay.addEventListener('click', (ev) => {
-    if (ev.target === overlay) close();
-  });
+  bindBackdropDismiss(overlay, close);
+
+  document.body.classList.add('visual-modal-open');
+
+  const hint = overlay.querySelector('.visual-samples-hint');
+  if (hint) {
+    hint.textContent = canHoverPreview
+      ? 'Hover a sample for a preview. Click to load it into the workspace.'
+      : 'Tap a sample to load it into the workspace.';
+  }
 
   document.addEventListener('keydown', function onKey(ev) {
     if (ev.key === 'Escape') {
@@ -184,14 +205,16 @@ export function openSamplesDialog({ onPick }) {
           btn.dataset.samplePath = sample.path;
           if (sample.preview) btn.classList.add('visual-samples-item--has-preview');
 
-          btn.addEventListener('mouseenter', () => {
-            preview.show(btn, sample.path, sample.preview);
-          });
-          btn.addEventListener('mouseleave', () => preview.hide());
-          btn.addEventListener('focus', () => {
-            preview.show(btn, sample.path, sample.preview);
-          });
-          btn.addEventListener('blur', () => preview.hide());
+          if (canHoverPreview) {
+            btn.addEventListener('mouseenter', () => {
+              preview.show(btn, sample.path, sample.preview);
+            });
+            btn.addEventListener('mouseleave', () => preview.hide());
+            btn.addEventListener('focus', () => {
+              preview.show(btn, sample.path, sample.preview);
+            });
+            btn.addEventListener('blur', () => preview.hide());
+          }
 
           btn.addEventListener('click', async () => {
             close();

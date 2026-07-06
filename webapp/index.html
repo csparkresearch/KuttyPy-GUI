@@ -1,12 +1,19 @@
 <!DOCTYPE html>
+<!--
+  KuttyPy I/O Monitor — web application
+  Copyright (c) CSpark Research, India. All rights reserved.
+  Developed by Jithin B.P — https://jithinbp.in
+  Product page: https://csparkresearch.in/kuttypyplus
+  Unauthorized copying, distribution, or modification without permission is prohibited.
+-->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>KuttyPy I/O Monitor</title>
   <link rel="icon" type="image/png" href="favicon.png">
-  <link rel="stylesheet" href="css/style.css?v=25">
-  <link rel="stylesheet" href="css/visual.css?v=30">
+  <link rel="stylesheet" href="css/style.css?v=31">
+  <link rel="stylesheet" href="css/visual.css?v=37">
 </head>
 <body>
   <header>
@@ -39,7 +46,9 @@
     <div class="layout">
       <div class="left-column">
         <section class="board-panel">
-          <img src="images/kpy_components.webp" alt="KuttyPyPlus ATMEGA32 development board" width="380" height="auto">
+          <a href="https://csparkresearch.in/kuttypyplus" target="_blank" rel="noopener noreferrer" class="board-panel-link" title="KuttyPyPlus product page">
+            <img src="images/kpy_components.webp" alt="KuttyPyPlus ATMEGA32 development board" width="380" height="auto">
+          </a>
           <button type="button" id="btn-open-visual" class="btn-visual-coding" title="Open visual programming">
             <img src="images/VisualCoding.png" width="40" height="40" alt="">
             <span>Visual Programming</span>
@@ -87,21 +96,28 @@
       <section class="ports-grid" id="ports-grid" aria-label="Port I/O panels"></section>
     </div>
 
-    <div class="hint">
-      <strong>Usage:</strong> Click <em>Connect USB</em> and select your KuttyPy device (CH340 / MCP2200).
-      Toggle each pin: <strong>IN</strong> / <strong>OUT</strong> on ports B–D;
-      Port A also offers <strong>ADC</strong> (10-bit analog read on PA0–PA7).
-      Writing DDRx in the register playground updates the switches below.
-      Input pins are polled continuously; output pins toggle when you click the LED.
-      Requires Chrome or Edge (desktop) or Chrome on Android with a USB OTG adapter.
-    </div>
+    <footer class="app-footer">
+      <div class="app-footer-inner">
+        <a href="https://csparkresearch.in/kuttypyplus" target="_blank" rel="noopener noreferrer" class="app-footer-logo-link" title="KuttyPyPlus product page">
+          <img src="cslogo.png" alt="CSpark Research" class="app-footer-logo" width="72" height="auto">
+        </a>
+        <div class="app-footer-text-block">
+          <p class="app-footer-text">
+            Developed by <a href="https://jithinbp.in" target="_blank" rel="noopener noreferrer">Jithin B.P</a>
+            for <a href="https://csparkresearch.in" target="_blank" rel="noopener noreferrer">CSpark Research</a>, India.
+            <a href="https://csparkresearch.in/kuttypyplus" target="_blank" rel="noopener noreferrer">KuttyPyPlus</a>
+          </p>
+          <p class="app-footer-copy">© 2026 CSpark Research. All rights reserved.</p>
+        </div>
+      </div>
+    </footer>
   </main>
 
   <section id="view-visual" class="app-view app-view--visual" hidden aria-label="Visual programming">
     <div class="visual-toolbar">
       <button type="button" id="btn-visual-back" class="btn-visual-back" title="Back to I/O Monitor">
         <span aria-hidden="true">←</span>
-        <span class="btn-visual-back__label">I/O Monitor</span>
+        <span class="btn-visual-back__label">I/O</span>
       </button>
       <button type="button" id="btn-visual-mode" class="btn-visual-mode" hidden aria-live="polite">
         <span class="btn-visual-mode__label">Editing</span>
@@ -140,6 +156,9 @@
     <div class="visual-body">
       <div class="visual-workspace-pane" id="visual-workspace-pane">
         <div id="visual-blockly-area" class="visual-blockly-area">
+          <div id="visual-loading" class="visual-loading" hidden aria-live="polite">
+            <p class="visual-loading-text">Loading files<span class="visual-loading-dots" aria-hidden="true"></span></p>
+          </div>
           <div id="visual-blockly-div"></div>
         </div>
       </div>
@@ -180,6 +199,6 @@
       Chart.register(ChartZoom);
     }
   </script>
-  <script type="module" src="js/app.js?v=30"></script>
+  <script type="module" src="js/app.js?v=37"></script>
 </body>
 </html>

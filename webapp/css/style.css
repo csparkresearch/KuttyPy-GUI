@@ -371,6 +371,21 @@ main {
   max-width: 480px;
 }
 
+.board-panel-link {
+  display: block;
+  border-radius: 10px;
+  transition: opacity 0.15s;
+}
+
+.board-panel-link:hover {
+  opacity: 0.88;
+}
+
+.board-panel-link:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
 .board-panel p {
   margin: 0.75rem 0 0;
   color: var(--muted);
@@ -1156,19 +1171,59 @@ main {
   cursor: not-allowed;
 }
 
-.hint {
+.app-footer {
   margin-top: 1rem;
   padding: 0.85rem 1rem;
-  background: rgba(56, 189, 248, 0.08);
-  border: 1px solid rgba(56, 189, 248, 0.25);
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 10px;
   color: var(--muted);
-  font-size: 0.85rem;
-  line-height: 1.5;
+  font-size: 0.82rem;
+  line-height: 1.55;
 }
 
-.hint strong {
+.app-footer-inner {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.app-footer-logo-link {
+  display: block;
+  flex-shrink: 0;
+}
+
+.app-footer-logo {
+  display: block;
+  width: 72px;
+  max-width: 72px;
+  height: auto;
+  opacity: 0.92;
+}
+
+.app-footer-text-block {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+}
+
+.app-footer-text {
+  margin: 0 0 0.35rem;
+}
+
+.app-footer-copy {
+  margin: 0;
+  font-size: 0.75rem;
+  opacity: 0.75;
+}
+
+.app-footer a {
   color: var(--accent);
+  text-decoration: none;
+}
+
+.app-footer a:hover {
+  text-decoration: underline;
 }
 
 /* ── Register terminal ── */

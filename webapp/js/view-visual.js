@@ -2,19 +2,19 @@
  * Visual programming view — Blockly workspace, toolbox, and program runner.
  */
 
-import { createVisualRunner } from './visual-runner.js?v=30';
+import { createVisualRunner } from './visual-runner.js?v=37';
 import { showConfirmDialog } from './confirm-dialog.js?v=25';
 import { SENSOR_TYPES } from './sensors.js';
-import { openSensorPicker } from './visual-sensor-picker.js?v=26';
+import { openSensorPicker } from './visual-sensor-picker.js?v=35';
 import {
   downloadWorkspaceXml,
   loadXmlIntoWorkspace,
   pickWorkspaceXmlFile,
   readFileAsText,
 } from './visual-workspace-files.js?v=25';
-import { fetchSampleXml, openSamplesDialog } from './visual-samples-dialog.js?v=25';
+import { fetchSampleXml, openSamplesDialog } from './visual-samples-dialog.js?v=33';
 
-const SCRIPT_V = '30';
+const SCRIPT_V = '31';
 
 const CORE_SCRIPTS = [
   'visual/blockly_compressed.js',
@@ -66,6 +66,7 @@ function injectSensorMeta() {
 }
 
 let loadPromise = null;
+let loadingDotsTimer = null;
 let workspace = null;
 let runner = null;
 let initialized = false;
@@ -158,6 +159,27 @@ function handleMobileModeAction() {
   }
   runner?.returnToBlocksView();
   updateMobileToolbar();
+}
+
+function showVisualLoading() {
+  const el = document.getElementById('visual-loading');
+  const dots = el?.querySelector('.visual-loading-dots');
+  if (!el) return;
+  el.hidden = false;
+  let step = 0;
+  clearInterval(loadingDotsTimer);
+  if (dots) dots.textContent = '';
+  loadingDotsTimer = setInterval(() => {
+    step = (step + 1) % 4;
+    if (dots) dots.textContent = '.'.repeat(step);
+  }, 400);
+}
+
+function hideVisualLoading() {
+  clearInterval(loadingDotsTimer);
+  loadingDotsTimer = null;
+  const el = document.getElementById('visual-loading');
+  if (el) el.hidden = true;
 }
 
 function loadScript(src) {
@@ -447,6 +469,20 @@ function resizeWorkspace() {
   if (workspace && window.Blockly) Blockly.svgResize(workspace);
 }
 
+function applyMobileVisualLayout() {
+  updateMobileToolbar();
+  if (!isMobileVisual()) {
+    document.body.classList.remove('visual-mobile-show-side');
+    resizeWorkspace();
+    return;
+  }
+  runner?.returnToBlocksView();
+  resizeWorkspace();
+  requestAnimationFrame(() => {
+    resizeWorkspace();
+  });
+}
+
 let blocklyUndoBtn = null;
 let blocklyRedoBtn = null;
 
@@ -604,72 +640,78 @@ function wireToolbar() {
 
 async function ensureWorkspace() {
   if (workspace) {
-    resizeWorkspace();
+    applyMobileVisualLayout();
     return workspace;
   }
 
-  await ensureBlocklyLoaded();
+  showVisualLoading();
+  try {
+    await ensureBlocklyLoaded();
 
-  const mount = document.getElementById('visual-blockly-div');
-  if (!mount) throw new Error('Blockly mount missing');
+    const mount = document.getElementById('visual-blockly-div');
+    if (!mount) throw new Error('Blockly mount missing');
 
-  workspace = Blockly.inject(mount, {
-    toolbox: buildToolbox(),
-    media: 'visual/media/',
-    grid: { spacing: 20, length: 3, colour: '#334155', snap: true },
-    zoom: {
-      controls: true,
-      wheel: true,
-      startScale: 0.9,
-      maxScale: 3,
-      minScale: 0.3,
-      scaleSpeed: 1.1,
-    },
-    trashcan: true,
-    sounds: true,
-    theme: Blockly.Theme.defineTheme('kuttypy', {
-      base: Blockly.Themes.Classic,
-      componentStyles: {
-        workspaceBackgroundColour: '#0f1419',
-        toolboxBackgroundColour: '#1a2332',
-        toolboxForegroundColour: '#e2e8f0',
-        flyoutBackgroundColour: '#1a2332',
-        flyoutForegroundColour: '#e2e8f0',
-        flyoutOpacity: 0.98,
-        scrollbarColour: '#475569',
-        insertionMarkerColour: '#38bdf8',
-        insertionMarkerOpacity: 0.4,
+    workspace = Blockly.inject(mount, {
+      toolbox: buildToolbox(),
+      media: 'visual/media/',
+      grid: { spacing: 20, length: 3, colour: '#334155', snap: true },
+      zoom: {
+        controls: true,
+        wheel: true,
+        startScale: 0.9,
+        maxScale: 3,
+        minScale: 0.3,
+        scaleSpeed: 1.1,
       },
-    }),
-  });
+      trashcan: true,
+      sounds: true,
+      theme: Blockly.Theme.defineTheme('kuttypy', {
+        base: Blockly.Themes.Classic,
+        componentStyles: {
+          workspaceBackgroundColour: '#0f1419',
+          toolboxBackgroundColour: '#1a2332',
+          toolboxForegroundColour: '#e2e8f0',
+          flyoutBackgroundColour: '#1a2332',
+          flyoutForegroundColour: '#e2e8f0',
+          flyoutOpacity: 0.98,
+          scrollbarColour: '#475569',
+          insertionMarkerColour: '#38bdf8',
+          insertionMarkerOpacity: 0.4,
+        },
+      }),
+    });
 
-  wireBlocklyUndoRedo(workspace);
-  loadWorkspaceFromStorage(workspace);
-  workspace.addChangeListener((event) => {
-    if (event.isUiEvent || event.type === Blockly.Events.FINISHED_LOADING) return;
-    saveWorkspaceToStorage(workspace);
-  });
+    wireBlocklyUndoRedo(workspace);
+    loadWorkspaceFromStorage(workspace);
+    workspace.addChangeListener((event) => {
+      if (event.isUiEvent || event.type === Blockly.Events.FINISHED_LOADING) return;
+      saveWorkspaceToStorage(workspace);
+    });
 
-  runner = createVisualRunner({
-    getWorkspace: () => workspace,
-    getDevice: () => session.getDevice(),
-    outputEl: document.getElementById('visual-output'),
-    registersEl: document.getElementById('visual-registers'),
-    plotsHost: document.getElementById('visual-plots-host'),
-    codeEl: document.getElementById('visual-codegen'),
-    statusEl: document.getElementById('visual-status'),
-    onRunningChange: (isOn) => {
-      const btn = document.getElementById('btn-visual-run');
-      if (!btn) return;
-      const label = btn.querySelector('.btn-visual-run-label');
-      if (label) label.textContent = isOn ? 'Stop' : 'Run';
-      btn.classList.toggle('is-running', isOn);
-      updateMobileToolbar();
-    },
-    onMobilePaneChange: () => updateMobileToolbar(),
-  });
+    runner = createVisualRunner({
+      getWorkspace: () => workspace,
+      getDevice: () => session.getDevice(),
+      outputEl: document.getElementById('visual-output'),
+      registersEl: document.getElementById('visual-registers'),
+      plotsHost: document.getElementById('visual-plots-host'),
+      codeEl: document.getElementById('visual-codegen'),
+      statusEl: document.getElementById('visual-status'),
+      onRunningChange: (isOn) => {
+        const btn = document.getElementById('btn-visual-run');
+        if (!btn) return;
+        const label = btn.querySelector('.btn-visual-run-label');
+        if (label) label.textContent = isOn ? 'Stop' : 'Run';
+        btn.classList.toggle('is-running', isOn);
+        updateMobileToolbar();
+      },
+      onMobilePaneChange: () => updateMobileToolbar(),
+    });
 
-  return workspace;
+    applyMobileVisualLayout();
+    return workspace;
+  } finally {
+    hideVisualLoading();
+  }
 }
 
 export function initVisualView(options = {}) {
@@ -695,11 +737,14 @@ export function initVisualView(options = {}) {
 
   window.addEventListener('kuttypy:visual-enter', () => {
     updateMobileToolbar();
-    ensureWorkspace().catch((err) => {
-      console.error(err);
-      const status = document.getElementById('visual-status');
-      if (status) status.textContent = err.message;
-    });
+    if (!workspace) showVisualLoading();
+    ensureWorkspace()
+      .then(() => applyMobileVisualLayout())
+      .catch((err) => {
+        console.error(err);
+        const status = document.getElementById('visual-status');
+        if (status) status.textContent = err.message;
+      });
   });
 
   window.addEventListener('kuttypy:visual-leave', () => {
@@ -711,14 +756,13 @@ export function initVisualView(options = {}) {
 
   window.addEventListener('resize', () => {
     if (!document.body.classList.contains('view-visual-active')) return;
-    updateMobileToolbar();
-    resizeWorkspace();
+    applyMobileVisualLayout();
   });
 
   if (typeof MOBILE_MQ.addEventListener === 'function') {
     MOBILE_MQ.addEventListener('change', () => {
       if (!document.body.classList.contains('view-visual-active')) return;
-      updateMobileToolbar();
+      applyMobileVisualLayout();
     });
   }
 }

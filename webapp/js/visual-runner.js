@@ -2,7 +2,7 @@
  * Acorn JS-Interpreter run loop for Blockly programs.
  */
 
-import { createVisualRuntime } from './visual-blockly-runtime.js?v=30';
+import { createVisualRuntime } from './visual-blockly-runtime.js?v=31';
 
 const RESERVED = [
   'highlightBlock', 'sleep', 'waitForSeconds', 'plot', 'plot_array', 'plot_xy',
