@@ -1,7 +1,7 @@
 from ..Qt import QtGui,QtCore,QtWidgets
 
 class Guage(QtWidgets.QWidget):
-	valueChanged = QtCore.pyqtSignal(float)
+	valueChanged = QtCore.Signal(float)
 	def __init__(self, parent=None):
 		super(Guage, self).__init__(parent)
 		self.setWindowTitle("Analog Clock")

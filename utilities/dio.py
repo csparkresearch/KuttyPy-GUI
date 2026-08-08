@@ -1,4 +1,4 @@
-from PyQt5 import QtGui,QtCore,QtWidgets
+from pyqtgraph.Qt import QtGui,QtCore,QtWidgets
 from .templates import ui_dio,ui_dio_pwm,ui_dio_adc,ui_dio_adcLog,ui_dio_sensor,ui_regvals,ui_dio_cntr,ui_regedit,ui_dio_control
 from .templates import ui_dio_robot,ui_dio_stepper,ui_dummyio, ui_dio_motor_shield
 
@@ -337,7 +337,7 @@ class DIOADC(QtWidgets.QStackedWidget,ui_dio_adc.Ui_stack):
 	def config(self,evt):
 		if not self.configWindow:
 			self.configWindow = DIOADCCONFIG(self,'ADMUX',self.muxOptions.keys(),self.logstate,self.setConfig)
-		#self.configWindow.exec_() #Blocks UI (Modal), and only one instance can be shown
+		#self.configWindow.exec() #Blocks UI (Modal), and only one instance can be shown
 		self.configWindow.show() # Non blocking. Multiple.
 
 	def setConfig(self,val,log):

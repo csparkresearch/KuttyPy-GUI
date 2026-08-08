@@ -3,12 +3,12 @@ import math, re, os
 import time
 from functools import partial
 
-from PyQt5 import QtGui, QtCore, QtWidgets
+from pyqtgraph.Qt import QtGui, QtCore, QtWidgets
 
 import pyqtgraph as pg
-from PyQt5.QtCore import pyqtSignal, Qt
-from PyQt5.QtGui import QRadialGradient, QColor
-from PyQt5.QtWidgets import QLabel, QCheckBox
+from pyqtgraph.Qt.QtCore import Signal, Qt
+from pyqtgraph.Qt.QtGui import QRadialGradient, QColor
+from pyqtgraph.Qt.QtWidgets import QLabel, QCheckBox
 from scipy.optimize import leastsq
 import scipy.optimize as optimize
 import numpy as np
@@ -63,7 +63,7 @@ class MyExptRow(QtWidgets.QFrame, ui_expt_row.Ui_Form):
         self.mousePressEvent = clickEvent
 
 class Gauge(QtWidgets.QWidget, QtWidgets.QGraphicsWidget):
-    valueChanged = QtCore.pyqtSignal(float)
+    valueChanged = QtCore.Signal(float)
 
     def __init__(self, parent=None, name=''):
         super(Gauge, self).__init__(parent)

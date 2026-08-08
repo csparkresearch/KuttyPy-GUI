@@ -5,9 +5,9 @@
 import os, sys, time, re, traceback, platform
 from typing import List
 
-from PyQt5 import QtGui, QtCore, QtWidgets
-from PyQt5.QtCore import QThread
-from PyQt5.QtGui import QPixmap
+from pyqtgraph.Qt import QtGui, QtCore, QtWidgets
+from pyqtgraph.Qt.QtCore import QThread
+from pyqtgraph.Qt.QtGui import QPixmap
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
@@ -23,17 +23,17 @@ import inspect
 
 class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
     p = None
-    logThis = QtCore.pyqtSignal(str)
-    showStatusSignal = QtCore.pyqtSignal(str, bool)
-    serverSignal = QtCore.pyqtSignal(str)
-    addMPSignal = QtCore.pyqtSignal()
-    delMPSignal = QtCore.pyqtSignal()
-    queryMPSignal = QtCore.pyqtSignal()
-    cameraReadySignal = QtCore.pyqtSignal()
+    logThis = QtCore.Signal(str)
+    showStatusSignal = QtCore.Signal(str, bool)
+    serverSignal = QtCore.Signal(str)
+    addMPSignal = QtCore.Signal()
+    delMPSignal = QtCore.Signal()
+    queryMPSignal = QtCore.Signal()
+    cameraReadySignal = QtCore.Signal()
 
-    logThisPlain = QtCore.pyqtSignal(bytes)
-    codeOutput = QtCore.pyqtSignal(str, str)
-    serialGaugeSignal = QtCore.pyqtSignal(bytes)
+    logThisPlain = QtCore.Signal(bytes)
+    codeOutput = QtCore.Signal(str, str)
+    serialGaugeSignal = QtCore.Signal(bytes)
     serialGaugeConvert = 'bytes'
     serialStream = b''
 
@@ -357,7 +357,7 @@ def run():
     app = QtWidgets.QApplication(sys.argv)
     myapp = AppWindow(app=app, path=path)
     myapp.show()
-    r = app.exec_()
+    r = app.exec()
     if myapp.mp_thread is not None:
         myapp.mp_thread.stopRunning()
 

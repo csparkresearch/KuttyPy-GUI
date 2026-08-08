@@ -1,6 +1,6 @@
-from PyQt5.QtCore import QThread, pyqtSignal
+from pyqtgraph.Qt.QtCore import QThread, Signal
 import socketio, threading
-from PyQt5.QtWidgets import QApplication
+from pyqtgraph.Qt.QtWidgets import QApplication
 from aiohttp import web
 import asyncio
 
@@ -11,9 +11,9 @@ import socket
 connections = {}
 
 class SocketIOClient:
-    finished = pyqtSignal()
-    showStatusSignal = pyqtSignal()
-    memberSignal = pyqtSignal()
+    finished = Signal()
+    showStatusSignal = Signal()
+    memberSignal = Signal()
     serverSignal = None
     removeSignal = None
     imageSignal = None

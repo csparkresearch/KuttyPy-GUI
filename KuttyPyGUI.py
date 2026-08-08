@@ -5,7 +5,7 @@
 import os,sys,time,re,traceback,platform
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from PyQt5 import QtGui, QtCore, QtWidgets
+from pyqtgraph.Qt import QtGui, QtCore, QtWidgets
 import KuttyPyLib
 
 from utilities.templates import ui_layout as layout
@@ -29,7 +29,7 @@ def translate(lang = None):
 	app.installTranslator(t)
 	t1=QtCore.QTranslator()
 	t1.load("qt_"+lang,
-		QtCore.QLibraryInfo.location(QtCore.QLibraryInfo.TranslationsPath))
+		(QtCore.QLibraryInfo.path if hasattr(QtCore.QLibraryInfo, 'path') else QtCore.QLibraryInfo.location)(QtCore.QLibraryInfo.TranslationsPath))
 	app.installTranslator(t1)
 
 
@@ -54,9 +54,9 @@ class myTimer():
 class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 	p=None
 	ports = ['A','B','C','D']
-	logThis = QtCore.pyqtSignal(str)
-	logThisPlain = QtCore.pyqtSignal(bytes)
-	serialGaugeSignal = QtCore.pyqtSignal(bytes)
+	logThis = QtCore.Signal(str)
+	logThisPlain = QtCore.Signal(bytes)
+	serialGaugeSignal = QtCore.Signal(bytes)
 	serialGaugeConvert = 'bytes'
 	serialStream = b''
 	def __init__(self, parent=None,**kwargs):
@@ -218,8 +218,8 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 
 	################USER CODE SECTION####################
 	class codeObject(QtCore.QObject):
-		finished = QtCore.pyqtSignal()
-		logThis = QtCore.pyqtSignal(str)
+		finished = QtCore.Signal()
+		logThis = QtCore.Signal(str)
 		code = ''
 
 		def __init__(self,REGISTERS):
@@ -550,9 +550,9 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 	########################### UPLOAD HEX FILE #######################
 
 	class uploadObject(QtCore.QObject):
-		finished = QtCore.pyqtSignal()
-		logThis = QtCore.pyqtSignal(str)
-		logThisPlain = QtCore.pyqtSignal(bytes)
+		finished = QtCore.Signal()
+		logThis = QtCore.Signal(str)
+		logThisPlain = QtCore.Signal(bytes)
 		fname = ''
 		p = None
 		def __init__(self):
@@ -854,7 +854,7 @@ class AppWindow(QtWidgets.QMainWindow, layout.Ui_MainWindow):
 
 	######## WINDOW EXPORT SVG
 	def exportSvg(self):
-		from PyQt5 import QtSvg
+		from pyqtgraph.Qt import QtSvg
 		path, _filter  = QtWidgets.QFileDialog.getSaveFileName(self, 'Save File', '~/')
 		if path:
 			generator = QtSvg.QSvgGenerator()
@@ -890,7 +890,7 @@ def translators(langDir, lang=None):
 	result=[]
 	qtTranslator=QtCore.QTranslator()
 	qtTranslator.load("qt_" + lang,
-			QtCore.QLibraryInfo.location(QtCore.QLibraryInfo.TranslationsPath))
+			(QtCore.QLibraryInfo.path if hasattr(QtCore.QLibraryInfo, 'path') else QtCore.QLibraryInfo.location)(QtCore.QLibraryInfo.TranslationsPath))
 	result.append(qtTranslator)
 
 	# path to the translation files (.qm files)
@@ -954,7 +954,7 @@ def run():
 	app = QtWidgets.QApplication(sys.argv)
 	myapp = AppWindow(app=app, path=path)
 	myapp.show()
-	r = app.exec_()
+	r = app.exec()
 	'''
 	if myapp.p.connected:
 		myapp.p.fd.write(b'j')

@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, session, send_from_directory, current_app
 import os, tempfile, subprocess, json, glob
-from PyQt5 import QtCore
+from pyqtgraph.Qt import QtCore
 
 main = Blueprint('main', __name__)
 

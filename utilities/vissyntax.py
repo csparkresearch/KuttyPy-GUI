@@ -2,7 +2,7 @@
 
 import sys
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from pyqtgraph.Qt import QtCore, QtGui, QtWidgets
 
 def format(color, style=''):
     """Return a QTextCharFormat with the given attributes.

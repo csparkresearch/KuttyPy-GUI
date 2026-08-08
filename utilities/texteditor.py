@@ -1,6 +1,6 @@
 # Adapted from https://gist.github.com/LegoStormtroopr/6146161
 
-from PyQt5 import QtGui, QtCore, QtWidgets
+from pyqtgraph.Qt import QtGui, QtCore, QtWidgets
 
 
 class myTextEditor(QtWidgets.QPlainTextEdit):
